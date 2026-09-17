@@ -1,5 +1,5 @@
 Signal
-[]
-[ Configure.ConfigureRequest ConsumeReset.ResetRequest ]
-[ Configured.Configured ResetConsumed.ResetOutcome ConfigureRejected.ConfigureRejection ResetRejected.ResetRejection ]
-[ OrdinarySocketPath.String MetaSocketPath.String Configuration.{ OrdinarySocketPath MetaSocketPath } ConfigureRequest.Configuration IdempotencyKey.String CreditId.String CreditSelection.[ Next Specific.CreditId ] ResetRequest.{ IdempotencyKey CreditSelection } Activation.[ NexusRestartRequired ] Configured.{ Configuration Activation } ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ] ConfigureRejection.[ StoreRefused ] ResetRejection.[ AdapterUnavailable ProtocolRefused ] ]
+[ signal_flow:[ FlowNode ] ]
+[ Configure.ConfigureRequest ConsumeReset.ResetRequest RegisterFlow.FlowNode ]
+[ Configured.Configured ResetConsumed.ResetOutcome FlowRegistered.FlowNode ConfigureRejected.ConfigureRejection ResetRejected.ResetRejection FlowRegistrationRejected.FlowRegistrationRejection ]
+[ OrdinarySocketPath.String MetaSocketPath.String Configuration.{ OrdinarySocketPath MetaSocketPath } ConfigureRequest.Configuration IdempotencyKey.String CreditId.String CreditSelection.[ Next Specific.CreditId ] ResetRequest.{ IdempotencyKey CreditSelection } Activation.[ NexusRestartRequired ] Configured.{ Configuration Activation } ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ] ConfigureRejection.[ StoreRefused ] ResetRejection.[ AdapterUnavailable ProtocolRefused ] FlowRegistrationRejection.[ StoreRefused ] ]

@@ -68,9 +68,16 @@ pub enum ResetRejection {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum FlowRegistrationRejection {
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
     Configure(ConfigureRequest),
     ConsumeReset(ResetRequest),
+    RegisterFlow(signal_flow::FlowNode),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -78,6 +85,8 @@ pub enum Query {
 pub enum Response {
     Configured(Configured),
     ResetConsumed(ResetOutcome),
+    FlowRegistered(signal_flow::FlowNode),
     ConfigureRejected(ConfigureRejection),
     ResetRejected(ResetRejection),
+    FlowRegistrationRejected(FlowRegistrationRejection),
 }
