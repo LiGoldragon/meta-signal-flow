@@ -19,7 +19,9 @@ fn privileged_requests_have_concrete_datoms() {
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable { da1e3f claude-session unavailable } Active }",
     ] {
-        let query = Potential::<Query>::from(text).actualize(&mut budget()).unwrap();
+        let query = Potential::<Query>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
         assert_eq!(query.datomize(vec![]).protosize().textualize(), text);
     }
 }
@@ -28,8 +30,13 @@ fn privileged_requests_have_concrete_datoms() {
 fn reset_outcome_round_trips_over_signal_and_datom() {
     let reply = Response::ResetConsumed(meta_signal_flow::ResetOutcome::Reset);
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
-    assert_eq!(rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(), reply);
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        reply
+    );
     let text = reply.datomize(vec![]).protosize().textualize();
-    let restored = Potential::<Response>::from(text).actualize(&mut budget()).unwrap();
+    let restored = Potential::<Response>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
     assert_eq!(restored, reply);
 }
