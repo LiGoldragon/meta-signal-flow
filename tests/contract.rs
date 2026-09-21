@@ -18,12 +18,30 @@ fn privileged_requests_have_concrete_datoms() {
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } Active }",
+        "SubmitBindingRegistration.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } Active registration-1 Bootstrap readiness-1 digest-1 }",
+        "SubmitBindingRegistration.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } Active registration-2 Refresh.transition-1 readiness-2 digest-2 }",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
             .unwrap();
         assert_eq!(query.datomize(vec![]).protosize().textualize(), text);
     }
+}
+
+#[test]
+fn binding_registration_rejection_round_trips_without_a_trusted_binding_payload() {
+    let reply = Response::BindingRegistrationRejected(
+        meta_signal_flow::BindingRegistrationRejection::VerifierUnavailable,
+    );
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        reply
+    );
+    assert_eq!(
+        reply.datomize(vec![]).protosize().textualize(),
+        "BindingRegistrationRejected.VerifierUnavailable"
+    );
 }
 
 #[test]
