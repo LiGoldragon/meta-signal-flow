@@ -18,12 +18,22 @@ fn privileged_requests_have_concrete_datoms() {
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } RegisteredUnconfirmed }",
+        "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } [ { psyche-flow Psyche High claude-opus Claude psyche-native workspace wD:p9 wD:t9 psyche-terminal psyche-agent { 4200 1001 psyche-token } /home/li/primary } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } { field-flow Field Medium gpt-6 Codex field-native workspace wQ:pF wQ:tF field-terminal field-agent { 4400 1001 field-token } /home/li/primary } ] }",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
             .unwrap();
         assert_eq!(query.datomize(vec![]).protosize().textualize(), text);
     }
+}
+
+#[test]
+fn bind_existing_result_preserves_each_explicit_outcome() {
+    let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } [ Bound.{ psyche-flow RegisteredUnconfirmed } Refused.{ mind-flow AmbiguousPane } Refused.{ field-flow DeadProcess } ] }";
+    let response = Potential::<Response>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(response.datomize(vec![]).protosize().textualize(), text);
 }
 
 #[test]
