@@ -185,11 +185,66 @@ pub enum BindExistingRejection {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct FirstStartReceiptReference {
+    pub launch_request_id: signal_flow::LaunchRequestId,
+    pub receipt_sha256: signal_flow::ReceiptSha256,
+}
+#[rustfmt::skip]
+pub type FinalTitleEvidenceSha256 = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct FinalTitleEvidenceReference {
+    pub herdr_terminal_id: signal_flow::HerdrTerminalId,
+    pub final_title_evidence_sha256: FinalTitleEvidenceSha256,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct MetaConfirmExisting {
+    pub flow_id: signal_flow::FlowId,
+    pub native_session_id: signal_flow::NativeSessionId,
+    pub first_start_receipt_reference: FirstStartReceiptReference,
+    pub model_name: signal_flow::ModelName,
+    pub effort: signal_flow::Effort,
+    pub prompt_sha256: signal_flow::PromptSha256,
+    pub native_turn_id: signal_flow::NativeTurnId,
+    pub native_skill_selection_vector: std::vec::Vec<signal_flow::NativeSkillSelection>,
+    pub final_title_evidence_reference: FinalTitleEvidenceReference,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfirmedExisting {
+    pub flow_id: signal_flow::FlowId,
+    pub native_session_id: signal_flow::NativeSessionId,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ConfirmExistingRejection {
+    UnknownFlow,
+    BindingNotRegisteredUnconfirmed,
+    FirstStartReceiptUnavailable,
+    FirstStartReceiptMismatch,
+    NativeSessionMismatch,
+    ModelMismatch,
+    EffortMismatch,
+    PromptDigestMismatch,
+    NativeTurnMismatch,
+    SkillManifestMismatch,
+    FinalTitleEvidenceMismatch,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
     Configure(ConfigureRequest),
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
+    MetaConfirmExisting(MetaConfirmExisting),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -203,4 +258,6 @@ pub enum Response {
     FlowRegistrationRejected(FlowRegistrationRejection),
     BoundExisting(BoundExisting),
     BindExistingRejected(BindExistingRejection),
+    ConfirmedExisting(ConfirmedExisting),
+    ConfirmExistingRejected(ConfirmExistingRejection),
 }
