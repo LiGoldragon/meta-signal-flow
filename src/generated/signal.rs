@@ -74,15 +74,35 @@ pub enum FlowRegistrationRejection {
     ConflictingBinding,
 }
 #[rustfmt::skip]
+pub type ProcessId = i64;
+#[rustfmt::skip]
+pub type ProcessUserId = i64;
+#[rustfmt::skip]
+pub type ProcessStartToken = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ProcessIdentity {
+    pub process_id: ProcessId,
+    pub process_user_id: ProcessUserId,
+    pub process_start_token: ProcessStartToken,
+}
+#[rustfmt::skip]
 pub type HerdrServerSocketPath = String;
 #[rustfmt::skip]
-pub type HerdrServerProcessIdentity = signal_flow::ProcessIdentity;
+pub type HerdrServerProcessIdentity = ProcessIdentity;
 #[rustfmt::skip]
 pub type MetaFlowOwnerId = signal_flow::FlowId;
 #[rustfmt::skip]
 pub type HerdrTabId = String;
 #[rustfmt::skip]
 pub type WorkingDirectory = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum FlowLifecycle {
+    RegisteredUnconfirmed,
+}
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
@@ -107,7 +127,7 @@ pub struct FlowBinding {
     pub herdr_tab_id: HerdrTabId,
     pub herdr_terminal_id: signal_flow::HerdrTerminalId,
     pub herdr_agent_name: signal_flow::HerdrAgentName,
-    pub process_identity: signal_flow::ProcessIdentity,
+    pub process_identity: ProcessIdentity,
     pub working_directory: WorkingDirectory,
 }
 #[rustfmt::skip]
@@ -122,7 +142,7 @@ pub struct MetaBindExisting {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct BoundFlowBinding {
     pub flow_id: signal_flow::FlowId,
-    pub flow_lifecycle: signal_flow::FlowLifecycle,
+    pub flow_lifecycle: FlowLifecycle,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
