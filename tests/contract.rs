@@ -17,7 +17,7 @@ fn privileged_requests_have_concrete_datoms() {
         "Configure.{ /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock }",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
-        "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } Active }",
+        "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } RegisteredUnconfirmed }",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
