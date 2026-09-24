@@ -42,6 +42,7 @@ fn confirm_existing_result_and_refusal_round_trip() {
     for text in [
         "ConfirmedExisting.{ mind-flow mind-native }",
         "ConfirmExistingRejected.PromptDigestMismatch",
+        "BoundExisting.{ { session /tmp/socket { 1 1 token } owner } [ Refused.{ flow NativeEvidenceUnavailable } Refused.{ flow2 NativeEvidenceMismatch } ] }",
     ] {
         let response = Potential::<Response>::from(text)
             .actualize(&mut budget())
