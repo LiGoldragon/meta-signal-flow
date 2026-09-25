@@ -4,11 +4,35 @@ pub type OrdinarySocketPath = String;
 #[rustfmt::skip]
 pub type MetaSocketPath = String;
 #[rustfmt::skip]
+pub type SourceRoot = String;
+#[rustfmt::skip]
+pub type ClientPath = String;
+#[rustfmt::skip]
+pub type Home = String;
+#[rustfmt::skip]
+pub type ControlSocketPath = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct CodexEndpoint {
+    pub client_path: ClientPath,
+    pub home: Home,
+    pub control_socket_path: ControlSocketPath,
+    pub model_name_vector: std::vec::Vec<signal_flow::ModelName>,
+}
+#[rustfmt::skip]
+pub type StableCodex = CodexEndpoint;
+#[rustfmt::skip]
+pub type NextCodex = CodexEndpoint;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Configuration {
     pub ordinary_socket_path: OrdinarySocketPath,
     pub meta_socket_path: MetaSocketPath,
+    pub source_root: SourceRoot,
+    pub stable_codex: StableCodex,
+    pub next_codex: NextCodex,
 }
 #[rustfmt::skip]
 pub type ConfigureRequest = Configuration;

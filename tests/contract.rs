@@ -16,7 +16,7 @@ fn budget() -> Budget {
 #[test]
 fn privileged_requests_have_concrete_datoms() {
     for text in [
-        "Configure.{ /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock }",
+        "Configure.{ /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } }",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } Pending }",
@@ -51,4 +51,47 @@ fn reset_outcome_round_trips_over_signal_and_datom() {
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(restored, reply);
+}
+
+#[test]
+fn configured_carries_source_root_and_both_codex_endpoints() {
+    let text = "Configured.{ { /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [] } } NexusRestartRequired }";
+    let response = Potential::<Response>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    let Response::Configured(configured) = &response else {
+        panic!("expected Configured");
+    };
+    let configuration = &configured.configuration;
+    assert_eq!(configuration.source_root, "/srv/source");
+    assert_eq!(
+        configuration.stable_codex.client_path,
+        "codex-stable-flow-client"
+    );
+    assert_eq!(configuration.stable_codex.home, "/home/someone/.codex");
+    assert_eq!(
+        configuration.stable_codex.control_socket_path,
+        "/home/someone/.codex/app-server-control/app-server-control.sock"
+    );
+    assert_eq!(
+        configuration.stable_codex.model_name_vector,
+        vec!["gpt-5.6-terra".to_owned()]
+    );
+    assert!(configuration.next_codex.model_name_vector.is_empty());
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        response
+    );
+    assert_eq!(response.datomize(vec![]).protosize().textualize(), text);
+}
+
+#[test]
+fn configure_missing_an_endpoint_is_refused_by_the_reader() {
+    let text = "Configure.{ /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock /srv/source }";
+    assert!(
+        Potential::<Query>::from(text)
+            .actualize(&mut budget())
+            .is_err()
+    );
 }
