@@ -1,6 +1,6 @@
 [package]
 name = "meta-signal-flow"
-version = "6.0.2"
+version = "6.0.3"
 edition = "2024"
 rust-version = "1.89"
 license = "MIT OR Apache-2.0"
@@ -17,12 +17,12 @@ datom = ["dep:datom-codec", "dep:protos", "signal/datom", "signal-flow/datom"]
 datom-codec = { git = "https://github.com/LiGoldragon/datom-codec", rev = "09e2a9d52bf7f2f11e51d15cb6c3177f72c6c927", optional = true }
 protos = { git = "https://github.com/LiGoldragon/protos", rev = "1febca7836bf8d5f5973a302fdd50aa9c84c159b", optional = true }
 signal = { git = "https://github.com/LiGoldragon/signal", rev = "7bcb0949cdaa4501651ed519625eba48e283fac0", default-features = false }
-signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "83171f3f39f53fbcff1a5fdc9bc7c96d6f57ac1f" }
+signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "cf3648f1e1733857bc5ff472824e2561745589c5" }
 rkyv = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 
 [build-dependencies]
 ethos-zero = { git = "https://github.com/LiGoldragon/ethos-zero", rev = "407f938d083a89236ef8c2c6e8a90561ec6b637a" }
-signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "83171f3f39f53fbcff1a5fdc9bc7c96d6f57ac1f" }
+signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "cf3648f1e1733857bc5ff472824e2561745589c5" }
 
 [lints.rust]
 unsafe_code = "forbid"
