@@ -95,3 +95,33 @@ fn configure_missing_an_endpoint_is_refused_by_the_reader() {
             .is_err()
     );
 }
+
+/// Retire is the privileged way to take a seat out of Flow without pretending
+/// Flow closed it. The reply carries the whole row, so the caller sees the
+/// history that was kept rather than an acknowledgement that it is gone.
+#[test]
+fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
+    let request = "Retire.d8df70";
+    let query = Potential::<Query>::from(request)
+        .actualize(&mut budget())
+        .unwrap();
+    assert!(matches!(&query, Query::Retire(flow_id) if flow_id == "d8df70"));
+    assert_eq!(query.datomize(vec![]).protosize().textualize(), request);
+
+    for text in [
+        "FlowRetired.{ d8df70 claude-session Claude Unavailable Unavailable { 88475f field-session turn-4 } Retired }",
+        "RetireRejected.UnknownFlow",
+        "RetireRejected.AlreadyGone",
+        "RetireRejected.StoreRefused",
+    ] {
+        let response = Potential::<Response>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(response.datomize(vec![]).protosize().textualize(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            response
+        );
+    }
+}

@@ -209,11 +209,20 @@ pub enum BindExistingRejection {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum RetireRejection {
+    UnknownFlow,
+    AlreadyGone,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
     Configure(ConfigureRequest),
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
+    Retire(signal_flow::FlowId),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -227,4 +236,6 @@ pub enum Response {
     FlowRegistrationRejected(FlowRegistrationRejection),
     BoundExisting(BoundExisting),
     BindExistingRejected(BindExistingRejection),
+    FlowRetired(signal_flow::FlowNode),
+    RetireRejected(RetireRejection),
 }
