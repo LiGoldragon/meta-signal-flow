@@ -25,6 +25,27 @@ pub type StableCodex = CodexEndpoint;
 #[rustfmt::skip]
 pub type NextCodex = CodexEndpoint;
 #[rustfmt::skip]
+pub type KeyName = String;
+#[rustfmt::skip]
+pub type CommandSigil = String;
+#[rustfmt::skip]
+pub type InterruptKeys = std::vec::Vec<KeyName>;
+#[rustfmt::skip]
+pub type SubmitKeys = std::vec::Vec<KeyName>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessProfile {
+    pub harness_kind: signal_flow::HarnessKind,
+    pub command_sigil_vector: std::vec::Vec<CommandSigil>,
+    pub interrupt_keys: InterruptKeys,
+    pub submit_keys: SubmitKeys,
+}
+#[rustfmt::skip]
+pub type MetaAspects = std::vec::Vec<signal_flow::FlowAspect>;
+#[rustfmt::skip]
+pub type MessageNexusPath = String;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Configuration {
@@ -33,6 +54,9 @@ pub struct Configuration {
     pub source_root: SourceRoot,
     pub stable_codex: StableCodex,
     pub next_codex: NextCodex,
+    pub harness_profile_vector: std::vec::Vec<HarnessProfile>,
+    pub meta_aspects: MetaAspects,
+    pub message_nexus_path: MessageNexusPath,
 }
 #[rustfmt::skip]
 pub type ConfigureRequest = Configuration;
@@ -215,6 +239,155 @@ pub enum RetireRejection {
     StoreRefused,
 }
 #[rustfmt::skip]
+pub type DeliveryId = String;
+#[rustfmt::skip]
+pub type CommandLine = String;
+#[rustfmt::skip]
+pub type ByteOffset = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Sender {
+    Flow(signal_flow::FlowId),
+    Owner,
+}
+#[rustfmt::skip]
+pub type PsycheContext = String;
+#[rustfmt::skip]
+pub type PsycheVerbatim = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Psyche_Data {
+    pub psyche_context: PsycheContext,
+    pub psyche_verbatim: PsycheVerbatim,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Content {
+    Text(String),
+    Psyche(Psyche_Data),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Letter {
+    pub sender: Sender,
+    pub content: Content,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Message {
+    HardAbrupt(Letter),
+    MiddleAbrupt(Letter),
+    Soft(Letter),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DeliveryRequest {
+    pub delivery_id: DeliveryId,
+    pub flow_id: signal_flow::FlowId,
+    pub message: Message,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum InterruptWitness {
+    NotRequested,
+    Observed,
+    Unobserved,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum DeliveryGrade {
+    Transported,
+    Presented,
+    Uncertain,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Delivery {
+    pub delivery_id: DeliveryId,
+    pub flow_id: signal_flow::FlowId,
+    pub interrupt_witness: InterruptWitness,
+    pub delivery_grade: DeliveryGrade,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum BodyRefusal {
+    EmptyBody,
+    HarnessCommand(CommandLine),
+    ControlCharacter(ByteOffset),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum DeliveryRejection {
+    UnknownFlow,
+    FlowStopped,
+    RouteUnavailable,
+    RecipientWorking,
+    RecipientBlocked,
+    ComposerOccupied,
+    BodyRefused(BodyRefusal),
+    NotDelivered,
+    PersistenceRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HarnessCommand {
+    Compact,
+    Interrupt,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct CommandRequest {
+    pub flow_id: signal_flow::FlowId,
+    pub harness_command: HarnessCommand,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum CommandGrade {
+    Transported,
+    Observed,
+    Uncertain,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct CommandOutcome {
+    pub flow_id: signal_flow::FlowId,
+    pub harness_command: HarnessCommand,
+    pub command_grade: CommandGrade,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum CommandRejection {
+    UnknownFlow,
+    FlowStopped,
+    RouteUnavailable,
+    RecipientBlocked,
+    UnsupportedForHarness,
+    NotDelivered,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum MetaRefusal {
+    PeerUnknown,
+    PeerNotAuthorized(signal_flow::Caller),
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
@@ -223,6 +396,10 @@ pub enum Query {
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
     Retire(signal_flow::FlowId),
+    Deliver(DeliveryRequest),
+    Vet(DeliveryRequest),
+    Command(CommandRequest),
+    ResolvePeer(ProcessIdentity),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -238,4 +415,12 @@ pub enum Response {
     BindExistingRejected(BindExistingRejection),
     FlowRetired(signal_flow::FlowNode),
     RetireRejected(RetireRejection),
+    Delivered(Delivery),
+    DeliveryRejected(DeliveryRejection),
+    Vetted(signal_flow::FlowId),
+    Commanded(CommandOutcome),
+    CommandRejected(CommandRejection),
+    PeerResolved(signal_flow::Caller),
+    PeerResolutionRejected(signal_flow::CallerResolutionRejection),
+    MetaRefused(MetaRefusal),
 }
