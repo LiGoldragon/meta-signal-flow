@@ -129,10 +129,10 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c 7d41e0 Soft.{ Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4 7d41e0 HardAbrupt.{ Owner Text.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa 7d41e0 MiddleAbrupt.{ Flow.88475f Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
-        "Vet.{ m-a2d913 7d41e0 Soft.{ Flow.e167d8 Text./compact } }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» } }",
+        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ m-81b0e4 Owner Text.«Stop the ouranos build now.» } }",
+        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ m-90c1aa Flow.88475f Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
+        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ m-a2d913 Flow.e167d8 Text./compact } }",
         "Command.{ 7d41e0 Compact }",
         "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",
@@ -147,9 +147,9 @@ fn delivery_requests_have_concrete_datoms() {
 #[test]
 fn delivery_replies_have_concrete_datoms() {
     for text in [
-        "Delivered.{ m-7f3a2c 7d41e0 NotRequested Presented }",
-        "Delivered.{ m-81b0e4 7d41e0 Observed Transported }",
-        "Delivered.{ m-81b0e5 7d41e0 Unobserved Uncertain }",
+        "Delivered.{ m-7f3a2c:7d41e0:0 7d41e0 NotRequested Presented }",
+        "Delivered.{ m-81b0e4:7d41e0:0 7d41e0 Observed Transported }",
+        "Delivered.{ m-81b0e5:7d41e0:1 7d41e0 Unobserved Uncertain }",
         "DeliveryRejected.RecipientBlocked",
         "DeliveryRejected.RecipientWorking",
         "DeliveryRejected.ComposerOccupied",
@@ -179,6 +179,7 @@ fn delivery_replies_have_concrete_datoms() {
 #[test]
 fn a_message_textualizes_with_its_priority_head_first() {
     let message = meta_signal_flow::Message::Soft(meta_signal_flow::Letter {
+        message_id: "m-7f3a2c".into(),
         sender: meta_signal_flow::Sender::Flow("e167d8".into()),
         content: meta_signal_flow::Content::Text(
             "Stage 1 is deployed; run the tier tests.".into(),
@@ -186,6 +187,6 @@ fn a_message_textualizes_with_its_priority_head_first() {
     });
     assert_eq!(
         message.datomize(vec![]).protosize().textualize(),
-        "Soft.{ Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» }"
+        "Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» }"
     );
 }

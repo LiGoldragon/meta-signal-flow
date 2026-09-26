@@ -241,6 +241,8 @@ pub enum RetireRejection {
 #[rustfmt::skip]
 pub type DeliveryId = String;
 #[rustfmt::skip]
+pub type MessageId = String;
+#[rustfmt::skip]
 pub type CommandLine = String;
 #[rustfmt::skip]
 pub type ByteOffset = i64;
@@ -273,6 +275,7 @@ pub enum Content {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Letter {
+    pub message_id: MessageId,
     pub sender: Sender,
     pub content: Content,
 }
