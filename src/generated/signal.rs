@@ -341,6 +341,8 @@ pub enum DeliveryRejection {
     BodyRefused(BodyRefusal),
     NotDelivered,
     PersistenceRefused,
+    FlowRetired,
+    FlowExited,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -382,6 +384,8 @@ pub enum CommandRejection {
     RecipientBlocked,
     UnsupportedForHarness,
     NotDelivered,
+    FlowRetired,
+    FlowExited,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
