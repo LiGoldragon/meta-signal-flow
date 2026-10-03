@@ -2,6 +2,25 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 14.0.0: signal 8.0.0, signal-flow 10.0.0
+
+What breaks:
+
+- meta-signal-flow depends on signal 8.0.0 (f35460de) and signal-flow
+  10.0.0 (f95034de), where it depended on signal 7.0.0 and signal-flow
+  9.0.0. The signal-flow types it imports and the `signal::Contracted` its
+  `Query` implements are now those releases', so a crate holding the older
+  ones alongside sees two distinct sets.
+- The `datom` feature also enables `signal/datom`: signal 8.0.0 binds the
+  same datom-codec and protos 0.32.2, so the graph holds one codec.
+- The build reads the ethos with ethos-zero 16.0.0 at c2653dd8. The
+  generated module is byte-identical (the build script asserts it), so
+  `ETHOS`, the contract digest and every archive are unchanged from 13.0.0.
+
+To deploy, in each consumer (signal-message, meta-signal-message, flow,
+message): repin meta-signal-flow, signal-flow 10.0.0 and signal 8.0.0 in
+one change. The wire is unchanged; a 13.0.0 peer still greets this one.
+
 ## 13.0.0: signal-flow 9.0.0; ReadEvents
 
 What breaks:
