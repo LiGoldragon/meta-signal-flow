@@ -2,7 +2,7 @@
 
 use datom_codec::{Actualizing, Budget, Datomizable, Potential};
 use meta_signal_flow::{Query, Response};
-use protos::{Protosizable, ReaderBudget, Textualizable};
+use protos::{Compactable, Protosizable, ReaderBudget};
 
 fn budget() -> Budget {
     Budget {
@@ -25,7 +25,7 @@ fn privileged_requests_have_concrete_datoms() {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
             .unwrap();
-        assert_eq!(query.datomize(vec![]).protosize().textualize(), text);
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
     }
 }
 
@@ -35,7 +35,7 @@ fn bind_existing_result_preserves_each_explicit_outcome() {
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
-    assert_eq!(response.datomize(vec![]).protosize().textualize(), text);
+    assert_eq!(response.datomize(vec![]).protosize().compact(), text);
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn reset_outcome_round_trips_over_signal_and_datom() {
         rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
         reply
     );
-    let text = reply.datomize(vec![]).protosize().textualize();
+    let text = reply.datomize(vec![]).protosize().compact();
     let restored = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -83,7 +83,7 @@ fn configured_carries_source_root_and_both_codex_endpoints() {
         rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
         response
     );
-    assert_eq!(response.datomize(vec![]).protosize().textualize(), text);
+    assert_eq!(response.datomize(vec![]).protosize().compact(), text);
 }
 
 #[test]
@@ -106,7 +106,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
         .actualize(&mut budget())
         .unwrap();
     assert!(matches!(&query, Query::Retire(flow_id) if flow_id == "d8df70"));
-    assert_eq!(query.datomize(vec![]).protosize().textualize(), request);
+    assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
         "FlowRetired.{ d8df70 claude-session Claude Unavailable Unavailable { 88475f field-session turn-4 } Retired }",
@@ -117,7 +117,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
         let response = Potential::<Response>::from(text)
             .actualize(&mut budget())
             .unwrap();
-        assert_eq!(response.datomize(vec![]).protosize().textualize(), text);
+        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
             rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
@@ -140,7 +140,7 @@ fn delivery_requests_have_concrete_datoms() {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
             .unwrap();
-        assert_eq!(query.datomize(vec![]).protosize().textualize(), text);
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
     }
 }
 
@@ -177,7 +177,7 @@ fn delivery_replies_have_concrete_datoms() {
             rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
             response
         );
-        assert_eq!(response.datomize(vec![]).protosize().textualize(), text);
+        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
     }
 }
 
@@ -186,12 +186,10 @@ fn a_message_textualizes_with_its_priority_head_first() {
     let message = meta_signal_flow::Message::Soft(meta_signal_flow::Letter {
         message_id: "m-7f3a2c".into(),
         sender: meta_signal_flow::Sender::Flow("e167d8".into()),
-        content: meta_signal_flow::Content::Text(
-            "Stage 1 is deployed; run the tier tests.".into(),
-        ),
+        content: meta_signal_flow::Content::Text("Stage 1 is deployed; run the tier tests.".into()),
     });
     assert_eq!(
-        message.datomize(vec![]).protosize().textualize(),
+        message.datomize(vec![]).protosize().compact(),
         "Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» }"
     );
 }
