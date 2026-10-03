@@ -2,6 +2,31 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 13.0.0: signal-flow 9.0.0; ReadEvents
+
+What breaks:
+
+- meta-signal-flow depends on signal-flow 9.0.0 (2cc48792), where it
+  depended on 8.0.0. The signal-flow types it imports (`FlowNode`, `FlowId`,
+  `Caller` and the rest) are now 9.0.0's, so a crate holding both versions
+  sees two distinct sets. signal-flow 9.0.0 renamed its `Started` payload
+  type `Launched`; meta-signal-flow names neither.
+- New query `ReadEvents.FlowId`, answered `EventsRead.{ FlowId
+  Vector<Event> }` (signal-flow's `Event`, imported) or
+  `ReadEventsRejected.[ UnknownFlow StoreRefused ]`: the owner reads the
+  harness events Flow recorded from `Report`s for one flow. `Query` and
+  `Response` gain variants, so the contract digest changes and a 12.0.0
+  peer is refused at the greeting.
+- The ethos body is reprinted vertically by ethos-zero 16.0.0's `Printable`
+  (every section was one line). No other declaration changed; the
+  generated Rust differs only by the three new items, and the rkyv archive
+  of every 12.0.0 value is unchanged.
+- signal stays at 7.0.0 (66e7b153): signal main has no newer version.
+
+To deploy, in flow: repin meta-signal-flow and signal-flow 9.0.0 together,
+answer `ReadEvents` from the events Flow's Memory holds, then rebuild and
+restart the Nexus and both CLIs together.
+
 ## 12.0.0: ethos-zero 16.0.0, signal 7.0.0, signal-flow 8.0.0, protos and datom-codec 0.32.2
 
 What breaks:

@@ -407,6 +407,21 @@ pub enum Query {
     Vet(DeliveryRequest),
     Command(CommandRequest),
     ResolvePeer(ProcessIdentity),
+    ReadEvents(signal_flow::FlowId),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct EventsRead_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub event_vector: std::vec::Vec<signal_flow::Event>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadEventsRejected_Data {
+    UnknownFlow,
+    StoreRefused,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -430,4 +445,6 @@ pub enum Response {
     PeerResolved(signal_flow::Caller),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
     MetaRefused(MetaRefusal),
+    EventsRead(EventsRead_Data),
+    ReadEventsRejected(ReadEventsRejected_Data),
 }
