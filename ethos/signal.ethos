@@ -80,7 +80,7 @@ Signal
   PeerResolved.Caller
   PeerResolutionRejected.CallerResolutionRejection
   MetaRefused.MetaRefusal
-  Refused.Store.String
+  Refused.Refusal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ] ]
 [ ; Flow Library owns the shared configuration field types.
@@ -167,4 +167,5 @@ Signal
   CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited ]
   MetaRefusal.[ PeerUnknown
                 PeerNotAuthorized.Caller ]
+  Refusal.[ Store.String ]
   ]
