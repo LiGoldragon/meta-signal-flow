@@ -29,16 +29,28 @@
 ; configured Message Nexus executable, a process in no flow's pane (the
 ; owner), or a flow whose aspect is in MetaAspects.
 ;
+; MessageNexusBinary is the executable identity used by Bind as Message on
+; the ordinary socket. A payload PID does not establish that identity.
+;
 ; ResolvePeer names the flow a process runs in, as ResolveCaller does for
 ; an ordinary connection's own peer.
 ;
 ; ReadEvents answers the harness events Flow holds in its Memory for one
 ; flow, in the order its Reports were recorded: EventsRead, or
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
+;
+; Configure accepts one whole typed Module, Model, Threshold or Nexus value.
+; The three non-Nexus values are independent updates. Nexus setup values must
+; agree within one process. Configuration reads the committed Nexus and the
+; committed model, threshold and module vectors; it never returns defaults.
+; Configure.Nexus names the actual Message executable in MessageNexusBinary.
+; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
 
 Signal
-[ signal_flow:[ FlowNode FlowId FlowAspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ] ]
-[ Configure.ConfigureRequest
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ]
+  flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Source ] ]
+[ Configuration
+  Configure.ConfigurationChange
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting.MetaBindExisting
@@ -48,7 +60,9 @@ Signal
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId ]
-[ Configured.Configured
+[ Configured
+  Configuration.ConfigurationSnapshot
+  Unconfigured
   ResetConsumed.ResetOutcome
   FlowRegistered.FlowNode
   ConfigureRejected.ConfigureRejection
@@ -66,35 +80,31 @@ Signal
   PeerResolved.Caller
   PeerResolutionRejected.CallerResolutionRejection
   MetaRefused.MetaRefusal
+  Refused.Store.String
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ] ]
-[ OrdinarySocketPath.String
-  MetaSocketPath.String
-  SourceRoot.String
-  ClientPath.String
-  Home.String
-  ControlSocketPath.String
-  CodexEndpoint.{ ClientPath Home ControlSocketPath Vector<ModelName> }
-  StableCodex.CodexEndpoint
-  NextCodex.CodexEndpoint
-  KeyName.String
-  CommandSigil.String
-  InterruptKeys.Vector<KeyName>
-  SubmitKeys.Vector<KeyName>
-  HarnessProfile.{ HarnessKind Vector<CommandSigil> InterruptKeys SubmitKeys }
-  MetaAspects.Vector<FlowAspect>
-  MessageNexusPath.String
-  Configuration.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath }
-  ConfigureRequest.Configuration
+[ ; Flow Library owns the shared configuration field types.
+  ; This record exists only for Flow's current internal launch defaults.
+  ; The process sockets are separately supplied by Library.Start; this
+  ; record is not a Configure wire payload.
+  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease }
+  ConfigureModule.{ Key Source }
+  ConfigureModel.{ Layer Native.String }
+  ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
+  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
+  ; Keep the payload type distinct from the unit Query.Configuration variant.
+  ConfigurationChange.[ Module.ConfigureModule
+                         Model.ConfigureModel
+                         Threshold.ConfigureThreshold
+                         Nexus.ConfigureNexus ]
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> Modules.Vector<ConfigureModule> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
-  Activation.[ NexusRestartRequired ]
-  Configured.{ Configuration Activation }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused ]
+  ConfigureRejection.[ StoreRefused Conflict ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
@@ -108,7 +118,7 @@ Signal
   WorkingDirectory.String
   FlowLifecycle.[ RegisteredUnconfirmed ]
   FlowContainer.{ HerdrSessionName HerdrServerSocketPath HerdrServerProcessIdentity MetaFlowOwnerId }
-  FlowBinding.{ FlowId FlowAspect PowerLevel ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
+  FlowBinding.{ FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
   MetaBindExisting.{ FlowContainer Vector<FlowBinding> }
   BoundFlowBinding.{ FlowId FlowLifecycle }
   FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch ]
@@ -156,4 +166,5 @@ Signal
   CommandOutcome.{ FlowId HarnessCommand CommandGrade }
   CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited ]
   MetaRefusal.[ PeerUnknown
-                PeerNotAuthorized.Caller ] ]
+                PeerNotAuthorized.Caller ]
+  ]
