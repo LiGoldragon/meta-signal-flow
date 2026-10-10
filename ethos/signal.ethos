@@ -51,7 +51,6 @@ Signal
   flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Subaspect Topic Layer Source ] ]
 [ Configuration
   Configure.Configuration
-  Configuration
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting.MetaBindExisting
