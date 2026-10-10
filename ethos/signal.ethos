@@ -90,7 +90,7 @@ Signal
   ConfigureModule.{ Subaspect Topic Source }
   ConfigureModel.{ Layer Native.String }
   ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
-  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles.Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease.Integer }
+  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease.Integer }
   Configuration.[ Module.ConfigureModule
                   Model.ConfigureModel
                   Threshold.ConfigureThreshold
