@@ -59,7 +59,7 @@ pub struct ConfigureNexus {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Configuration {
+pub enum ConfigurationChange {
     Module(ConfigureModule),
     Model(ConfigureModel),
     Threshold(ConfigureThreshold),
@@ -408,8 +408,8 @@ pub enum MetaRefusal {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
-    Configuration(Configuration),
-    Configure(Configuration),
+    Configuration,
+    Configure(ConfigurationChange),
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
