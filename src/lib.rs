@@ -1,6 +1,18 @@
 pub mod generated;
 pub use generated::signal::*;
 
+pub use flow_ethos::{
+    Blake3, ClientPath, CodexEndpoint, CommandSigil, ControlSocketPath, HarnessKind,
+    HarnessProfile, HarnessProfiles, Hash, Home, InterruptKeys, KeyName, Layer,
+    MessageNexusBinary, MessageNexusPath, MetaAspects, MetaSocketPath, ModelName,
+    NextCodex, OrdinarySocketPath, Path, Repository, Source, SourceRoot, StableCodex,
+    Subaspect, SubmitKeys, Topic,
+};
+
+pub use flow_ethos::Hash as SourceHash;
+pub use flow_ethos::Path as SourcePath;
+pub use flow_ethos::Repository as SourceRepository;
+
 pub use signal::{ByteViewable, Restorable, Signal, Signalizable};
 
 pub const ETHOS: &str = include_str!("../ethos/signal.ethos");
