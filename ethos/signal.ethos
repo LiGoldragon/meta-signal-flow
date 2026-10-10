@@ -35,6 +35,13 @@
 ; ReadEvents answers the harness events Flow holds in its Memory for one
 ; flow, in the order its Reports were recorded: EventsRead, or
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
+;
+; Flow-meta's local ConfigureFiles input is one CLI Datom. The named paths
+; stay in the client: it reads each path as one ConfigurationFragment Datom,
+; composes a full Configuration, and sends exactly one existing Configure
+; query. Every Configuration field is required; equal repeated assignments
+; are accepted and conflicting ones are rejected. These local types are not
+; Query variants and do not cross the meta socket.
 
 Signal
 [ signal_flow:[ FlowNode FlowId FlowAspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ] ]
@@ -156,4 +163,18 @@ Signal
   CommandOutcome.{ FlowId HarnessCommand CommandGrade }
   CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited ]
   MetaRefusal.[ PeerUnknown
-                PeerNotAuthorized.Caller ] ]
+                PeerNotAuthorized.Caller ]
+  HarnessProfileVector.Vector<HarnessProfile>
+  ConfigurationAssignment.[ OrdinarySocketPath.OrdinarySocketPath
+                             MetaSocketPath.MetaSocketPath
+                             SourceRoot.SourceRoot
+                             StableCodex.CodexEndpoint
+                             NextCodex.CodexEndpoint
+                             HarnessProfileVector.HarnessProfileVector
+                             MetaAspects.MetaAspects
+                             MessageNexusPath.MessageNexusPath ]
+  ConfigurationFragment.{ Vector<ConfigurationAssignment> }
+  ConfigurationFilePath.{ Path.String }
+  ConfigurationFilePathVector.Vector<ConfigurationFilePath>
+  ConfigureFiles.{ ConfigurationFilePathVector }
+  ConfigurationFile.{ ConfigurationFilePath ConfigurationFragment } ]

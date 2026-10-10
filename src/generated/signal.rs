@@ -395,6 +395,50 @@ pub enum MetaRefusal {
     PeerNotAuthorized(signal_flow::Caller),
 }
 #[rustfmt::skip]
+pub type HarnessProfileVector = std::vec::Vec<HarnessProfile>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ConfigurationAssignment {
+    OrdinarySocketPath(OrdinarySocketPath),
+    MetaSocketPath(MetaSocketPath),
+    SourceRoot(SourceRoot),
+    StableCodex(CodexEndpoint),
+    NextCodex(CodexEndpoint),
+    HarnessProfileVector(HarnessProfileVector),
+    MetaAspects(MetaAspects),
+    MessageNexusPath(MessageNexusPath),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigurationFragment {
+    pub configuration_assignment_vector: std::vec::Vec<ConfigurationAssignment>,
+}
+#[rustfmt::skip]
+pub type Path = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigurationFilePath {
+    pub path: Path,
+}
+#[rustfmt::skip]
+pub type ConfigurationFilePathVector = std::vec::Vec<ConfigurationFilePath>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureFiles {
+    pub configuration_file_path_vector: ConfigurationFilePathVector,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigurationFile {
+    pub configuration_file_path: ConfigurationFilePath,
+    pub configuration_fragment: ConfigurationFragment,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
