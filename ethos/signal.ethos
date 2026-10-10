@@ -50,7 +50,7 @@ Signal
 [ signal_flow:[ FlowNode FlowId FlowAspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ]
   flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Source ] ]
 [ Configuration
-  Configure.Configuration
+  Configure.ConfigurationChange
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting.MetaBindExisting
@@ -91,10 +91,11 @@ Signal
   ConfigureModel.{ Layer Native.String }
   ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
-  Configuration.[ Module.ConfigureModule
-                  Model.ConfigureModel
-                  Threshold.ConfigureThreshold
-                  Nexus.ConfigureNexus ]
+  ; Keep the payload type distinct from the unit Query.Configuration variant.
+  ConfigurationChange.[ Module.ConfigureModule
+                         Model.ConfigureModel
+                         Threshold.ConfigureThreshold
+                         Nexus.ConfigureNexus ]
   ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> Modules.Vector<ConfigureModule> }
   IdempotencyKey.String
   CreditId.String

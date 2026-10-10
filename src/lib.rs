@@ -1,5 +1,6 @@
 pub mod generated;
 pub use generated::signal::*;
+pub use generated::signal::ConfigurationChange as Configuration;
 
 pub use flow_ethos::{
     Blake3, ClientPath, CodexEndpoint, CommandSigil, ControlSocketPath, HarnessKind,

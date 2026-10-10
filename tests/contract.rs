@@ -25,8 +25,15 @@ fn privileged_requests_have_concrete_datoms() {
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
-            .unwrap();
-        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+            .unwrap_or_else(|_| panic!("not a Query Datom: {text}"));
+        if text == "Configuration" {
+            assert_eq!(query, Query::Configuration, "wrong unit query variant");
+        }
+        assert_eq!(
+            query.datomize(vec![]).protosize().compact(),
+            text,
+            "Query Datom did not round-trip: {text}"
+        );
     }
 }
 
