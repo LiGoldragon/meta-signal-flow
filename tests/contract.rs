@@ -148,11 +148,11 @@ fn configure_ack_is_unit_and_configuration_read_carries_the_snapshot() {
     assert_eq!(configuration.thresholds[0].refresh, 900);
     assert_eq!(configuration.modules.len(), 1);
     assert_eq!(
-        configuration.modules[0].subaspect,
+        configuration.modules[0].key.subaspect,
         meta_signal_flow::Subaspect::Compensation
     );
     assert_eq!(
-        configuration.modules[0].topic,
+        configuration.modules[0].key.topic,
         "compensationBookDistillation"
     );
     assert_eq!(
