@@ -17,6 +17,7 @@ fn budget() -> Budget {
 fn privileged_requests_have_concrete_datoms() {
     for text in [
         "Configure.Nexus.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus 60 }",
+        "Configure.Module.{ { Compensation compensationBookDistillation } { meta-signal-flow 0000000000000000000000000000000000000000000000000000000000000000 /git/github.com/LiGoldragon/meta-signal-flow } }",
         "Configuration",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
@@ -78,7 +79,7 @@ fn configure_ack_is_unit_and_configuration_read_carries_the_snapshot() {
         configured
     );
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { Compensation compensationBookDistillation { meta-signal-flow 0000000000000000000000000000000000000000000000000000000000000000 /git/github.com/LiGoldragon/meta-signal-flow } } ] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Compensation compensationBookDistillation } { meta-signal-flow 0000000000000000000000000000000000000000000000000000000000000000 /git/github.com/LiGoldragon/meta-signal-flow } } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
