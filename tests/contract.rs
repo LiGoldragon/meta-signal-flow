@@ -16,7 +16,8 @@ fn budget() -> Budget {
 #[test]
 fn privileged_requests_have_concrete_datoms() {
     for text in [
-        "Configure.{ /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /etc/profiles/per-user/li/bin/message-nexus }",
+        "Configure.Nexus.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus 60 }",
+        "Configuration",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } Pending }",
@@ -54,41 +55,136 @@ fn reset_outcome_round_trips_over_signal_and_datom() {
 }
 
 #[test]
-fn configured_carries_source_root_and_both_codex_endpoints() {
-    let text = "Configured.{ { /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [] } [] [ Psyche ] /srv/message-nexus } NexusRestartRequired }";
+// These are Signal wire round-trips, not claims about configured store state.
+fn configure_ack_is_unit_and_configuration_read_carries_the_snapshot() {
+    let configured = Potential::<Response>::from("Configured")
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(configured, Response::Configured);
+    assert_eq!(
+        configured.datomize(vec![]).protosize().compact(),
+        "Configured"
+    );
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&configured).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        configured
+    );
+
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { Compensation compensationBookDistillation { meta-signal-flow 0000000000000000000000000000000000000000000000000000000000000000 /git/github.com/LiGoldragon/meta-signal-flow } } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
-    let Response::Configured(configured) = &response else {
-        panic!("expected Configured");
+    let Response::Configuration(configuration) = &response else {
+        panic!("expected Configuration snapshot");
     };
-    let configuration = &configured.configuration;
-    assert_eq!(configuration.source_root, "/srv/source");
+    assert_eq!(configuration.nexus.source_root, "/srv/source");
     assert_eq!(
-        configuration.stable_codex.client_path,
+        configuration.nexus.stable_codex.client_path,
         "codex-stable-flow-client"
     );
-    assert_eq!(configuration.stable_codex.home, "/home/someone/.codex");
+    assert_eq!(configuration.nexus.stable_codex.home, "/home/someone/.codex");
     assert_eq!(
-        configuration.stable_codex.control_socket_path,
+        configuration.nexus.stable_codex.control_socket_path,
         "/home/someone/.codex/app-server-control/app-server-control.sock"
     );
     assert_eq!(
-        configuration.stable_codex.model_name_vector,
+        configuration.nexus.stable_codex.model_name_vector,
         vec!["gpt-5.6-terra".to_owned()]
     );
-    assert!(configuration.next_codex.model_name_vector.is_empty());
+    assert_eq!(
+        configuration.nexus.next_codex.model_name_vector,
+        vec!["gpt-6.1".to_owned()]
+    );
+    assert_eq!(configuration.nexus.harness_profiles.len(), 1);
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].harness_kind,
+        meta_signal_flow::HarnessKind::Claude
+    );
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].command_sigil_vector,
+        vec!["/".to_owned(), "!".to_owned(), "#".to_owned()]
+    );
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].interrupt_keys,
+        vec!["esc".to_owned(), "esc".to_owned()]
+    );
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].submit_keys,
+        vec!["enter".to_owned()]
+    );
+    assert_eq!(
+        configuration.nexus.meta_aspects.as_slice(),
+        &[signal_flow::FlowAspect::Psyche, signal_flow::FlowAspect::Mind]
+    );
+    assert_eq!(
+        configuration.nexus.message_nexus_path,
+        "/srv/message-nexus.sock"
+    );
+    assert_eq!(
+        configuration.nexus.message_nexus_binary,
+        "/usr/bin/message-nexus"
+    );
+    assert_eq!(configuration.nexus.lease, 60);
+    assert_eq!(configuration.models.len(), 1);
+    assert_eq!(
+        configuration.models[0].layer,
+        meta_signal_flow::Layer::Secondary
+    );
+    assert_eq!(configuration.models[0].native, "claude-opus");
+    assert_eq!(configuration.thresholds.len(), 1);
+    assert_eq!(
+        configuration.thresholds[0].layer,
+        meta_signal_flow::Layer::Primary
+    );
+    assert_eq!(configuration.thresholds[0].handover, 300);
+    assert_eq!(configuration.thresholds[0].refresh, 900);
+    assert_eq!(configuration.modules.len(), 1);
+    assert_eq!(
+        configuration.modules[0].subaspect,
+        meta_signal_flow::Subaspect::Compensation
+    );
+    assert_eq!(
+        configuration.modules[0].topic,
+        "compensationBookDistillation"
+    );
+    assert_eq!(
+        configuration.modules[0].source.repository,
+        "meta-signal-flow"
+    );
+    assert_eq!(
+        configuration.modules[0].source.hash,
+        "0000000000000000000000000000000000000000000000000000000000000000"
+    );
+    assert_eq!(
+        configuration.modules[0].source.path,
+        "/git/github.com/LiGoldragon/meta-signal-flow"
+    );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
     assert_eq!(
         rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
         response
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+
+    let unconfigured = Potential::<Response>::from("Unconfigured")
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(unconfigured, Response::Unconfigured);
+    assert_eq!(
+        unconfigured.datomize(vec![]).protosize().compact(),
+        "Unconfigured"
+    );
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&unconfigured).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        unconfigured
+    );
 }
 
 #[test]
-fn configure_missing_an_endpoint_is_refused_by_the_reader() {
-    let text = "Configure.{ /run/user/1001/flow/flow.sock /run/user/1001/flow/flow-meta.sock /srv/source }";
+fn configure_missing_a_required_nexus_field_is_refused_by_the_reader() {
+    let text = "Configure.Nexus.{ /srv/source { stable-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { next-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus }";
     assert!(
         Potential::<Query>::from(text)
             .actualize(&mut budget())
