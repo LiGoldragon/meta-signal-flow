@@ -1,65 +1,86 @@
 #![allow(dead_code, non_camel_case_types, non_snake_case)]
 #[rustfmt::skip]
-pub type OrdinarySocketPath = String;
-#[rustfmt::skip]
-pub type MetaSocketPath = String;
-#[rustfmt::skip]
-pub type SourceRoot = String;
-#[rustfmt::skip]
-pub type ClientPath = String;
-#[rustfmt::skip]
-pub type Home = String;
-#[rustfmt::skip]
-pub type ControlSocketPath = String;
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct NexusRuntimeSettings {
+    pub ordinary_socket_path: flow_ethos::OrdinarySocketPath,
+    pub meta_socket_path: flow_ethos::MetaSocketPath,
+    pub source_root: flow_ethos::SourceRoot,
+    pub stable_codex: flow_ethos::StableCodex,
+    pub next_codex: flow_ethos::NextCodex,
+    pub harness_profile_vector: std::vec::Vec<flow_ethos::HarnessProfile>,
+    pub meta_aspects: flow_ethos::MetaAspects,
+    pub message_nexus_path: flow_ethos::MessageNexusPath,
+    pub message_nexus_binary: flow_ethos::MessageNexusBinary,
+    pub lease: flow_ethos::Lease,
+}
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct CodexEndpoint {
-    pub client_path: ClientPath,
-    pub home: Home,
-    pub control_socket_path: ControlSocketPath,
-    pub model_name_vector: std::vec::Vec<signal_flow::ModelName>,
+pub struct ConfigureModule {
+    pub key: flow_ethos::Key,
+    pub source: flow_ethos::Source,
 }
 #[rustfmt::skip]
-pub type StableCodex = CodexEndpoint;
-#[rustfmt::skip]
-pub type NextCodex = CodexEndpoint;
-#[rustfmt::skip]
-pub type KeyName = String;
-#[rustfmt::skip]
-pub type CommandSigil = String;
-#[rustfmt::skip]
-pub type InterruptKeys = std::vec::Vec<KeyName>;
-#[rustfmt::skip]
-pub type SubmitKeys = std::vec::Vec<KeyName>;
+pub type Native = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct HarnessProfile {
-    pub harness_kind: signal_flow::HarnessKind,
-    pub command_sigil_vector: std::vec::Vec<CommandSigil>,
-    pub interrupt_keys: InterruptKeys,
-    pub submit_keys: SubmitKeys,
+pub struct ConfigureModel {
+    pub layer: flow_ethos::Layer,
+    pub native: Native,
 }
 #[rustfmt::skip]
-pub type MetaAspects = std::vec::Vec<signal_flow::FlowAspect>;
+pub type Handover = i64;
 #[rustfmt::skip]
-pub type MessageNexusPath = String;
+pub type Refresh = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct Configuration {
-    pub ordinary_socket_path: OrdinarySocketPath,
-    pub meta_socket_path: MetaSocketPath,
-    pub source_root: SourceRoot,
-    pub stable_codex: StableCodex,
-    pub next_codex: NextCodex,
-    pub harness_profile_vector: std::vec::Vec<HarnessProfile>,
-    pub meta_aspects: MetaAspects,
-    pub message_nexus_path: MessageNexusPath,
+pub struct ConfigureThreshold {
+    pub layer: flow_ethos::Layer,
+    pub handover: Handover,
+    pub refresh: Refresh,
 }
 #[rustfmt::skip]
-pub type ConfigureRequest = Configuration;
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureNexus {
+    pub source_root: flow_ethos::SourceRoot,
+    pub stable_codex: flow_ethos::StableCodex,
+    pub next_codex: flow_ethos::NextCodex,
+    pub harness_profiles: flow_ethos::HarnessProfiles,
+    pub meta_aspects: flow_ethos::MetaAspects,
+    pub message_nexus_path: flow_ethos::MessageNexusPath,
+    pub message_nexus_binary: flow_ethos::MessageNexusBinary,
+    pub lease: flow_ethos::Lease,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ConfigurationChange {
+    Module(ConfigureModule),
+    Model(ConfigureModel),
+    Threshold(ConfigureThreshold),
+    Nexus(ConfigureNexus),
+}
+#[rustfmt::skip]
+pub type Nexus = ConfigureNexus;
+#[rustfmt::skip]
+pub type Models = std::vec::Vec<ConfigureModel>;
+#[rustfmt::skip]
+pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
+#[rustfmt::skip]
+pub type Modules = std::vec::Vec<ConfigureModule>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigurationSnapshot {
+    pub nexus: Nexus,
+    pub models: Models,
+    pub thresholds: Thresholds,
+    pub modules: Modules,
+}
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
 #[rustfmt::skip]
@@ -81,19 +102,6 @@ pub struct ResetRequest {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Activation {
-    NexusRestartRequired,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct Configured {
-    pub configuration: Configuration,
-    pub activation: Activation,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ResetOutcome {
     Reset,
     NothingToReset,
@@ -105,6 +113,7 @@ pub enum ResetOutcome {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigureRejection {
     StoreRefused,
+    Conflict,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -165,7 +174,7 @@ pub struct FlowContainer {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct FlowBinding {
     pub flow_id: signal_flow::FlowId,
-    pub flow_aspect: signal_flow::FlowAspect,
+    pub aspect: signal_flow::Aspect,
     pub power_level: signal_flow::PowerLevel,
     pub model_name: signal_flow::ModelName,
     pub harness_kind: signal_flow::HarnessKind,
@@ -397,8 +406,15 @@ pub enum MetaRefusal {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Refusal {
+    Store(String),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
-    Configure(ConfigureRequest),
+    Configuration,
+    Configure(ConfigurationChange),
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
@@ -427,7 +443,9 @@ pub enum ReadEventsRejected_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Response {
-    Configured(Configured),
+    Configured,
+    Configuration(ConfigurationSnapshot),
+    Unconfigured,
     ResetConsumed(ResetOutcome),
     FlowRegistered(signal_flow::FlowNode),
     ConfigureRejected(ConfigureRejection),
@@ -445,6 +463,7 @@ pub enum Response {
     PeerResolved(signal_flow::Caller),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
     MetaRefused(MetaRefusal),
+    Refused(Refusal),
     EventsRead(EventsRead_Data),
     ReadEventsRejected(ReadEventsRejected_Data),
 }
