@@ -2,6 +2,14 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 19.0.1: signal-flow 16.0.0
+
+meta-signal-flow pins signal-flow 16.0.0 (229933d9), whose `LaunchProfile`
+names an `Address`. The types this contract imports from signal-flow are
+unchanged, and so is its own Ethos source and contract digest: a 19.0.0
+peer still greets this one. Repin it in Flow together with signal-flow
+16.0.0, so the workspace holds one signal-flow.
+
 ## 19.0.0: Reconfigure replaces the whole Nexus value
 
 `Query::Reconfigure(ConfigureNexus)` replaces the committed Nexus value of a
