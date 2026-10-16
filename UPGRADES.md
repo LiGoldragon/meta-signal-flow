@@ -9,7 +9,7 @@ How to deploy each breaking change of meta-signal-flow.
 named by its launch's module identities (signal-flow 17.0.0), never
 configured on the meta socket. `Key` and `Source` are no longer imported.
 The contract digest changes, so an older peer is refused at the greeting.
-Repin it in Flow together with signal-flow 17.0.0 (d2b37757); a
+Repin it in Flow together with signal-flow 17.0.0 (63619a15); a
 `Configure.Module` caller must stop sending it.
 
 ## 19.0.1: signal-flow 16.0.0
