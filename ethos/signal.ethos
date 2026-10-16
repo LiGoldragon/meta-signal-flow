@@ -45,6 +45,14 @@
 ; committed model, threshold and module vectors; it never returns defaults.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
+;
+; Reconfigure replaces the whole committed Nexus value of a configured store
+; in one atomic commit; models, thresholds, modules and all non-configuration
+; state are kept. It answers Reconfigured, or ReconfigureRejected and changes
+; nothing: Unconfigured when the store holds no Nexus value yet (first setup
+; is Configure.Nexus), CodexModelsOverlap when one model names both Codex
+; endpoints. A running Nexus reads its Codex endpoints when it opens, so a
+; replaced endpoint is served from the next start.
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ]
@@ -59,7 +67,8 @@ Signal
   Vet.DeliveryRequest
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
-  ReadEvents.FlowId ]
+  ReadEvents.FlowId
+  Reconfigure.ConfigureNexus ]
 [ Configured
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -82,7 +91,9 @@ Signal
   MetaRefused.MetaRefusal
   Refused.Refusal
   EventsRead.{ FlowId Vector<Event> }
-  ReadEventsRejected.[ UnknownFlow StoreRefused ] ]
+  ReadEventsRejected.[ UnknownFlow StoreRefused ]
+  Reconfigured
+  ReconfigureRejected.ReconfigureRejection ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
@@ -105,6 +116,7 @@ Signal
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   ConfigureRejection.[ StoreRefused Conflict ]
+  ReconfigureRejection.[ Unconfigured CodexModelsOverlap ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

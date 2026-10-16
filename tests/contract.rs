@@ -91,7 +91,10 @@ fn configure_ack_is_unit_and_configuration_read_carries_the_snapshot() {
         configuration.nexus.stable_codex.client_path,
         "codex-stable-flow-client"
     );
-    assert_eq!(configuration.nexus.stable_codex.home, "/home/someone/.codex");
+    assert_eq!(
+        configuration.nexus.stable_codex.home,
+        "/home/someone/.codex"
+    );
     assert_eq!(
         configuration.nexus.stable_codex.control_socket_path,
         "/home/someone/.codex/app-server-control/app-server-control.sock"
@@ -311,4 +314,46 @@ fn a_message_textualizes_with_its_priority_head_first() {
         message.datomize(vec![]).protosize().compact(),
         "Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» }"
     );
+}
+
+#[test]
+fn reconfigure_carries_one_whole_nexus_and_answers_with_typed_outcomes() {
+    let text = "Reconfigure.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus 60 }";
+    let query = Potential::<Query>::from(text)
+        .actualize(&mut budget())
+        .expect("Reconfigure Datom");
+    let Query::Reconfigure(nexus) = &query else {
+        panic!("not a Reconfigure query")
+    };
+    assert_eq!(
+        nexus.stable_codex.model_name_vector,
+        vec!["gpt-5.6-sol".to_owned(), "gpt-5.6-luna".to_owned()]
+    );
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        query
+    );
+    // A Reconfigure without its Lease is not a whole Nexus value.
+    assert!(
+        Potential::<Query>::from(text.replace(" 60 }", " }"))
+            .actualize(&mut budget())
+            .is_err()
+    );
+    for reply in [
+        "Reconfigured",
+        "ReconfigureRejected.Unconfigured",
+        "ReconfigureRejected.CodexModelsOverlap",
+    ] {
+        let response = Potential::<Response>::from(reply)
+            .actualize(&mut budget())
+            .unwrap_or_else(|_| panic!("not a Response Datom: {reply}"));
+        assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            response
+        );
+    }
 }

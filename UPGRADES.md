@@ -2,6 +2,19 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 19.0.0: Reconfigure replaces the whole Nexus value
+
+`Query::Reconfigure(ConfigureNexus)` replaces the committed Nexus value of a
+configured store in one atomic commit and keeps every other row. It answers
+`Response::Reconfigured`, or `Response::ReconfigureRejected` with
+`ReconfigureRejection::Unconfigured` (no Nexus value yet; first setup stays
+`Configure.Nexus`) or `ReconfigureRejection::CodexModelsOverlap` (one model
+names both Codex endpoints), and then nothing changed. `Configure.Nexus`
+still refuses a differing value as `Conflict`. A Nexus reads its Codex
+endpoints when it opens, so a replaced endpoint is served from its next
+start. The contract digest changes: repin this release in Flow and its meta
+clients together; an 18.0.0 peer is refused at the greeting.
+
 ## 18.0.0: one shared Aspect type
 
 `FlowBinding` and the imported `Caller` now use the Library's `Aspect`

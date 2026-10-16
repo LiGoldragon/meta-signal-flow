@@ -1,13 +1,13 @@
 pub mod generated;
-pub use generated::signal::*;
 pub use generated::signal::ConfigurationChange as Configuration;
+pub use generated::signal::*;
 
 pub use flow_ethos::{
     Aspect, Blake3, ClientPath, CodexEndpoint, CommandSigil, ControlSocketPath, HarnessKind,
     HarnessProfile, HarnessProfiles, Hash, Home, InterruptKeys, Key, KeyName, Layer,
-    MessageNexusBinary, MessageNexusPath, MetaAspects, MetaSocketPath, ModelName,
-    NextCodex, OrdinarySocketPath, Path, Repository, Source, SourceRoot, StableCodex,
-    Subaspect, SubmitKeys, Topic,
+    MessageNexusBinary, MessageNexusPath, MetaAspects, MetaSocketPath, ModelName, NextCodex,
+    OrdinarySocketPath, Path, Repository, Source, SourceRoot, StableCodex, Subaspect, SubmitKeys,
+    Topic,
 };
 
 pub use flow_ethos::Hash as SourceHash;
