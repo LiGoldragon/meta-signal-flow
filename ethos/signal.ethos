@@ -39,15 +39,16 @@
 ; flow, in the order its Reports were recorded: EventsRead, or
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
-; Configure accepts one whole typed Module, Model, Threshold or Nexus value.
-; The three non-Nexus values are independent updates. Nexus setup values must
+; Configure accepts one whole typed Model, Threshold or Nexus value. The
+; two non-Nexus values are independent updates. Nexus setup values must
 ; agree within one process. Configuration reads the committed Nexus and the
-; committed model, threshold and module vectors; it never returns defaults.
+; committed model and threshold vectors; it never returns defaults. A seat's
+; context is named by its launch, never configured here.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
 ;
 ; Reconfigure replaces the whole committed Nexus value of a configured store
-; in one atomic commit; models, thresholds, modules and all non-configuration
+; in one atomic commit; models, thresholds and all non-configuration
 ; state are kept. It answers Reconfigured, or ReconfigureRejected and changes
 ; nothing: Unconfigured when the store holds no Nexus value yet (first setup
 ; is Configure.Nexus), CodexModelsOverlap when one model names both Codex
@@ -56,7 +57,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ]
-  flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex Key KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Source ] ]
+  flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -99,16 +100,14 @@ Signal
   ; The process sockets are separately supplied by Library.Start; this
   ; record is not a Configure wire payload.
   NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease }
-  ConfigureModule.{ Key Source }
   ConfigureModel.{ Layer Native.String }
   ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
-  ConfigurationChange.[ Module.ConfigureModule
-                         Model.ConfigureModel
+  ConfigurationChange.[ Model.ConfigureModel
                          Threshold.ConfigureThreshold
                          Nexus.ConfigureNexus ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> Modules.Vector<ConfigureModule> }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next

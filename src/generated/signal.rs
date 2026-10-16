@@ -15,13 +15,6 @@ pub struct NexusRuntimeSettings {
     pub lease: flow_ethos::Lease,
 }
 #[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ConfigureModule {
-    pub key: flow_ethos::Key,
-    pub source: flow_ethos::Source,
-}
-#[rustfmt::skip]
 pub type Native = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -59,7 +52,6 @@ pub struct ConfigureNexus {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
-    Module(ConfigureModule),
     Model(ConfigureModel),
     Threshold(ConfigureThreshold),
     Nexus(ConfigureNexus),
@@ -71,15 +63,12 @@ pub type Models = std::vec::Vec<ConfigureModel>;
 #[rustfmt::skip]
 pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
 #[rustfmt::skip]
-pub type Modules = std::vec::Vec<ConfigureModule>;
-#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
     pub nexus: Nexus,
     pub models: Models,
     pub thresholds: Thresholds,
-    pub modules: Modules,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
