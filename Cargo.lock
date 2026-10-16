@@ -115,8 +115,8 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ethos-zero"
-version = "16.0.0"
-source = "git+https://github.com/LiGoldragon/ethos-zero?rev=c2653dd82adbdb1f1f2f654405c6620e0d06fd58#c2653dd82adbdb1f1f2f654405c6620e0d06fd58"
+version = "17.0.0"
+source = "git+https://github.com/LiGoldragon/ethos-zero?rev=07714b0171802787bea1eefe4caa2d826d9c4030#07714b0171802787bea1eefe4caa2d826d9c4030"
 dependencies = [
  "datom-codec",
  "prettyplease",
@@ -378,7 +378,7 @@ dependencies = [
 [[package]]
 name = "signal-flow"
 version = "17.0.0"
-source = "git+https://github.com/LiGoldragon/signal-flow?rev=63619a15fe7eb452cf7e1ab2768c12a22350cd53#63619a15fe7eb452cf7e1ab2768c12a22350cd53"
+source = "git+https://github.com/LiGoldragon/signal-flow?rev=8176038b2136a180b201f128b6f353517ff2b38e#8176038b2136a180b201f128b6f353517ff2b38e"
 dependencies = [
  "datom-codec",
  "ethos-zero",
