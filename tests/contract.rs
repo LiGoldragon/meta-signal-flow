@@ -20,7 +20,7 @@ fn privileged_requests_have_concrete_datoms() {
         "Configuration",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
-        "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable { da1e3f claude-session unavailable } Pending }",
+        "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable Unbound Pending }",
         "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } [ { psyche-flow Psyche High claude-opus Claude psyche-native workspace wD:p9 wD:t9 psyche-terminal psyche-agent { 4200 1001 psyche-token } /home/li/primary } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } { field-flow Field Medium gpt-6 Codex field-native workspace wQ:pF wQ:tF field-terminal field-agent { 4400 1001 field-token } /home/li/primary } ] }",
     ] {
         let query = Potential::<Query>::from(text)
@@ -217,7 +217,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
     assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
-        "FlowRetired.{ d8df70 claude-session Claude Unavailable Unavailable { 88475f field-session turn-4 } Retired }",
+        "FlowRetired.{ d8df70 claude-session Claude Unavailable Unavailable Flow.{ 88475f field-session } Retired }",
         "RetireRejected.UnknownFlow",
         "RetireRejected.AlreadyGone",
         "RetireRejected.StoreRefused",
