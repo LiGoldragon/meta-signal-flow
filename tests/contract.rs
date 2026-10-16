@@ -78,7 +78,7 @@ fn configure_ack_is_unit_and_configuration_read_carries_the_snapshot() {
         configured
     );
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } [ SkillTool WorkflowTool ] } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -149,6 +149,14 @@ fn configure_ack_is_unit_and_configuration_read_carries_the_snapshot() {
     );
     assert_eq!(configuration.thresholds[0].handover, 300);
     assert_eq!(configuration.thresholds[0].refresh, 900);
+    assert_eq!(configuration.default_leave_outs.len(), 1);
+    assert_eq!(
+        configuration.default_leave_outs[0].leave_outs,
+        [
+            signal_flow::LeaveOut::SkillTool,
+            signal_flow::LeaveOut::WorkflowTool
+        ]
+    );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
     assert_eq!(
         rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),

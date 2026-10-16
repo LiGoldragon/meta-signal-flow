@@ -38,6 +38,13 @@ pub struct ConfigureThreshold {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureLeaveOut {
+    pub address: flow_ethos::Address,
+    pub leave_outs: signal_flow::LeaveOuts,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureNexus {
     pub source_root: flow_ethos::SourceRoot,
     pub stable_codex: flow_ethos::StableCodex,
@@ -54,6 +61,7 @@ pub struct ConfigureNexus {
 pub enum ConfigurationChange {
     Model(ConfigureModel),
     Threshold(ConfigureThreshold),
+    LeaveOut(ConfigureLeaveOut),
     Nexus(ConfigureNexus),
 }
 #[rustfmt::skip]
@@ -63,12 +71,15 @@ pub type Models = std::vec::Vec<ConfigureModel>;
 #[rustfmt::skip]
 pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
 #[rustfmt::skip]
+pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
     pub nexus: Nexus,
     pub models: Models,
     pub thresholds: Thresholds,
+    pub default_leave_outs: DefaultLeaveOuts,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;

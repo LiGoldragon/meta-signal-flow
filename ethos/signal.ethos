@@ -39,10 +39,11 @@
 ; flow, in the order its Reports were recorded: EventsRead, or
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
-; Configure accepts one whole typed Model, Threshold or Nexus value. The
-; two non-Nexus values are independent updates. Nexus setup values must
+; Configure accepts one whole typed Model, Threshold, LeaveOut or Nexus
+; value. The non-Nexus values are independent updates; a LeaveOut names the
+; default leave-outs of one metaflow, which a Start naming its own replaces. Nexus setup values must
 ; agree within one process. Configuration reads the committed Nexus and the
-; committed model and threshold vectors; it never returns defaults. A seat's
+; committed model, threshold and leave-out vectors; it never returns defaults. A seat's
 ; context is named by its launch, never configured here.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
@@ -56,8 +57,8 @@
 ; replaced endpoint is served from the next start.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ]
-  flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer ] ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ]
+  flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -102,12 +103,15 @@ Signal
   NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease }
   ConfigureModel.{ Layer Native.String }
   ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
+  ; The leave-outs a metaflow's Start takes when it names none.
+  ConfigureLeaveOut.{ Address LeaveOuts }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Model.ConfigureModel
                          Threshold.ConfigureThreshold
+                         LeaveOut.ConfigureLeaveOut
                          Nexus.ConfigureNexus ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next

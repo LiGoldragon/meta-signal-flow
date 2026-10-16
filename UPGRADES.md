@@ -7,10 +7,12 @@ How to deploy each breaking change of meta-signal-flow.
 `ConfigureModule` and `ConfigurationChange.Module` are removed, and
 `ConfigurationSnapshot` no longer carries `Modules`: a seat's context is
 named by its launch's module identities (signal-flow 17.0.0), never
-configured on the meta socket. `Key` and `Source` are no longer imported.
+configured on the meta socket. `Configure.LeaveOut.{ Address LeaveOuts }` names the
+default leave-outs of one metaflow, which a Start naming its own
+replaces; `ConfigurationSnapshot` carries them as `DefaultLeaveOuts`. `Key` and `Source` are no longer imported.
 The contract digest changes, so an older peer is refused at the greeting.
 The build generates with ethos-zero 17.0.0 at 07714b0, whose output for
-this source is byte-identical to 16.0.0's. Repin it in Flow together with signal-flow 17.0.0 (23df76f0); a
+this source is byte-identical to 16.0.0's. Repin it in Flow together with signal-flow 17.0.0 (58581f6c); a
 `Configure.Module` caller must stop sending it.
 
 ## 19.0.1: signal-flow 16.0.0
