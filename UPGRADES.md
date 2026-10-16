@@ -2,6 +2,24 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 18.0.0: one shared Aspect type
+
+`FlowBinding` and the imported `Caller` now use the Library's `Aspect`
+directly; `FlowAspect` is removed. Regenerate and pin this release with the
+matching `signal-flow` and `flow-ethos` sources, then rebuild Flow consumers
+together. The contract digest changes, so an older peer is refused at the
+greeting.
+
+## 17.0.0: explicit store refusals
+
+`Response::Refused.Store` carries the store's own error text when a meta
+query cannot read or commit its requested state. `Configure.Module` now
+contains the shared `flow_ethos::Key` and `flow_ethos::Source` types, so its
+identity and source have the same nominal shapes as Flow's Library. Consumers
+must regenerate and repin meta-signal-flow 17.0.0 with the matching Flow
+Nexus; store failures must not be converted to an empty configuration or a
+successful response.
+
 ## 14.0.0: signal 8.0.0, signal-flow 10.0.0
 
 What breaks:
