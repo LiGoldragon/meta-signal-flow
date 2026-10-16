@@ -2,6 +2,17 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 21.0.0: configured subagent roles
+
+`Configure.SubagentRoles.{ [ RoleName ... ] }` names, by Curriculum role
+name, the subagent roles Flow composes for its Claude flows and guards at
+Agent dispatch; a differing value is refused as `Conflict`.
+`ConfigurationSnapshot` carries them last as `SubagentRoles`, an empty
+vector when none is committed. The contract digest changes, so an older
+peer is refused at the greeting. Repin it in Flow, which reads the names
+when its Nexus opens; a deployment that wants the comment relay sends
+`Configure.SubagentRoles.{ [ comment-relay ] }`.
+
 ## 20.0.0: no configured modules; signal-flow 17.0.0
 
 `ConfigureModule` and `ConfigurationChange.Module` are removed, and

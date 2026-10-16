@@ -43,6 +43,14 @@ pub struct ConfigureLeaveOut {
     pub leave_outs: signal_flow::LeaveOuts,
 }
 #[rustfmt::skip]
+pub type SubagentRoleNames = std::vec::Vec<String>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureSubagentRoles {
+    pub subagent_role_names: SubagentRoleNames,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureNexus {
@@ -62,6 +70,7 @@ pub enum ConfigurationChange {
     Model(ConfigureModel),
     Threshold(ConfigureThreshold),
     LeaveOut(ConfigureLeaveOut),
+    SubagentRoles(ConfigureSubagentRoles),
     Nexus(ConfigureNexus),
 }
 #[rustfmt::skip]
@@ -73,6 +82,8 @@ pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
 #[rustfmt::skip]
 pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
 #[rustfmt::skip]
+pub type SubagentRoles = ConfigureSubagentRoles;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -80,6 +91,7 @@ pub struct ConfigurationSnapshot {
     pub models: Models,
     pub thresholds: Thresholds,
     pub default_leave_outs: DefaultLeaveOuts,
+    pub subagent_roles: SubagentRoles,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
