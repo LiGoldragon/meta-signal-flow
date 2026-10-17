@@ -2,6 +2,12 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 22.0.1: signal-flow 18.0.0
+
+The imported signal-flow types are pinned at 18.0.0 (59aab725). No type this
+contract imports changed and its own source is unchanged, so its digest is the
+same and no meta-wire peer repins.
+
 ## 22.0.0: Refresh(Address)
 
 `Query::Refresh(Address)` marks one Asleep metaflow so its next wake starts a
