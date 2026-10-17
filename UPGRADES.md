@@ -2,6 +2,13 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 24.0.1: pin signal-flow 20.0.0
+
+The imported signal-flow types are pinned at 20.0.0 (6a496646) and flow-ethos
+at flow 9e417bb. This contract's own source is unchanged, so its digest stays
+7bbc37359da8843c; a peer rebuilds against signal-flow 20.0.0 so the shared
+types have one identity.
+
 ## 24.0.0: MetaBindExisting verifies each binding against Herdr
 
 `FlowBindingRefusalReason` appends `PaneAbsent`, `ProcessMismatch`,
