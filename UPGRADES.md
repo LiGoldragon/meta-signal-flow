@@ -4,7 +4,7 @@ How to deploy each breaking change of meta-signal-flow.
 
 ## 23.0.1: signal-flow 19.0.0
 
-The imported signal-flow types are pinned at 19.0.0 (3e44cb02). No type this
+The imported signal-flow types are pinned at 19.0.0 (37a41014). No type this
 contract imports changed and its own source is unchanged, so its digest is the
 same and no meta-wire peer repins.
 
