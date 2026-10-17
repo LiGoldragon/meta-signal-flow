@@ -14,8 +14,8 @@ written. The existing variants keep their discriminants.
 
 `Configure.LeaveOuts.[ { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Mind core Primary } Codex [ CodexAgentsMd ] } ]`
 
-The contract digest changes: every meta-wire peer repins (Flow 0.35.13, the
-Message Nexus), and every declarer of `Configure.LeaveOuts` names each
+The contract digest changes from 7bbc37359da8843c to 94175d68080bf89a: every
+meta-wire peer repins (Flow 0.35.13, the Message Nexus), and every declarer of `Configure.LeaveOuts` names each
 entry's harness.
 
 ## 24.0.1: pin signal-flow 20.0.0
