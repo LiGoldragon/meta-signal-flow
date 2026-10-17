@@ -69,6 +69,16 @@
 ; NoLaunchProfile (its last flow has no recorded launch profile to compose
 ; from), StoreRefused. Only an Asleep metaflow is accepted.
 
+; MetaBindExisting verifies each binding against Herdr before it is stored:
+; PaneAbsent (the container's Herdr session shows no agent of the binding's
+; harness at its workspace, pane and terminal), ProcessMismatch (the pane's
+; foreground processes do not include the binding's process), SessionMismatch
+; (Herdr reports another native session for the pane), SessionUnreported (a
+; Claude pane reports no native session), SessionUnproven (a Codex pane
+; reports none and no rollout whose session_meta names the session exists),
+; HerdrUnreadable (the session's snapshot or the pane's processes could not
+; be read).
+
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ]
   flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
@@ -150,7 +160,7 @@ Signal
   FlowBinding.{ FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
   MetaBindExisting.{ FlowContainer Vector<FlowBinding> }
   BoundFlowBinding.{ FlowId FlowLifecycle }
-  FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch ]
+  FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch PaneAbsent ProcessMismatch SessionMismatch SessionUnreported SessionUnproven HerdrUnreadable ]
   RefusedFlowBinding.{ FlowId FlowBindingRefusalReason }
   FlowBindingResult.[ Bound.BoundFlowBinding
                       Refused.RefusedFlowBinding ]

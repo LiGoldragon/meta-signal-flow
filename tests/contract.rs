@@ -39,7 +39,7 @@ fn privileged_requests_have_concrete_datoms() {
 
 #[test]
 fn bind_existing_result_preserves_each_explicit_outcome() {
-    let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } [ Bound.{ psyche-flow RegisteredUnconfirmed } Refused.{ mind-flow AmbiguousPane } Refused.{ field-flow DeadProcess } ] }";
+    let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } [ Bound.{ psyche-flow RegisteredUnconfirmed } Refused.{ mind-flow AmbiguousPane } Refused.{ field-flow DeadProcess } Refused.{ codex-flow SessionUnproven } Refused.{ claude-flow SessionMismatch } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();

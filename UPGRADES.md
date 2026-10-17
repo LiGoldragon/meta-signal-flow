@@ -2,11 +2,20 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
-## 23.0.1: signal-flow 19.0.0
+## 24.0.0: MetaBindExisting verifies each binding against Herdr
 
-The imported signal-flow types are pinned at 19.0.0 (37a41014). No type this
-contract imports changed and its own source is unchanged, so its digest is the
-same and no meta-wire peer repins.
+`FlowBindingRefusalReason` appends `PaneAbsent`, `ProcessMismatch`,
+`SessionMismatch`, `SessionUnreported`, `SessionUnproven` and
+`HerdrUnreadable`; the existing variants keep their discriminants. The Nexus
+refuses a binding whose pane its Herdr session does not show for the
+binding's harness, whose pane does not run the binding's process, or whose
+native session Herdr or (for a Codex pane that reports none) a rollout's
+`session_meta` does not prove:
+`Refused.{ codex-flow SessionUnproven }`.
+
+The imported signal-flow types are pinned at 19.0.0 (37a41014). The contract
+digest changes from 371d348ad5b3fbad to 7bbc37359da8843c: every meta-wire peer
+repins.
 
 ## 23.0.0: Configure declares a whole family; Reconfigure is gone
 
