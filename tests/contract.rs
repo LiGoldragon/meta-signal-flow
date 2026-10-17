@@ -343,3 +343,39 @@ fn reconfigure_carries_one_whole_nexus_and_answers_with_typed_outcomes() {
         );
     }
 }
+
+#[test]
+fn refresh_names_one_metaflow_and_answers_with_typed_outcomes() {
+    let request = "Refresh.{ Mind flow Secondary }";
+    let query = Potential::<Query>::from(request)
+        .actualize(&mut budget())
+        .expect("Refresh Datom");
+    let Query::Refresh(address) = &query else {
+        panic!("not a Refresh query")
+    };
+    assert_eq!(address.topic, "flow");
+    assert_eq!(query.datomize(vec![]).protosize().compact(), request);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        query
+    );
+    for reply in [
+        "Refreshed.{ Mind flow Secondary }",
+        "RefreshRejected.Unknown",
+        "RefreshRejected.Awake",
+        "RefreshRejected.Ended",
+        "RefreshRejected.NoLaunchProfile",
+        "RefreshRejected.StoreRefused",
+    ] {
+        let response = Potential::<Response>::from(reply)
+            .actualize(&mut budget())
+            .unwrap_or_else(|_| panic!("not a Response Datom: {reply}"));
+        assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            response
+        );
+    }
+}

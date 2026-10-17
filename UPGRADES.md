@@ -2,6 +2,18 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 22.0.0: Refresh(Address)
+
+`Query::Refresh(Address)` marks one Asleep metaflow so its next wake starts a
+fresh native session composed from its last launch's recorded module
+identities and leave-outs, instead of resuming. It answers
+`Response::Refreshed(Address)` (a repeat while marked answers the same), or
+`Response::RefreshRejected(RefreshRejection)`: `Unknown`, `Awake`, `Ended`,
+`NoLaunchProfile`, `StoreRefused`. A new variant changes the contract digest,
+so an older peer is refused at the greeting. 21.0.0 is held by the unmerged
+`SubagentRoles` branch; this is the next free major on main. Repin it in Flow
+(Flow 0.35.2).
+
 ## 20.0.0: no configured modules; signal-flow 17.0.0
 
 `ConfigureModule` and `ConfigurationChange.Module` are removed, and

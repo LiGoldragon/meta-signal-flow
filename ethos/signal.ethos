@@ -55,6 +55,16 @@
 ; is Configure.Nexus), CodexModelsOverlap when one model names both Codex
 ; endpoints. A running Nexus reads its Codex endpoints when it opens, so a
 ; replaced endpoint is served from the next start.
+;
+; Refresh names one metaflow whose next wake starts a fresh native session,
+; composed from the module identities and leave-outs its last launch
+; recorded, instead of resuming the last flow's session. It marks that one
+; metaflow only; no model or threshold changes, and the mark clears when
+; the metaflow is recorded Awoken. It answers Refreshed with the Address,
+; and a second Refresh while the metaflow is marked answers the same.
+; RefreshRejected: Unknown (no metaflow at the Address), Awake, Ended,
+; NoLaunchProfile (its last flow has no recorded launch profile to compose
+; from), StoreRefused. Only an Asleep metaflow is accepted.
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ]
@@ -70,7 +80,8 @@ Signal
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
-  Reconfigure.ConfigureNexus ]
+  Reconfigure.ConfigureNexus
+  Refresh.Address ]
 [ Configured
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -95,7 +106,9 @@ Signal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   Reconfigured
-  ReconfigureRejected.ReconfigureRejection ]
+  ReconfigureRejected.ReconfigureRejection
+  Refreshed.Address
+  RefreshRejected.RefreshRejection ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
@@ -120,6 +133,7 @@ Signal
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   ConfigureRejection.[ StoreRefused Conflict ]
   ReconfigureRejection.[ Unconfigured CodexModelsOverlap ]
+  RefreshRejection.[ Unknown Awake Ended NoLaunchProfile StoreRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
