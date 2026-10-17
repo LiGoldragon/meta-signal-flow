@@ -59,10 +59,17 @@ pub struct ConfigureNexus {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
-    Model(ConfigureModel),
-    Threshold(ConfigureThreshold),
-    LeaveOut(ConfigureLeaveOut),
+    Models(std::vec::Vec<ConfigureModel>),
+    Thresholds(std::vec::Vec<ConfigureThreshold>),
+    LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ConfigureOutcome {
+    Replaced,
+    Unchanged,
 }
 #[rustfmt::skip]
 pub type Nexus = ConfigureNexus;
@@ -113,13 +120,7 @@ pub enum ResetOutcome {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigureRejection {
     StoreRefused,
-    Conflict,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ReconfigureRejection {
-    Unconfigured,
+    DuplicateEntry,
     CodexModelsOverlap,
 }
 #[rustfmt::skip]
@@ -441,7 +442,6 @@ pub enum Query {
     Command(CommandRequest),
     ResolvePeer(ProcessIdentity),
     ReadEvents(signal_flow::FlowId),
-    Reconfigure(ConfigureNexus),
     Refresh(flow_ethos::Address),
 }
 #[rustfmt::skip]
@@ -462,7 +462,7 @@ pub enum ReadEventsRejected_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Response {
-    Configured,
+    Configured(ConfigureOutcome),
     Configuration(ConfigurationSnapshot),
     Unconfigured,
     ResetConsumed(ResetOutcome),
@@ -485,8 +485,6 @@ pub enum Response {
     Refused(Refusal),
     EventsRead(EventsRead_Data),
     ReadEventsRejected(ReadEventsRejected_Data),
-    Reconfigured,
-    ReconfigureRejected(ReconfigureRejection),
     Refreshed(flow_ethos::Address),
     RefreshRejected(RefreshRejection),
 }

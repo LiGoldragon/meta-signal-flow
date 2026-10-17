@@ -63,20 +63,28 @@ fn reset_outcome_round_trips_over_signal_and_datom() {
 
 #[test]
 // These are Signal wire round-trips, not claims about configured store state.
-fn configure_ack_is_unit_and_configuration_read_carries_the_snapshot() {
-    let configured = Potential::<Response>::from("Configured")
-        .actualize(&mut budget())
-        .unwrap();
-    assert_eq!(configured, Response::Configured);
-    assert_eq!(
-        configured.datomize(vec![]).protosize().compact(),
-        "Configured"
-    );
-    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&configured).unwrap();
-    assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
-        configured
-    );
+fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot() {
+    for (text, expected) in [
+        (
+            "Configured.Replaced",
+            Response::Configured(meta_signal_flow::ConfigureOutcome::Replaced),
+        ),
+        (
+            "Configured.Unchanged",
+            Response::Configured(meta_signal_flow::ConfigureOutcome::Unchanged),
+        ),
+    ] {
+        let configured = Potential::<Response>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(configured, expected);
+        assert_eq!(configured.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&configured).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            configured
+        );
+    }
 
     let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } [ SkillTool WorkflowTool ] } ] }";
     let response = Potential::<Response>::from(text)
@@ -303,34 +311,47 @@ fn a_message_textualizes_with_its_priority_head_first() {
 }
 
 #[test]
-fn reconfigure_carries_one_whole_nexus_and_answers_with_typed_outcomes() {
-    let text = "Reconfigure.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus 60 }";
-    let query = Potential::<Query>::from(text)
-        .actualize(&mut budget())
-        .expect("Reconfigure Datom");
-    let Query::Reconfigure(nexus) = &query else {
-        panic!("not a Reconfigure query")
+fn configure_declares_one_whole_family() {
+    for text in [
+        "Configure.Models.[ { Quaternary claude-haiku-5-5 } { Secondary claude-opus-5-5 } ]",
+        "Configure.Thresholds.[ { Primary 600000 700000 } ]",
+        "Configure.LeaveOuts.[ { { Field core Primary } [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]",
+        "Configure.LeaveOuts.[]",
+    ] {
+        let query = Potential::<Query>::from(text)
+            .actualize(&mut budget())
+            .unwrap_or_else(|_| panic!("not a Query Datom: {text}"));
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            query
+        );
+    }
+    let Query::Configure(meta_signal_flow::Configuration::Models(models)) =
+        Potential::<Query>::from("Configure.Models.[ { Quaternary claude-haiku-5-5 } ]")
+            .actualize(&mut budget())
+            .unwrap()
+    else {
+        panic!("not a Models declaration")
     };
-    assert_eq!(
-        nexus.stable_codex.model_name_vector,
-        vec!["gpt-5.6-sol".to_owned(), "gpt-5.6-luna".to_owned()]
-    );
-    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
-    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
-    assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
-        query
-    );
-    // A Reconfigure without its Lease is not a whole Nexus value.
+    assert_eq!(models.len(), 1);
+    // One entry is not a family: a declaration is always the whole vector.
     assert!(
-        Potential::<Query>::from(text.replace(" 60 }", " }"))
+        Potential::<Query>::from("Configure.Models.{ Quaternary claude-haiku-5-5 }")
+            .actualize(&mut budget())
+            .is_err()
+    );
+    // Configure.Nexus is the one way to set or replace the Nexus.
+    assert!(
+        Potential::<Query>::from("Reconfigure.{ /srv }")
             .actualize(&mut budget())
             .is_err()
     );
     for reply in [
-        "Reconfigured",
-        "ReconfigureRejected.Unconfigured",
-        "ReconfigureRejected.CodexModelsOverlap",
+        "ConfigureRejected.DuplicateEntry",
+        "ConfigureRejected.CodexModelsOverlap",
+        "ConfigureRejected.StoreRefused",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())

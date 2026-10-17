@@ -39,23 +39,26 @@
 ; flow, in the order its Reports were recorded: EventsRead, or
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
-; Configure accepts one whole typed Model, Threshold, LeaveOut or Nexus
-; value. The non-Nexus values are independent updates; a LeaveOut names the
-; default leave-outs of one metaflow, which a Start naming its own replaces. Nexus setup values must
-; agree within one process. Configuration reads the committed Nexus and the
-; committed model, threshold and leave-out vectors; it never returns defaults. A seat's
-; context is named by its launch, never configured here.
+; Configure declares one configuration family whole: Models, Thresholds,
+; LeaveOuts or Nexus. The declared value replaces that family's committed
+; value in one atomic commit, so the family's effective value is always its
+; last declaration; an entry absent from the declaration is removed. It
+; answers Configured.Replaced, or Configured.Unchanged when the committed
+; value already equals the declaration and nothing is written. Each family
+; holds one entry per key: Models and Thresholds one per Layer, LeaveOuts
+; one per Address (the default leave-outs of one metaflow, which a Start
+; naming its own replaces). ConfigureRejected changes nothing:
+; DuplicateEntry when a declaration names one key twice, CodexModelsOverlap
+; when a Nexus names one model under both Codex endpoints. Configuration
+; reads the committed Nexus and the committed model, threshold and leave-out
+; vectors; it never returns defaults, and answers Unconfigured while no
+; Nexus has been declared. A seat's context is named by its launch, never
+; configured here.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
-;
-; Reconfigure replaces the whole committed Nexus value of a configured store
-; in one atomic commit; models, thresholds and all non-configuration
-; state are kept. It answers Reconfigured, or ReconfigureRejected and changes
-; nothing: Unconfigured when the store holds no Nexus value yet (first setup
-; is Configure.Nexus), CodexModelsOverlap when one model names both Codex
-; endpoints. A running Nexus reads its Codex endpoints when it opens, so a
-; replaced endpoint is served from the next start.
-;
+; A running Nexus reads its Codex endpoints when it opens, so a replaced
+; endpoint is served from the next start.
+
 ; Refresh names one metaflow whose next wake starts a fresh native session,
 ; composed from the module identities and leave-outs its last launch
 ; recorded, instead of resuming the last flow's session. It marks that one
@@ -80,9 +83,8 @@ Signal
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
-  Reconfigure.ConfigureNexus
   Refresh.Address ]
-[ Configured
+[ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
   Unconfigured
   ResetConsumed.ResetOutcome
@@ -105,8 +107,6 @@ Signal
   Refused.Refusal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
-  Reconfigured
-  ReconfigureRejected.ReconfigureRejection
   Refreshed.Address
   RefreshRejected.RefreshRejection ]
 [ ; Flow Library owns the shared configuration field types.
@@ -120,10 +120,11 @@ Signal
   ConfigureLeaveOut.{ Address LeaveOuts }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
-  ConfigurationChange.[ Model.ConfigureModel
-                         Threshold.ConfigureThreshold
-                         LeaveOut.ConfigureLeaveOut
+  ConfigurationChange.[ Models.Vector<ConfigureModel>
+                         Thresholds.Vector<ConfigureThreshold>
+                         LeaveOuts.Vector<ConfigureLeaveOut>
                          Nexus.ConfigureNexus ]
+  ConfigureOutcome.[ Replaced Unchanged ]
   ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> }
   IdempotencyKey.String
   CreditId.String
@@ -131,8 +132,7 @@ Signal
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused Conflict ]
-  ReconfigureRejection.[ Unconfigured CodexModelsOverlap ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap ]
   RefreshRejection.[ Unknown Awake Ended NoLaunchProfile StoreRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]

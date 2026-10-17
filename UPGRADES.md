@@ -2,6 +2,24 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 23.0.0: Configure declares a whole family; Reconfigure is gone
+
+`ConfigurationChange` is `Models.Vector<ConfigureModel>`,
+`Thresholds.Vector<ConfigureThreshold>`, `LeaveOuts.Vector<ConfigureLeaveOut>`
+or `Nexus.ConfigureNexus`. Each declaration replaces its family's committed
+value whole in one atomic commit, so the effective family is always its last
+declaration and an entry left out of it is removed. `Configured` carries
+`ConfigureOutcome.[ Replaced Unchanged ]`. `ConfigureRejection` is
+`[ StoreRefused DuplicateEntry CodexModelsOverlap ]`: one key named twice in a
+declaration, or one model under both Codex endpoints of a Nexus.
+`Query::Reconfigure`, `Response::Reconfigured`, `ReconfigureRejected` and
+`ReconfigureRejection` are removed; `Configure.Nexus` is the one way to set or
+replace the Nexus. The contract digest changes, so an older peer is refused at
+the greeting. A declarer sends one `Configure.<Family>` with the whole
+declared vector instead of one `Configure.LeaveOut` per metaflow, and reads
+`Configured.Replaced` or `Configured.Unchanged`. Repin it in Flow (0.35.4)
+and in every meta-wire peer.
+
 ## 22.0.1: signal-flow 18.0.0
 
 The imported signal-flow types are pinned at 18.0.0 (59aab725). No type this
