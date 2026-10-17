@@ -40,6 +40,7 @@ pub struct ConfigureThreshold {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureLeaveOut {
     pub address: flow_ethos::Address,
+    pub harness_kind: signal_flow::HarnessKind,
     pub leave_outs: signal_flow::LeaveOuts,
 }
 #[rustfmt::skip]
@@ -122,6 +123,7 @@ pub enum ConfigureRejection {
     StoreRefused,
     DuplicateEntry,
     CodexModelsOverlap,
+    LeaveOutNotForHarness,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

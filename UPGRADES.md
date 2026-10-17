@@ -2,6 +2,22 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 25.0.0: a leave-out default names its harness
+
+`ConfigureLeaveOut` is `{ Address HarnessKind LeaveOuts }`: the default
+leave-outs of one metaflow started on one harness. `Configure.LeaveOuts`
+holds one entry per Address and HarnessKind, so one metaflow may carry a
+Claude default and a Codex default, and a Start takes only the default of
+its own harness. `ConfigureRejection` appends `LeaveOutNotForHarness`: an
+entry naming a leave-out of another harness is refused and nothing is
+written. The existing variants keep their discriminants.
+
+`Configure.LeaveOuts.[ { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Mind core Primary } Codex [ CodexAgentsMd ] } ]`
+
+The contract digest changes: every meta-wire peer repins (Flow 0.35.13, the
+Message Nexus), and every declarer of `Configure.LeaveOuts` names each
+entry's harness.
+
 ## 24.0.1: pin signal-flow 20.0.0
 
 The imported signal-flow types are pinned at 20.0.0 (6a496646) and flow-ethos

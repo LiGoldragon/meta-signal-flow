@@ -46,10 +46,13 @@
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
 ; value already equals the declaration and nothing is written. Each family
 ; holds one entry per key: Models and Thresholds one per Layer, LeaveOuts
-; one per Address (the default leave-outs of one metaflow, which a Start
-; naming its own replaces). ConfigureRejected changes nothing:
-; DuplicateEntry when a declaration names one key twice, CodexModelsOverlap
-; when a Nexus names one model under both Codex endpoints. Configuration
+; one per Address and HarnessKind (the default leave-outs of one metaflow
+; started on one harness, which a Start naming its own replaces; a Start
+; whose harness has no entry for its Address takes none). ConfigureRejected
+; changes nothing: DuplicateEntry when a declaration names one key twice,
+; CodexModelsOverlap when a Nexus names one model under both Codex
+; endpoints, LeaveOutNotForHarness when an entry names a leave-out of
+; another harness than its own. Configuration
 ; reads the committed Nexus and the committed model, threshold and leave-out
 ; vectors; it never returns defaults, and answers Unconfigured while no
 ; Nexus has been declared. A seat's context is named by its launch, never
@@ -126,8 +129,8 @@ Signal
   NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease }
   ConfigureModel.{ Layer Native.String }
   ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
-  ; The leave-outs a metaflow's Start takes when it names none.
-  ConfigureLeaveOut.{ Address LeaveOuts }
+  ; The leave-outs a metaflow's Start on one harness takes when it names none.
+  ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
@@ -142,7 +145,7 @@ Signal
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness ]
   RefreshRejection.[ Unknown Awake Ended NoLaunchProfile StoreRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]

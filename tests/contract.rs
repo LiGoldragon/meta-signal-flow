@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } [ SkillTool WorkflowTool ] } ] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -158,6 +158,10 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
     assert_eq!(configuration.thresholds[0].handover, 300);
     assert_eq!(configuration.thresholds[0].refresh, 900);
     assert_eq!(configuration.default_leave_outs.len(), 1);
+    assert_eq!(
+        configuration.default_leave_outs[0].harness_kind,
+        meta_signal_flow::HarnessKind::Claude
+    );
     assert_eq!(
         configuration.default_leave_outs[0].leave_outs,
         [
@@ -315,7 +319,7 @@ fn configure_declares_one_whole_family() {
     for text in [
         "Configure.Models.[ { Quaternary claude-haiku-5-5 } { Secondary claude-opus-5-5 } ]",
         "Configure.Thresholds.[ { Primary 600000 700000 } ]",
-        "Configure.LeaveOuts.[ { { Field core Primary } [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]",
+        "Configure.LeaveOuts.[ { { Field core Primary } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Secondary } Codex [ CodexAgentsMd ] } ]",
         "Configure.LeaveOuts.[]",
     ] {
         let query = Potential::<Query>::from(text)
@@ -399,4 +403,30 @@ fn refresh_names_one_metaflow_and_answers_with_typed_outcomes() {
             response
         );
     }
+}
+
+#[test]
+fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_rejection() {
+    // An entry without its harness is no longer a ConfigureLeaveOut.
+    assert!(
+        Potential::<Query>::from(
+            "Configure.LeaveOuts.[ { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]"
+        )
+        .actualize(&mut budget())
+        .is_err()
+    );
+    let text = "ConfigureRejected.LeaveOutNotForHarness";
+    let response = Potential::<Response>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(
+        response,
+        Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::LeaveOutNotForHarness)
+    );
+    assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        response
+    );
 }
