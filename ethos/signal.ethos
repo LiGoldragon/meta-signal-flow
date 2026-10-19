@@ -45,8 +45,8 @@
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
 ; value already equals the declaration and nothing is written. Each family
-; holds one entry per key: Models and Thresholds one per Layer, LeaveOuts
-; one per Address (the default leave-outs of one metaflow, which a Start
+; holds one entry per key: Models one per Layer and Aspect, Thresholds one
+; per Layer, LeaveOuts one per Address (the default leave-outs of one metaflow, which a Start
 ; naming its own replaces). ConfigureRejected changes nothing:
 ; DuplicateEntry when a declaration names one key twice, CodexModelsOverlap
 ; when a Nexus names one model under both Codex endpoints. Configuration
@@ -124,7 +124,9 @@ Signal
   ; The process sockets are separately supplied by Library.Start; this
   ; record is not a Configure wire payload.
   NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease }
-  ConfigureModel.{ Layer Native.String }
+  ; The model a seat of one layer and aspect runs; a Start naming another
+  ; model for that seat is refused.
+  ConfigureModel.{ Layer Aspect Native.String }
   ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
   ; The leave-outs a metaflow's Start takes when it names none.
   ConfigureLeaveOut.{ Address LeaveOuts }

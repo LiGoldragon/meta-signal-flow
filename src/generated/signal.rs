@@ -21,6 +21,7 @@ pub type Native = String;
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureModel {
     pub layer: flow_ethos::Layer,
+    pub aspect: signal_flow::Aspect,
     pub native: Native,
 }
 #[rustfmt::skip]
