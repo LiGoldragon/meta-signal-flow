@@ -2,6 +2,14 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 29.0.0: no Refresh
+
+Every wake of an Asleep metaflow starts a fresh flow composed from its
+modules (flow 0.35.22), so a mark asking for a fresh wake has nothing to
+change. `Query::Refresh`, `Response::Refreshed`, `Response::RefreshRejected`
+and `RefreshRejection` are gone; a peer that sent `Refresh.{ ... }` drops the
+call. Every meta-socket peer repins.
+
 ## 28.0.0: models by layer and aspect, leave-outs by harness, send servers, queue deliveries
 
 - `ConfigureModel` is `{ Layer Aspect Native.String }`: the Models family
