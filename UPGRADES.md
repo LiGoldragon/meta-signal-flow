@@ -2,6 +2,22 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 25.0.0: SendServers names the send servers Flow trusts to name a thread
+
+- `ConfigurationChange` appends `SendServers.Vector<ConfigureSendServer>`,
+  `ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }`, one
+  entry per Codex app-server executable; each path is the executable the
+  kernel reports for the running process:
+  `Configure.SendServers.[ { /nix/store/…-codex/bin/codex /nix/store/…/bin/flow-send-mcp } ]`.
+  signal-flow 21.0.0's `IdentifyThread` is accepted only from a process
+  running a configured `McpSendServerBinary` whose parent runs the paired
+  `CodexAppServerBinary`.
+- `ConfigurationSnapshot` appends `SendServers.Vector<ConfigureSendServer>`;
+  a store with none configured reads `[]`.
+- The imported signal-flow types are pinned at 21.0.0 (f50640f7).
+- The contract digest changes from 7bbc37359da8843c to 81907c3b3f56108a:
+  every meta-wire peer repins.
+
 ## 24.0.1: pin signal-flow 20.0.0
 
 The imported signal-flow types are pinned at 20.0.0 (6a496646) and flow-ethos

@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } [ SkillTool WorkflowTool ] } ] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -164,6 +164,13 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             signal_flow::LeaveOut::SkillTool,
             signal_flow::LeaveOut::WorkflowTool
         ]
+    );
+    assert_eq!(
+        configuration.send_servers,
+        vec![meta_signal_flow::ConfigureSendServer {
+            codex_app_server_binary: "/nix/store/codex/bin/codex".into(),
+            mcp_send_server_binary: "/nix/store/send/bin/flow-send-mcp".into(),
+        }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
     assert_eq!(
@@ -399,4 +406,24 @@ fn refresh_names_one_metaflow_and_answers_with_typed_outcomes() {
             response
         );
     }
+}
+
+/// A send-servers declaration pairs each Codex app-server executable with
+/// the MCP send-server executable its child must run.
+#[test]
+fn configure_send_servers_has_a_concrete_datom() {
+    let text = "Configure.SendServers.[ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ]";
+    let query = Potential::<meta_signal_flow::Query>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(
+        query,
+        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::SendServers(
+            vec![meta_signal_flow::ConfigureSendServer {
+                codex_app_server_binary: "/nix/store/codex/bin/codex".into(),
+                mcp_send_server_binary: "/nix/store/send/bin/flow-send-mcp".into(),
+            }]
+        ))
+    );
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
 }
