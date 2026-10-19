@@ -2,6 +2,13 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 24.0.2: pin signal-flow 21.0.0
+
+The imported signal-flow types are pinned at 21.0.0 (eb32ffc2), which appends
+`NativeLaunchFailure::WorkspaceLabelRefused`. This contract's own source is
+unchanged; a peer rebuilds against signal-flow 21.0.0 so the shared types have
+one identity.
+
 ## 24.0.1: pin signal-flow 20.0.0
 
 The imported signal-flow types are pinned at 20.0.0 (6a496646) and flow-ethos
