@@ -2,7 +2,7 @@
 //! The expected texts are written out here, not computed through the codec.
 
 use meta_signal_flow::{EventsRead_Data, Query, ReadEventsRejected_Data, Response};
-use signal_flow::{Event, NativeStop};
+use signal_flow::{Event, NativeStop, Publication};
 
 fn events_read() -> Response {
     Response::EventsRead(EventsRead_Data {
@@ -11,6 +11,15 @@ fn events_read() -> Response {
             Event::Started,
             Event::ToolUsed("Bash".into()),
             Event::Stopped(NativeStop {
+                native_session_id_option: Some("s1".into()),
+                transcript_path_option: None,
+            }),
+            Event::Published(Publication {
+                native_session_id_option: Some("s1".into()),
+                prompt_id_option: None,
+                artifact_url: "https://claude.ai/code/artifact/4fcc3326".into(),
+            }),
+            Event::StopHeld(NativeStop {
                 native_session_id_option: Some("s1".into()),
                 transcript_path_option: None,
             }),
@@ -62,7 +71,7 @@ mod datom {
         assert_eq!(query, Query::ReadEvents("f1c841".into()));
         assert_eq!(
             events_read().datomize(vec![]).protosize().compact(),
-            "EventsRead.{ f1c841 [ Started ToolUsed.Bash Stopped.{ Some.s1 None } ] }"
+            "EventsRead.{ f1c841 [ Started ToolUsed.Bash Stopped.{ Some.s1 None } Published.{ Some.s1 None https://claude.ai/code/artifact/4fcc3326 } StopHeld.{ Some.s1 None } ] }"
         );
         assert_eq!(
             Response::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow)
@@ -72,7 +81,7 @@ mod datom {
             "ReadEventsRejected.UnknownFlow"
         );
         let read =
-            Potential::<Response>::from("EventsRead.{ f1c841 [ Started ToolUsed.Bash Stopped.{ Some.s1 None } ] }")
+            Potential::<Response>::from("EventsRead.{ f1c841 [ Started ToolUsed.Bash Stopped.{ Some.s1 None } Published.{ Some.s1 None https://claude.ai/code/artifact/4fcc3326 } StopHeld.{ Some.s1 None } ] }")
                 .actualize(&mut budget())
                 .unwrap();
         assert_eq!(read, events_read());

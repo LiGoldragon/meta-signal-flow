@@ -2,6 +2,15 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 29.0.0: signal-flow 23.0.0
+
+- `EventsRead` carries signal-flow 23.0.0's `Event`: a submitted prompt
+  carries its `PromptOrigin`, and a flow's events may hold
+  `Published.{ Some.s1 None https://claude.ai/code/artifact/4fcc3326 }` and
+  `StopHeld.{ Some.s1 None }`. The archived `Event` layout changes, so every
+  meta-socket peer that reads events repins. This contract's own source and
+  digest are unchanged.
+
 ## 28.0.0: models by layer and aspect, leave-outs by harness, send servers, queue deliveries
 
 - `ConfigureModel` is `{ Layer Aspect Native.String }`: the Models family
