@@ -147,7 +147,6 @@ pub enum ConfigureRejection {
 pub enum RefreshRejection {
     Unknown,
     Awake,
-    Ended,
     NoLaunchProfile,
     StoreRefused,
 }
@@ -426,6 +425,25 @@ pub struct CommandOutcome {
     pub command_grade: CommandGrade,
 }
 #[rustfmt::skip]
+pub type ContextTokens = i64;
+#[rustfmt::skip]
+pub type RefreshTokens = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ContextBelowThreshold {
+    pub context_tokens: ContextTokens,
+    pub refresh_tokens: RefreshTokens,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum CompactionRefusal {
+    BelowThreshold(ContextBelowThreshold),
+    Unmeasured,
+    NoThreshold,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum CommandRejection {
@@ -437,6 +455,7 @@ pub enum CommandRejection {
     NotDelivered,
     FlowRetired,
     FlowExited,
+    CompactionRefused(CompactionRefusal),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

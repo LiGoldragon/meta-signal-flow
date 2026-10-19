@@ -77,7 +77,7 @@
 ; metaflow only; no model or threshold changes, and the mark clears when
 ; the metaflow is recorded Awoken. It answers Refreshed with the Address,
 ; and a second Refresh while the metaflow is marked answers the same.
-; RefreshRejected: Unknown (no metaflow at the Address), Awake, Ended,
+; RefreshRejected: Unknown (no metaflow at the Address), Awake,
 ; NoLaunchProfile (its last flow has no recorded launch profile to compose
 ; from), StoreRefused. Only an Asleep metaflow is accepted.
 
@@ -108,6 +108,14 @@
 ; (the attempt is Prepared, ReceiptRecorded, Absent, Settled or Resolved),
 ; NotOldest (the attempt is no longer the oldest request of its address),
 ; EmptyReason, StoreRefused.
+
+; Compaction is an emergency measure. Command.Compact is refused, before
+; anything reaches the pane, unless the flow's context at its last Stop was
+; at or above the Refresh threshold configured for its layer:
+; CompactionRefused.BelowThreshold carries that context and that threshold,
+; in tokens; Unmeasured says no context size is recorded for the flow;
+; NoThreshold says no Refresh threshold applies, its layer having none
+; configured or Flow holding no metaflow or launch that names its layer.
 
 ; MetaBindExisting verifies each binding against Herdr before it is stored:
 ; PaneAbsent (the container's Herdr session shows no agent of the binding's
@@ -195,7 +203,7 @@ Signal
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness ]
-  RefreshRejection.[ Unknown Awake Ended NoLaunchProfile StoreRefused ]
+  RefreshRejection.[ Unknown Awake NoLaunchProfile StoreRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
@@ -255,7 +263,11 @@ Signal
   CommandRequest.{ FlowId HarnessCommand }
   CommandGrade.[ Transported Observed Uncertain ]
   CommandOutcome.{ FlowId HarnessCommand CommandGrade }
-  CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited ]
+  ContextTokens.Integer
+  RefreshTokens.Integer
+  ContextBelowThreshold.{ ContextTokens RefreshTokens }
+  CompactionRefusal.[ BelowThreshold.ContextBelowThreshold Unmeasured NoThreshold ]
+  CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited CompactionRefused.CompactionRefusal ]
   MetaRefusal.[ PeerUnknown
                 PeerNotAuthorized.Caller ]
   Refusal.[ Store.String ]

@@ -307,6 +307,9 @@ fn delivery_replies_have_concrete_datoms() {
         "CommandRejected.UnsupportedForHarness",
         "CommandRejected.FlowRetired",
         "CommandRejected.FlowExited",
+        "CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }",
+        "CommandRejected.CompactionRefused.Unmeasured",
+        "CommandRejected.CompactionRefused.NoThreshold",
         "PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
         "MetaRefused.PeerNotAuthorized.{ da88cf Field Medium gpt-5.5 }",
@@ -412,7 +415,6 @@ fn refresh_names_one_metaflow_and_answers_with_typed_outcomes() {
         "Refreshed.{ Mind flow Secondary }",
         "RefreshRejected.Unknown",
         "RefreshRejected.Awake",
-        "RefreshRejected.Ended",
         "RefreshRejected.NoLaunchProfile",
         "RefreshRejected.StoreRefused",
     ] {
@@ -471,5 +473,16 @@ fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_reje
     assert_eq!(
         rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
         response
+    );
+}
+
+/// A topic never dies: a Refresh is never refused for an Ended metaflow,
+/// since no metaflow is Ended.
+#[test]
+fn refresh_has_no_ended_rejection() {
+    assert!(
+        Potential::<Response>::from("RefreshRejected.Ended")
+            .actualize(&mut budget())
+            .is_err()
     );
 }
