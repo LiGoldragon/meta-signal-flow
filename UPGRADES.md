@@ -2,6 +2,26 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 25.0.0: a model is configured per layer and aspect
+
+`ConfigureModel` is `{ Layer Aspect Native.String }`: the Models family
+holds one entry per Layer and Aspect, so one layer runs a Claude model for
+Psyche and a Codex model for Mind and Field. A declaration naming one
+layer and aspect twice is `ConfigureRejected.DuplicateEntry`. A model
+declared without its aspect no longer reads:
+
+```
+Configure.Models.[ { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]
+```
+
+`Configuration` answers the same rows. The Nexus refuses a Start whose
+model is not the one configured for its Address's layer and aspect
+(signal-flow 21.0.0, `StartRejected.ModelRefused`).
+
+The imported signal-flow types are pinned at 21.0.0 (dc7a0eee). The
+contract digest changes from 7bbc37359da8843c to 8b24d7ee385b001e: every
+meta-wire peer repins.
+
 ## 24.0.1: pin signal-flow 20.0.0
 
 The imported signal-flow types are pinned at 20.0.0 (6a496646) and flow-ethos

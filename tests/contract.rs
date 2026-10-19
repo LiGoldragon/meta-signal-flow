@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary claude-opus } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } [ SkillTool WorkflowTool ] } ] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } [ SkillTool WorkflowTool ] } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -144,12 +144,28 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         "/usr/bin/message-nexus"
     );
     assert_eq!(configuration.nexus.lease, 60);
-    assert_eq!(configuration.models.len(), 1);
+    // One layer holds a model per aspect.
     assert_eq!(
-        configuration.models[0].layer,
-        meta_signal_flow::Layer::Secondary
+        configuration.models,
+        vec![
+            meta_signal_flow::ConfigureModel {
+                layer: meta_signal_flow::Layer::Secondary,
+                aspect: meta_signal_flow::Aspect::Psyche,
+                native: "claude-opus".into(),
+            },
+            meta_signal_flow::ConfigureModel {
+                layer: meta_signal_flow::Layer::Secondary,
+                aspect: meta_signal_flow::Aspect::Mind,
+                native: "gpt-6.1".into(),
+            },
+        ]
     );
-    assert_eq!(configuration.models[0].native, "claude-opus");
+    // A model that names no aspect is no longer a declaration.
+    assert!(
+        Potential::<Query>::from("Configure.Models.[ { Secondary claude-opus-5-5 } ]")
+            .actualize(&mut budget())
+            .is_err()
+    );
     assert_eq!(configuration.thresholds.len(), 1);
     assert_eq!(
         configuration.thresholds[0].layer,
@@ -313,7 +329,7 @@ fn a_message_textualizes_with_its_priority_head_first() {
 #[test]
 fn configure_declares_one_whole_family() {
     for text in [
-        "Configure.Models.[ { Quaternary claude-haiku-5-5 } { Secondary claude-opus-5-5 } ]",
+        "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]",
         "Configure.Thresholds.[ { Primary 600000 700000 } ]",
         "Configure.LeaveOuts.[ { { Field core Primary } [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]",
         "Configure.LeaveOuts.[]",
@@ -329,7 +345,7 @@ fn configure_declares_one_whole_family() {
         );
     }
     let Query::Configure(meta_signal_flow::Configuration::Models(models)) =
-        Potential::<Query>::from("Configure.Models.[ { Quaternary claude-haiku-5-5 } ]")
+        Potential::<Query>::from("Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } ]")
             .actualize(&mut budget())
             .unwrap()
     else {
@@ -338,7 +354,7 @@ fn configure_declares_one_whole_family() {
     assert_eq!(models.len(), 1);
     // One entry is not a family: a declaration is always the whole vector.
     assert!(
-        Potential::<Query>::from("Configure.Models.{ Quaternary claude-haiku-5-5 }")
+        Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 }")
             .actualize(&mut budget())
             .is_err()
     );
