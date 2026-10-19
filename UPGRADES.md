@@ -2,91 +2,64 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
-## 24.0.2: pin signal-flow 21.0.0
+## 28.0.0: models by layer and aspect, leave-outs by harness, send servers, queue deliveries
 
-The imported signal-flow types are pinned at 21.0.0 (eb32ffc2), which appends
-`NativeLaunchFailure::WorkspaceLabelRefused`. This contract's own source is
-unchanged; a peer rebuilds against signal-flow 21.0.0 so the shared types have
-one identity.
+- `ConfigureModel` is `{ Layer Aspect Native.String }`: the Models family
+  holds one entry per Layer and Aspect, so one layer runs a Claude model for
+  Psyche and a Codex model for Mind and Field. A declaration naming one
+  layer and aspect twice is `ConfigureRejected.DuplicateEntry`. A model
+  declared without its aspect no longer reads:
 
-## 25.0.0: a model is configured per layer and aspect
+  ```
+  Configure.Models.[ { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]
+  ```
 
-`ConfigureModel` is `{ Layer Aspect Native.String }`: the Models family
-holds one entry per Layer and Aspect, so one layer runs a Claude model for
-Psyche and a Codex model for Mind and Field. A declaration naming one
-layer and aspect twice is `ConfigureRejected.DuplicateEntry`. A model
-declared without its aspect no longer reads:
-
-```
-Configure.Models.[ { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]
-```
-
-`Configuration` answers the same rows. The Nexus refuses a Start whose
-model is not the one configured for its Address's layer and aspect
-(signal-flow 21.0.0, `StartRejected.ModelRefused`).
-
-The imported signal-flow types are pinned at 21.0.0 (dc7a0eee). The
-contract digest changes from 7bbc37359da8843c to 8b24d7ee385b001e: every
-meta-wire peer repins.
-
-## 25.0.0: SendServers names the send servers Flow trusts to name a thread
-
+  `Configuration` answers the same rows. The Nexus refuses a Start whose
+  model is not the one configured for its Address's layer and aspect
+  (signal-flow 22.0.0, `StartRejected.ModelRefused`).
+- `ConfigureLeaveOut` is `{ Address HarnessKind LeaveOuts }`: the default
+  leave-outs of one metaflow started on one harness. `Configure.LeaveOuts`
+  holds one entry per Address and HarnessKind, so one metaflow may carry a
+  Claude default and a Codex default, and a Start takes only the default of
+  its own harness. `ConfigureRejection` appends `LeaveOutNotForHarness`: an
+  entry naming a leave-out of another harness is refused and nothing is
+  written:
+  `Configure.LeaveOuts.[ { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Mind core Primary } Codex [ CodexAgentsMd ] } ]`.
 - `ConfigurationChange` appends `SendServers.Vector<ConfigureSendServer>`,
   `ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }`, one
   entry per Codex app-server executable; each path is the executable the
   kernel reports for the running process:
   `Configure.SendServers.[ { /nix/store/…-codex/bin/codex /nix/store/…/bin/flow-send-mcp } ]`.
-  signal-flow 21.0.0's `IdentifyThread` is accepted only from a process
+  signal-flow 22.0.0's `IdentifyThread` is accepted only from a process
   running a configured `McpSendServerBinary` whose parent runs the paired
-  `CodexAppServerBinary`.
-- `ConfigurationSnapshot` appends `SendServers.Vector<ConfigureSendServer>`;
-  a store with none configured reads `[]`.
-- The imported signal-flow types are pinned at 21.0.0 (f50640f7).
-- The contract digest changes from 7bbc37359da8843c to 81907c3b3f56108a:
-  every meta-wire peer repins.
-
-## 27.0.0: ResolveQueueDelivery
-
+  `CodexAppServerBinary`. `ConfigurationSnapshot` appends
+  `SendServers.Vector<ConfigureSendServer>`; a store with none configured
+  reads `[]`.
+- `Query` appends `ReadQueueDeliveries.Address`; `Response` appends
+  `QueueDeliveriesRead.{ Address Vector<QueueDelivery> }` and
+  `ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]`. A
+  `QueueDelivery` is `{ QueueAttemptId FlowId NativeSessionId HarnessKind
+  QueuedRequest QueueDeliveryStanding }`, its standing `Prepared`,
+  `Uncertain.Option<Undecided>`, `ReceiptRecorded`, `Absent.AbsenceProof`
+  or `Resolved.QueueResolutionRecord`.
 - `Query` appends `ResolveQueueDelivery.{ QueueAttemptId
   [ Delivered Absent ] QueueResolutionReason }`. `Delivered`: the request
   reached the seat and leaves the queue. `Absent`: it did not, and a new
   attempt is authorised. Flow records the outcome, the requesting meta
   peer's `ResolverIdentity.{ ProcessIdentity Option<FlowId> }`, the reason
   and the time (`UnixSeconds`) in the commit that settles or authorises.
-- `Response` appends `QueueDeliveryResolved.{ Address
+  `Response` appends `QueueDeliveryResolved.{ Address
   QueueDeliveryResolution }` and `ResolveQueueDeliveryRejected.[
-  UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ]`;
-  `QueueDeliveryStanding` appends `Resolved.QueueResolutionRecord`.
-  Appended last, so every earlier discriminant is unchanged.
-
-## 26.0.0: ReadQueueDeliveries; signal-flow 21.0.0
-
-- `Query` appends `ReadQueueDeliveries.Address`; `Response` appends
-  `QueueDeliveriesRead.{ Address Vector<QueueDelivery> }` and
-  `ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]`. A
-  `QueueDelivery` is `{ QueueAttemptId FlowId NativeSessionId HarnessKind
-  QueuedRequest QueueDeliveryStanding }`, its standing `Prepared`,
-  `Uncertain.Option<Undecided>`, `ReceiptRecorded` or `Absent.AbsenceProof`.
-  Appended last, so every earlier discriminant is unchanged.
-- The imported signal-flow types are pinned at 21.0.0 (5af38281), whose
+  UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ]`.
+- Appended variants leave every earlier discriminant unchanged.
+- The imported signal-flow types are pinned at 22.0.0 (e6ccbddb), whose
   `Event.Stopped` carries `NativeStop` and which appends
   `Event.PromptSubmitted`: `EventsRead.{ f1c841 [ Started ToolUsed.Bash
-  Stopped.{ Some.s1 None } ] }`. Every meta-wire peer repins.
-## 25.0.0: a leave-out default names its harness
-
-`ConfigureLeaveOut` is `{ Address HarnessKind LeaveOuts }`: the default
-leave-outs of one metaflow started on one harness. `Configure.LeaveOuts`
-holds one entry per Address and HarnessKind, so one metaflow may carry a
-Claude default and a Codex default, and a Start takes only the default of
-its own harness. `ConfigureRejection` appends `LeaveOutNotForHarness`: an
-entry naming a leave-out of another harness is refused and nothing is
-written. The existing variants keep their discriminants.
-
-`Configure.LeaveOuts.[ { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Mind core Primary } Codex [ CodexAgentsMd ] } ]`
-
-The contract digest changes: every meta-wire peer repins (Flow 0.35.13, the
-Message Nexus), and every declarer of `Configure.LeaveOuts` names each
-entry's harness.
+  Stopped.{ Some.s1 None } ] }`.
+- The contract digest changes from 7bbc37359da8843c to 809506754cfaf73d:
+  every meta-wire peer repins (Flow, the Message Nexus), and every declarer
+  of `Configure.Models` and `Configure.LeaveOuts` names each entry's aspect
+  and harness.
 
 ## 24.0.1: pin signal-flow 20.0.0
 
