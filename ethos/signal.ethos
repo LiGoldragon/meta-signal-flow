@@ -71,16 +71,6 @@
 ; process, so a configured path names the binary itself, never a wrapper
 ; script that execs it.
 
-; Refresh names one metaflow whose next wake starts a fresh native session,
-; composed from the module identities and leave-outs its last launch
-; recorded, instead of resuming the last flow's session. It marks that one
-; metaflow only; no model or threshold changes, and the mark clears when
-; the metaflow is recorded Awoken. It answers Refreshed with the Address,
-; and a second Refresh while the metaflow is marked answers the same.
-; RefreshRejected: Unknown (no metaflow at the Address), Awake,
-; NoLaunchProfile (its last flow has no recorded launch profile to compose
-; from), StoreRefused. Only an Asleep metaflow is accepted.
-
 ; ReadQueueDeliveries answers every queued request of one metaflow that Flow
 ; has begun handing to a native seat and not settled: the attempt, the flow
 ; and native session it was handed to, the request with its sender, and its
@@ -111,7 +101,8 @@
 
 ; Compaction is an emergency measure. Command.Compact is refused, before
 ; anything reaches the pane, unless the flow's context at its last Stop was
-; at or above the Refresh threshold configured for its layer:
+; at or above the Refresh threshold configured for its layer (the Refresh
+; of that layer's ConfigureThreshold, declared by Configure.Thresholds):
 ; CompactionRefused.BelowThreshold carries that context and that threshold,
 ; in tokens; Unmeasured says no context size is recorded for the flow;
 ; NoThreshold says no Refresh threshold applies, its layer having none
@@ -141,7 +132,6 @@ Signal
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
-  Refresh.Address
   ReadQueueDeliveries.Address
   ResolveQueueDelivery.QueueDeliveryResolution ]
 [ Configured.ConfigureOutcome
@@ -167,8 +157,6 @@ Signal
   Refused.Refusal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
-  Refreshed.Address
-  RefreshRejected.RefreshRejection
   QueueDeliveriesRead.{ Address Vector<QueueDelivery> }
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
   QueueDeliveryResolved.{ Address QueueDeliveryResolution }
@@ -203,7 +191,6 @@ Signal
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness ]
-  RefreshRejection.[ Unknown Awake NoLaunchProfile StoreRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

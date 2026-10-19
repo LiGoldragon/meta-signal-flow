@@ -144,15 +144,6 @@ pub enum ConfigureRejection {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum RefreshRejection {
-    Unknown,
-    Awake,
-    NoLaunchProfile,
-    StoreRefused,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ResetRejection {
     AdapterUnavailable,
     ProtocolRefused,
@@ -561,7 +552,6 @@ pub enum Query {
     Command(CommandRequest),
     ResolvePeer(ProcessIdentity),
     ReadEvents(signal_flow::FlowId),
-    Refresh(flow_ethos::Address),
     ReadQueueDeliveries(flow_ethos::Address),
     ResolveQueueDelivery(QueueDeliveryResolution),
 }
@@ -637,8 +627,6 @@ pub enum Response {
     Refused(Refusal),
     EventsRead(EventsRead_Data),
     ReadEventsRejected(ReadEventsRejected_Data),
-    Refreshed(flow_ethos::Address),
-    RefreshRejected(RefreshRejection),
     QueueDeliveriesRead(QueueDeliveriesRead_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
     QueueDeliveryResolved(QueueDeliveryResolved_Data),

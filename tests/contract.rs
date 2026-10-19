@@ -395,41 +395,6 @@ fn configure_declares_one_whole_family() {
     }
 }
 
-#[test]
-fn refresh_names_one_metaflow_and_answers_with_typed_outcomes() {
-    let request = "Refresh.{ Mind flow Secondary }";
-    let query = Potential::<Query>::from(request)
-        .actualize(&mut budget())
-        .expect("Refresh Datom");
-    let Query::Refresh(address) = &query else {
-        panic!("not a Refresh query")
-    };
-    assert_eq!(address.topic, "flow");
-    assert_eq!(query.datomize(vec![]).protosize().compact(), request);
-    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
-    assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
-        query
-    );
-    for reply in [
-        "Refreshed.{ Mind flow Secondary }",
-        "RefreshRejected.Unknown",
-        "RefreshRejected.Awake",
-        "RefreshRejected.NoLaunchProfile",
-        "RefreshRejected.StoreRefused",
-    ] {
-        let response = Potential::<Response>::from(reply)
-            .actualize(&mut budget())
-            .unwrap_or_else(|_| panic!("not a Response Datom: {reply}"));
-        assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
-        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
-        assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
-            response
-        );
-    }
-}
-
 /// A send-servers declaration pairs each Codex app-server executable with
 /// the MCP send-server executable its child must run.
 #[test]
@@ -473,16 +438,5 @@ fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_reje
     assert_eq!(
         rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
         response
-    );
-}
-
-/// A topic never dies: a Refresh is never refused for an Ended metaflow,
-/// since no metaflow is Ended.
-#[test]
-fn refresh_has_no_ended_rejection() {
-    assert!(
-        Potential::<Response>::from("RefreshRejected.Ended")
-            .actualize(&mut budget())
-            .is_err()
     );
 }

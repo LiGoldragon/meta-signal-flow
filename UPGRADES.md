@@ -2,25 +2,30 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
-## 29.0.0: compaction refused below the Refresh threshold; no Ended metaflow
+## 29.0.0: no Refresh; compaction refused below the Refresh threshold; no Ended metaflow
 
+- `Query::Refresh`, `Response::Refreshed`, `Response::RefreshRejected` and
+  `RefreshRejection` are gone: every wake of an Asleep metaflow starts a
+  fresh flow composed from its modules (flow 0.35.22), so a mark asking for
+  a fresh wake has nothing to change. A peer that sent `Refresh.{ ... }`
+  drops the call.
 - `CommandRejection` appends `CompactionRefused.CompactionRefusal`,
   `CompactionRefusal.[ BelowThreshold.ContextBelowThreshold Unmeasured
   NoThreshold ]`, `ContextBelowThreshold.{ ContextTokens RefreshTokens }`.
   Compaction is an emergency measure: `Command.{ 7d41e0 Compact }` is
   refused, before anything reaches the pane, unless the flow's context at
   its last Stop was at or above the Refresh threshold configured for its
-  layer: `CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }`,
+  layer, the `Refresh` of that layer's `ConfigureThreshold` declared by
+  `Configure.Thresholds`, which keeps its shape:
+  `CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }`,
   `CommandRejected.CompactionRefused.Unmeasured` (no context size is
   recorded for the flow), `CommandRejected.CompactionRefused.NoThreshold`
   (no Refresh threshold applies to its layer). Appended last, it leaves
   every earlier discriminant unchanged.
-- `RefreshRejection` loses `Ended`: a topic never dies, so no metaflow is
-  Ended. `RefreshRejected.Ended` no longer reads, and `NoLaunchProfile` and
-  `StoreRefused` move.
 - The imported types are pinned at signal-flow 23.0.0 (c7dcc07) and flow
-  06171a5, whose `State` is `[ Awake.FlowId Asleep ]`.
-- The contract digest changes from 809506754cfaf73d to 72678ba9f74bda5d:
+  06171a5, whose `State` is `[ Awake.FlowId Asleep ]`: no metaflow is
+  Ended.
+- The contract digest changes from 809506754cfaf73d to 73ce9b26e5cd4583:
   every meta-wire peer repins (Flow, the Message Nexus).
 
 ## 28.0.0: models by layer and aspect, leave-outs by harness, send servers, queue deliveries
