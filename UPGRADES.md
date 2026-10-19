@@ -18,7 +18,7 @@ How to deploy each breaking change of meta-signal-flow.
 - `RefreshRejection` loses `Ended`: a topic never dies, so no metaflow is
   Ended. `RefreshRejected.Ended` no longer reads, and `NoLaunchProfile` and
   `StoreRefused` move.
-- The imported types are pinned at signal-flow 23.0.0 (86237dc) and flow
+- The imported types are pinned at signal-flow 23.0.0 (c7dcc07) and flow
   06171a5, whose `State` is `[ Awake.FlowId Asleep ]`.
 - The contract digest changes from 809506754cfaf73d to 72678ba9f74bda5d:
   every meta-wire peer repins (Flow, the Message Nexus).
