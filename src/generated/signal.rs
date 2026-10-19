@@ -41,6 +41,7 @@ pub struct ConfigureThreshold {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureLeaveOut {
     pub address: flow_ethos::Address,
+    pub harness_kind: signal_flow::HarnessKind,
     pub leave_outs: signal_flow::LeaveOuts,
 }
 #[rustfmt::skip]
@@ -138,6 +139,7 @@ pub enum ConfigureRejection {
     StoreRefused,
     DuplicateEntry,
     CodexModelsOverlap,
+    LeaveOutNotForHarness,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -450,6 +452,82 @@ pub enum Refusal {
     Store(String),
 }
 #[rustfmt::skip]
+pub type QueueAttemptId = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Undecided {
+    HistoryUnreadable,
+    HistoryReplaced,
+    PendingInHarness,
+    Ambiguous,
+    SeatNotResting,
+    AbsenceUnprovable,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum AbsenceProof {
+    HandOverRefused,
+    HistoryAbsent,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum QueueDeliveryStanding {
+    Prepared,
+    Uncertain(std::option::Option<Undecided>),
+    ReceiptRecorded,
+    Absent(AbsenceProof),
+    Resolved(QueueResolutionRecord),
+}
+#[rustfmt::skip]
+pub type QueueResolutionReason = String;
+#[rustfmt::skip]
+pub type UnixSeconds = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum QueueResolutionOutcome {
+    Delivered,
+    Absent,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueDeliveryResolution {
+    pub queue_attempt_id: QueueAttemptId,
+    pub queue_resolution_outcome: QueueResolutionOutcome,
+    pub queue_resolution_reason: QueueResolutionReason,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ResolverIdentity {
+    pub process_identity: ProcessIdentity,
+    pub flow_id_option: std::option::Option<signal_flow::FlowId>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueResolutionRecord {
+    pub queue_resolution_outcome: QueueResolutionOutcome,
+    pub resolver_identity: ResolverIdentity,
+    pub queue_resolution_reason: QueueResolutionReason,
+    pub unix_seconds: UnixSeconds,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueDelivery {
+    pub queue_attempt_id: QueueAttemptId,
+    pub flow_id: signal_flow::FlowId,
+    pub native_session_id: signal_flow::NativeSessionId,
+    pub harness_kind: signal_flow::HarnessKind,
+    pub queued_request: flow_ethos::QueuedRequest,
+    pub queue_delivery_standing: QueueDeliveryStanding,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
@@ -465,6 +543,8 @@ pub enum Query {
     ResolvePeer(ProcessIdentity),
     ReadEvents(signal_flow::FlowId),
     Refresh(flow_ethos::Address),
+    ReadQueueDeliveries(flow_ethos::Address),
+    ResolveQueueDelivery(QueueDeliveryResolution),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -478,6 +558,37 @@ pub struct EventsRead_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ReadEventsRejected_Data {
     UnknownFlow,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueDeliveriesRead_Data {
+    pub address: flow_ethos::Address,
+    pub queue_delivery_vector: std::vec::Vec<QueueDelivery>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadQueueDeliveriesRejected_Data {
+    UnknownAddress,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueDeliveryResolved_Data {
+    pub address: flow_ethos::Address,
+    pub queue_delivery_resolution: QueueDeliveryResolution,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ResolveQueueDeliveryRejected_Data {
+    UnknownAttempt,
+    NotUncertain,
+    NotOldest,
+    EmptyReason,
     StoreRefused,
 }
 #[rustfmt::skip]
@@ -509,4 +620,8 @@ pub enum Response {
     ReadEventsRejected(ReadEventsRejected_Data),
     Refreshed(flow_ethos::Address),
     RefreshRejected(RefreshRejection),
+    QueueDeliveriesRead(QueueDeliveriesRead_Data),
+    ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
+    QueueDeliveryResolved(QueueDeliveryResolved_Data),
+    ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data),
 }

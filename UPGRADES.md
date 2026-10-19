@@ -45,6 +45,49 @@ meta-wire peer repins.
 - The contract digest changes from 7bbc37359da8843c to 81907c3b3f56108a:
   every meta-wire peer repins.
 
+## 27.0.0: ResolveQueueDelivery
+
+- `Query` appends `ResolveQueueDelivery.{ QueueAttemptId
+  [ Delivered Absent ] QueueResolutionReason }`. `Delivered`: the request
+  reached the seat and leaves the queue. `Absent`: it did not, and a new
+  attempt is authorised. Flow records the outcome, the requesting meta
+  peer's `ResolverIdentity.{ ProcessIdentity Option<FlowId> }`, the reason
+  and the time (`UnixSeconds`) in the commit that settles or authorises.
+- `Response` appends `QueueDeliveryResolved.{ Address
+  QueueDeliveryResolution }` and `ResolveQueueDeliveryRejected.[
+  UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ]`;
+  `QueueDeliveryStanding` appends `Resolved.QueueResolutionRecord`.
+  Appended last, so every earlier discriminant is unchanged.
+
+## 26.0.0: ReadQueueDeliveries; signal-flow 21.0.0
+
+- `Query` appends `ReadQueueDeliveries.Address`; `Response` appends
+  `QueueDeliveriesRead.{ Address Vector<QueueDelivery> }` and
+  `ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]`. A
+  `QueueDelivery` is `{ QueueAttemptId FlowId NativeSessionId HarnessKind
+  QueuedRequest QueueDeliveryStanding }`, its standing `Prepared`,
+  `Uncertain.Option<Undecided>`, `ReceiptRecorded` or `Absent.AbsenceProof`.
+  Appended last, so every earlier discriminant is unchanged.
+- The imported signal-flow types are pinned at 21.0.0 (5af38281), whose
+  `Event.Stopped` carries `NativeStop` and which appends
+  `Event.PromptSubmitted`: `EventsRead.{ f1c841 [ Started ToolUsed.Bash
+  Stopped.{ Some.s1 None } ] }`. Every meta-wire peer repins.
+## 25.0.0: a leave-out default names its harness
+
+`ConfigureLeaveOut` is `{ Address HarnessKind LeaveOuts }`: the default
+leave-outs of one metaflow started on one harness. `Configure.LeaveOuts`
+holds one entry per Address and HarnessKind, so one metaflow may carry a
+Claude default and a Codex default, and a Start takes only the default of
+its own harness. `ConfigureRejection` appends `LeaveOutNotForHarness`: an
+entry naming a leave-out of another harness is refused and nothing is
+written. The existing variants keep their discriminants.
+
+`Configure.LeaveOuts.[ { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Mind core Primary } Codex [ CodexAgentsMd ] } ]`
+
+The contract digest changes: every meta-wire peer repins (Flow 0.35.13, the
+Message Nexus), and every declarer of `Configure.LeaveOuts` names each
+entry's harness.
+
 ## 24.0.1: pin signal-flow 20.0.0
 
 The imported signal-flow types are pinned at 20.0.0 (6a496646) and flow-ethos

@@ -46,12 +46,16 @@
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
 ; value already equals the declaration and nothing is written. Each family
 ; holds one entry per key: Models one per Layer and Aspect, Thresholds one
-; per Layer, LeaveOuts one per Address (the default leave-outs of one metaflow, which a Start
-; naming its own replaces), SendServers one per CodexAppServerBinary. ConfigureRejected changes nothing:
-; DuplicateEntry when a declaration names one key twice, CodexModelsOverlap
-; when a Nexus names one model under both Codex endpoints. Configuration
-; reads the committed Nexus and the committed model, threshold, leave-out
-; and send-server vectors; it never returns defaults, and answers Unconfigured while no
+; per Layer, LeaveOuts one per Address and HarnessKind (the default
+; leave-outs of one metaflow started on one harness, which a Start naming
+; its own replaces; a Start whose harness has no entry for its Address takes
+; none), SendServers one per CodexAppServerBinary. ConfigureRejected changes
+; nothing: DuplicateEntry when a declaration names one key twice,
+; CodexModelsOverlap when a Nexus names one model under both Codex
+; endpoints, LeaveOutNotForHarness when an entry names a leave-out of
+; another harness than its own. Configuration reads the committed Nexus and
+; the committed model, threshold, leave-out and send-server vectors; it
+; never returns defaults, and answers Unconfigured while no
 ; Nexus has been declared. A seat's context is named by its launch, never
 ; configured here.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
@@ -77,6 +81,34 @@
 ; NoLaunchProfile (its last flow has no recorded launch profile to compose
 ; from), StoreRefused. Only an Asleep metaflow is accepted.
 
+; ReadQueueDeliveries answers every queued request of one metaflow that Flow
+; has begun handing to a native seat and not settled: the attempt, the flow
+; and native session it was handed to, the request with its sender, and its
+; standing. Prepared: recorded, nothing native done yet. Uncertain: native
+; input may have happened and no exact receipt was found; it is never sent
+; again, and Undecided names why reconciliation from native history could not
+; decide, or is None before one ran. ReceiptRecorded: the exact native
+; receipt is held and the request leaves the queue when it is still oldest.
+; Absent: native history proved the request never reached the seat, so a new
+; attempt was authorised; AbsenceProof names the proof. Resolved: the owner
+; resolved an Uncertain attempt through ResolveQueueDelivery; the record holds
+; the outcome, the requesting peer, the reason and the time. Settled
+; attempts are not listed. ReadQueueDeliveriesRejected: UnknownAddress, StoreRefused.
+
+; ResolveQueueDelivery settles one Uncertain attempt by its QueueAttemptId
+; when reconciliation from native history cannot: the owner states what is
+; true and why. Delivered: the request reached the seat, so it leaves the
+; queue. Absent: it did not, so a new attempt is authorised. Flow records the
+; resolution with the identity of the requesting meta peer (its process, and
+; the flow it runs in when it runs in one), the reason, and the time in Unix
+; seconds, in the same commit as the settlement or authorisation; the
+; attempt then lists as Resolved. Flow never resolves by itself.
+; QueueDeliveryResolved answers with the attempt and the resolution.
+; ResolveQueueDeliveryRejected changes nothing: UnknownAttempt, NotUncertain
+; (the attempt is Prepared, ReceiptRecorded, Absent, Settled or Resolved),
+; NotOldest (the attempt is no longer the oldest request of its address),
+; EmptyReason, StoreRefused.
+
 ; MetaBindExisting verifies each binding against Herdr before it is stored:
 ; PaneAbsent (the container's Herdr session shows no agent of the binding's
 ; harness at its workspace, pane and terminal), ProcessMismatch (the pane's
@@ -89,7 +121,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ]
-  flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
+  flow_ethos:[ QueuedRequest OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -101,7 +133,9 @@ Signal
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
-  Refresh.Address ]
+  Refresh.Address
+  ReadQueueDeliveries.Address
+  ResolveQueueDelivery.QueueDeliveryResolution ]
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -126,7 +160,11 @@ Signal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   Refreshed.Address
-  RefreshRejected.RefreshRejection ]
+  RefreshRejected.RefreshRejection
+  QueueDeliveriesRead.{ Address Vector<QueueDelivery> }
+  ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
+  QueueDeliveryResolved.{ Address QueueDeliveryResolution }
+  ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ] ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
@@ -136,8 +174,8 @@ Signal
   ; model for that seat is refused.
   ConfigureModel.{ Layer Aspect Native.String }
   ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
-  ; The leave-outs a metaflow's Start takes when it names none.
-  ConfigureLeaveOut.{ Address LeaveOuts }
+  ; The leave-outs a metaflow's Start on one harness takes when it names none.
+  ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
   CodexAppServerBinary.String
   McpSendServerBinary.String
@@ -156,7 +194,7 @@ Signal
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness ]
   RefreshRejection.[ Unknown Awake Ended NoLaunchProfile StoreRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
@@ -221,4 +259,19 @@ Signal
   MetaRefusal.[ PeerUnknown
                 PeerNotAuthorized.Caller ]
   Refusal.[ Store.String ]
+  QueueAttemptId.String
+  Undecided.[ HistoryUnreadable HistoryReplaced PendingInHarness Ambiguous SeatNotResting AbsenceUnprovable ]
+  AbsenceProof.[ HandOverRefused HistoryAbsent ]
+  QueueDeliveryStanding.[ Prepared
+                          Uncertain.Option<Undecided>
+                          ReceiptRecorded
+                          Absent.AbsenceProof
+                          Resolved.QueueResolutionRecord ]
+  QueueResolutionReason.String
+  UnixSeconds.Integer
+  QueueResolutionOutcome.[ Delivered Absent ]
+  QueueDeliveryResolution.{ QueueAttemptId QueueResolutionOutcome QueueResolutionReason }
+  ResolverIdentity.{ ProcessIdentity Option<FlowId> }
+  QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
+  QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueuedRequest QueueDeliveryStanding }
   ]
