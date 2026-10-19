@@ -2,6 +2,20 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 27.0.0: ResolveQueueDelivery
+
+- `Query` appends `ResolveQueueDelivery.{ QueueAttemptId
+  [ Delivered Absent ] QueueResolutionReason }`. `Delivered`: the request
+  reached the seat and leaves the queue. `Absent`: it did not, and a new
+  attempt is authorised. Flow records the outcome, the requesting meta
+  peer's `ResolverIdentity.{ ProcessIdentity Option<FlowId> }`, the reason
+  and the time (`UnixSeconds`) in the commit that settles or authorises.
+- `Response` appends `QueueDeliveryResolved.{ Address
+  QueueDeliveryResolution }` and `ResolveQueueDeliveryRejected.[
+  UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ]`;
+  `QueueDeliveryStanding` appends `Resolved.QueueResolutionRecord`.
+  Appended last, so every earlier discriminant is unchanged.
+
 ## 26.0.0: ReadQueueDeliveries; signal-flow 21.0.0
 
 - `Query` appends `ReadQueueDeliveries.Address`; `Response` appends

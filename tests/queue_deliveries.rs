@@ -4,8 +4,10 @@
 
 use flow_ethos::{Address, Aspect, Layer, QueuedRequest, Request, SentBy};
 use meta_signal_flow::{
-    AbsenceProof, Query, QueueDeliveriesRead_Data, QueueDelivery, QueueDeliveryStanding,
-    ReadQueueDeliveriesRejected_Data, Response, Undecided,
+    AbsenceProof, ProcessIdentity, Query, QueueDeliveriesRead_Data, QueueDelivery,
+    QueueDeliveryResolution, QueueDeliveryResolved_Data, QueueDeliveryStanding,
+    QueueResolutionOutcome, QueueResolutionRecord, ReadQueueDeliveriesRejected_Data,
+    ResolveQueueDeliveryRejected_Data, ResolverIdentity, Response, Undecided,
 };
 use signal_flow::HarnessKind;
 
@@ -71,6 +73,67 @@ fn read_queue_deliveries_round_trips_as_an_archive() {
     );
 }
 
+fn resolution(outcome: QueueResolutionOutcome) -> QueueDeliveryResolution {
+    QueueDeliveryResolution {
+        queue_attempt_id: "queue-attempt-3".into(),
+        queue_resolution_outcome: outcome,
+        queue_resolution_reason: "seen in the pane".into(),
+    }
+}
+
+fn record() -> QueueResolutionRecord {
+    QueueResolutionRecord {
+        queue_resolution_outcome: QueueResolutionOutcome::Absent,
+        resolver_identity: ResolverIdentity {
+            process_identity: ProcessIdentity {
+                process_id: 7,
+                process_user_id: 1001,
+                process_start_token: "99".into(),
+            },
+            flow_id_option: Some("aa034f".into()),
+        },
+        queue_resolution_reason: "seen in the pane".into(),
+        unix_seconds: 1_790_000_000,
+    }
+}
+
+#[test]
+fn resolve_queue_delivery_round_trips_as_an_archive() {
+    let queries = [
+        Query::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Delivered)),
+        Query::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Absent)),
+    ];
+    for query in queries {
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            query
+        );
+    }
+    let replies = [
+        Response::QueueDeliveryResolved(QueueDeliveryResolved_Data {
+            address: address(),
+            queue_delivery_resolution: resolution(QueueResolutionOutcome::Absent),
+        }),
+        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::UnknownAttempt),
+        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::NotUncertain),
+        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::NotOldest),
+        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::EmptyReason),
+        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::StoreRefused),
+        Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
+            address: address(),
+            queue_delivery_vector: vec![delivery(QueueDeliveryStanding::Resolved(record()))],
+        }),
+    ];
+    for reply in replies {
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            reply
+        );
+    }
+}
+
 #[cfg(feature = "datom")]
 mod datom {
     use super::*;
@@ -116,6 +179,31 @@ mod datom {
             .protosize()
             .compact(),
             "ReadQueueDeliveriesRejected.UnknownAddress"
+        );
+    }
+
+    #[test]
+    fn resolve_queue_delivery_has_concrete_datoms() {
+        let query = Query::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Absent));
+        let text = "ResolveQueueDelivery.{ queue-attempt-3 Absent «seen in the pane» }";
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+        assert_eq!(
+            Potential::<Query>::from(text)
+                .actualize(&mut budget())
+                .unwrap(),
+            query
+        );
+        let one = Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
+            address: address(),
+            queue_delivery_vector: vec![delivery(QueueDeliveryStanding::Resolved(record()))],
+        });
+        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { queue-attempt-3 f1c841 s1 Claude { Sender.{ Psyche core Secondary } Order.go } Resolved.{ Absent { { 7 1001 99 } Some.aa034f } «seen in the pane» 1790000000 } } ] }";
+        assert_eq!(one.datomize(vec![]).protosize().compact(), text);
+        assert_eq!(
+            Potential::<Response>::from(text)
+                .actualize(&mut budget())
+                .unwrap(),
+            one
         );
     }
 }

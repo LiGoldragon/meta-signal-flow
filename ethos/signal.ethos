@@ -81,8 +81,24 @@
 ; decide, or is None before one ran. ReceiptRecorded: the exact native
 ; receipt is held and the request leaves the queue when it is still oldest.
 ; Absent: native history proved the request never reached the seat, so a new
-; attempt was authorised; AbsenceProof names the proof. Settled attempts are
-; not listed. ReadQueueDeliveriesRejected: UnknownAddress, StoreRefused.
+; attempt was authorised; AbsenceProof names the proof. Resolved: the owner
+; resolved an Uncertain attempt through ResolveQueueDelivery; the record holds
+; the outcome, the requesting peer, the reason and the time. Settled
+; attempts are not listed. ReadQueueDeliveriesRejected: UnknownAddress, StoreRefused.
+
+; ResolveQueueDelivery settles one Uncertain attempt by its QueueAttemptId
+; when reconciliation from native history cannot: the owner states what is
+; true and why. Delivered: the request reached the seat, so it leaves the
+; queue. Absent: it did not, so a new attempt is authorised. Flow records the
+; resolution with the identity of the requesting meta peer (its process, and
+; the flow it runs in when it runs in one), the reason, and the time in Unix
+; seconds, in the same commit as the settlement or authorisation; the
+; attempt then lists as Resolved. Flow never resolves by itself.
+; QueueDeliveryResolved answers with the attempt and the resolution.
+; ResolveQueueDeliveryRejected changes nothing: UnknownAttempt, NotUncertain
+; (the attempt is Prepared, ReceiptRecorded, Absent, Settled or Resolved),
+; NotOldest (the attempt is no longer the oldest request of its address),
+; EmptyReason, StoreRefused.
 
 ; MetaBindExisting verifies each binding against Herdr before it is stored:
 ; PaneAbsent (the container's Herdr session shows no agent of the binding's
@@ -109,7 +125,8 @@ Signal
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
   Refresh.Address
-  ReadQueueDeliveries.Address ]
+  ReadQueueDeliveries.Address
+  ResolveQueueDelivery.QueueDeliveryResolution ]
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -136,7 +153,9 @@ Signal
   Refreshed.Address
   RefreshRejected.RefreshRejection
   QueueDeliveriesRead.{ Address Vector<QueueDelivery> }
-  ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ] ]
+  ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
+  QueueDeliveryResolved.{ Address QueueDeliveryResolution }
+  ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ] ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
@@ -231,6 +250,13 @@ Signal
   QueueDeliveryStanding.[ Prepared
                           Uncertain.Option<Undecided>
                           ReceiptRecorded
-                          Absent.AbsenceProof ]
+                          Absent.AbsenceProof
+                          Resolved.QueueResolutionRecord ]
+  QueueResolutionReason.String
+  UnixSeconds.Integer
+  QueueResolutionOutcome.[ Delivered Absent ]
+  QueueDeliveryResolution.{ QueueAttemptId QueueResolutionOutcome QueueResolutionReason }
+  ResolverIdentity.{ ProcessIdentity Option<FlowId> }
+  QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
   QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueuedRequest QueueDeliveryStanding }
   ]
