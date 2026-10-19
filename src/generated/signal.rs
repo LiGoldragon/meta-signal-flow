@@ -436,6 +436,46 @@ pub enum Refusal {
     Store(String),
 }
 #[rustfmt::skip]
+pub type QueueAttemptId = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Undecided {
+    HistoryUnreadable,
+    HistoryReplaced,
+    PendingInHarness,
+    Ambiguous,
+    SeatNotResting,
+    AbsenceUnprovable,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum AbsenceProof {
+    HandOverRefused,
+    HistoryAbsent,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum QueueDeliveryStanding {
+    Prepared,
+    Uncertain(std::option::Option<Undecided>),
+    ReceiptRecorded,
+    Absent(AbsenceProof),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueDelivery {
+    pub queue_attempt_id: QueueAttemptId,
+    pub flow_id: signal_flow::FlowId,
+    pub native_session_id: signal_flow::NativeSessionId,
+    pub harness_kind: signal_flow::HarnessKind,
+    pub queued_request: flow_ethos::QueuedRequest,
+    pub queue_delivery_standing: QueueDeliveryStanding,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
@@ -451,6 +491,7 @@ pub enum Query {
     ResolvePeer(ProcessIdentity),
     ReadEvents(signal_flow::FlowId),
     Refresh(flow_ethos::Address),
+    ReadQueueDeliveries(flow_ethos::Address),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -464,6 +505,20 @@ pub struct EventsRead_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ReadEventsRejected_Data {
     UnknownFlow,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueDeliveriesRead_Data {
+    pub address: flow_ethos::Address,
+    pub queue_delivery_vector: std::vec::Vec<QueueDelivery>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadQueueDeliveriesRejected_Data {
+    UnknownAddress,
     StoreRefused,
 }
 #[rustfmt::skip]
@@ -495,4 +550,6 @@ pub enum Response {
     ReadEventsRejected(ReadEventsRejected_Data),
     Refreshed(flow_ethos::Address),
     RefreshRejected(RefreshRejection),
+    QueueDeliveriesRead(QueueDeliveriesRead_Data),
+    ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
 }

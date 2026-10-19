@@ -72,6 +72,18 @@
 ; NoLaunchProfile (its last flow has no recorded launch profile to compose
 ; from), StoreRefused. Only an Asleep metaflow is accepted.
 
+; ReadQueueDeliveries answers every queued request of one metaflow that Flow
+; has begun handing to a native seat and not settled: the attempt, the flow
+; and native session it was handed to, the request with its sender, and its
+; standing. Prepared: recorded, nothing native done yet. Uncertain: native
+; input may have happened and no exact receipt was found; it is never sent
+; again, and Undecided names why reconciliation from native history could not
+; decide, or is None before one ran. ReceiptRecorded: the exact native
+; receipt is held and the request leaves the queue when it is still oldest.
+; Absent: native history proved the request never reached the seat, so a new
+; attempt was authorised; AbsenceProof names the proof. Settled attempts are
+; not listed. ReadQueueDeliveriesRejected: UnknownAddress, StoreRefused.
+
 ; MetaBindExisting verifies each binding against Herdr before it is stored:
 ; PaneAbsent (the container's Herdr session shows no agent of the binding's
 ; harness at its workspace, pane and terminal), ProcessMismatch (the pane's
@@ -84,7 +96,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ]
-  flow_ethos:[ OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
+  flow_ethos:[ QueuedRequest OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -96,7 +108,8 @@ Signal
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
-  Refresh.Address ]
+  Refresh.Address
+  ReadQueueDeliveries.Address ]
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -121,7 +134,9 @@ Signal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   Refreshed.Address
-  RefreshRejected.RefreshRejection ]
+  RefreshRejected.RefreshRejection
+  QueueDeliveriesRead.{ Address Vector<QueueDelivery> }
+  ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ] ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
@@ -210,4 +225,12 @@ Signal
   MetaRefusal.[ PeerUnknown
                 PeerNotAuthorized.Caller ]
   Refusal.[ Store.String ]
+  QueueAttemptId.String
+  Undecided.[ HistoryUnreadable HistoryReplaced PendingInHarness Ambiguous SeatNotResting AbsenceUnprovable ]
+  AbsenceProof.[ HandOverRefused HistoryAbsent ]
+  QueueDeliveryStanding.[ Prepared
+                          Uncertain.Option<Undecided>
+                          ReceiptRecorded
+                          Absent.AbsenceProof ]
+  QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueuedRequest QueueDeliveryStanding }
   ]

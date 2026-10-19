@@ -2,6 +2,19 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 26.0.0: ReadQueueDeliveries; signal-flow 21.0.0
+
+- `Query` appends `ReadQueueDeliveries.Address`; `Response` appends
+  `QueueDeliveriesRead.{ Address Vector<QueueDelivery> }` and
+  `ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]`. A
+  `QueueDelivery` is `{ QueueAttemptId FlowId NativeSessionId HarnessKind
+  QueuedRequest QueueDeliveryStanding }`, its standing `Prepared`,
+  `Uncertain.Option<Undecided>`, `ReceiptRecorded` or `Absent.AbsenceProof`.
+  Appended last, so every earlier discriminant is unchanged.
+- The imported signal-flow types are pinned at 21.0.0 (5af38281), whose
+  `Event.Stopped` carries `NativeStop` and which appends
+  `Event.PromptSubmitted`: `EventsRead.{ f1c841 [ Started ToolUsed.Bash
+  Stopped.{ Some.s1 None } ] }`. Every meta-wire peer repins.
 ## 25.0.0: a leave-out default names its harness
 
 `ConfigureLeaveOut` is `{ Address HarnessKind LeaveOuts }`: the default
