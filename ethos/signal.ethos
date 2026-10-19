@@ -40,24 +40,32 @@
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
-; LeaveOuts or Nexus. The declared value replaces that family's committed
+; LeaveOuts, Nexus or SendServers. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
 ; value already equals the declaration and nothing is written. Each family
 ; holds one entry per key: Models one per Layer and Aspect, Thresholds one
 ; per Layer, LeaveOuts one per Address (the default leave-outs of one metaflow, which a Start
-; naming its own replaces). ConfigureRejected changes nothing:
+; naming its own replaces), SendServers one per CodexAppServerBinary. ConfigureRejected changes nothing:
 ; DuplicateEntry when a declaration names one key twice, CodexModelsOverlap
 ; when a Nexus names one model under both Codex endpoints. Configuration
-; reads the committed Nexus and the committed model, threshold and leave-out
-; vectors; it never returns defaults, and answers Unconfigured while no
+; reads the committed Nexus and the committed model, threshold, leave-out
+; and send-server vectors; it never returns defaults, and answers Unconfigured while no
 ; Nexus has been declared. A seat's context is named by its launch, never
 ; configured here.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
 ; A running Nexus reads its Codex endpoints when it opens, so a replaced
 ; endpoint is served from the next start.
+;
+; A send server is an MCP server a Codex app-server runs for one thread,
+; trusted to name the thread whose tool calls it serves (signal-flow
+; IdentifyThread). ConfigureSendServer pairs the executable a Codex
+; app-server runs with the MCP send-server executable its child must run;
+; each is matched against the executable the kernel reports for the running
+; process, so a configured path names the binary itself, never a wrapper
+; script that execs it.
 
 ; Refresh names one metaflow whose next wake starts a fresh native session,
 ; composed from the module identities and leave-outs its last launch
@@ -131,13 +139,17 @@ Signal
   ; The leave-outs a metaflow's Start takes when it names none.
   ConfigureLeaveOut.{ Address LeaveOuts }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
+  CodexAppServerBinary.String
+  McpSendServerBinary.String
+  ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
                          LeaveOuts.Vector<ConfigureLeaveOut>
-                         Nexus.ConfigureNexus ]
+                         Nexus.ConfigureNexus
+                         SendServers.Vector<ConfigureSendServer> ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next

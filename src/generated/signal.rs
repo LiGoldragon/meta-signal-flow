@@ -57,6 +57,17 @@ pub struct ConfigureNexus {
     pub lease: flow_ethos::Lease,
 }
 #[rustfmt::skip]
+pub type CodexAppServerBinary = String;
+#[rustfmt::skip]
+pub type McpSendServerBinary = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureSendServer {
+    pub codex_app_server_binary: CodexAppServerBinary,
+    pub mcp_send_server_binary: McpSendServerBinary,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
@@ -64,6 +75,7 @@ pub enum ConfigurationChange {
     Thresholds(std::vec::Vec<ConfigureThreshold>),
     LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
+    SendServers(std::vec::Vec<ConfigureSendServer>),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -81,6 +93,8 @@ pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
 #[rustfmt::skip]
 pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
 #[rustfmt::skip]
+pub type SendServers = std::vec::Vec<ConfigureSendServer>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -88,6 +102,7 @@ pub struct ConfigurationSnapshot {
     pub models: Models,
     pub thresholds: Thresholds,
     pub default_leave_outs: DefaultLeaveOuts,
+    pub send_servers: SendServers,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
