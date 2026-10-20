@@ -2,6 +2,17 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 30.0.0: a metaflow is declared in Flow's configuration
+
+- `ConfigurationChange` appends `Metaflows.Vector<ConfigureMetaflow>`,
+  `ConfigureMetaflow.{ Address SystemModules UserModules }`: one declaration
+  per Address, the modules an ordinary `Launch.{ Address InstructionPrompt }`
+  (signal-flow 24.0.0) composes. `Configure.Metaflows.[ { { Psyche core
+  Secondary } [ spirit-core ] [ compensation-truth ] } ]`.
+- `ConfigurationSnapshot` appends its `Metaflows` vector: a peer reading
+  `Configuration` rebuilds.
+- Pins signal-flow 24.0.0 (8796628).
+
 ## 29.0.0: no Refresh; compaction refused below the Refresh threshold; no Ended metaflow
 
 - `Query::Refresh`, `Response::Refreshed`, `Response::RefreshRejected` and

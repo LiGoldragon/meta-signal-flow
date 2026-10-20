@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit-core ] [ vision-flow ] } ] }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -190,6 +190,18 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         vec![meta_signal_flow::ConfigureSendServer {
             codex_app_server_binary: "/nix/store/codex/bin/codex".into(),
             mcp_send_server_binary: "/nix/store/send/bin/flow-send-mcp".into(),
+        }]
+    );
+    assert_eq!(
+        configuration.metaflows,
+        vec![meta_signal_flow::ConfigureMetaflow {
+            address: signal_flow::Address {
+                aspect: meta_signal_flow::Aspect::Mind,
+                topic: "core".into(),
+                layer: meta_signal_flow::Layer::Secondary,
+            },
+            system_modules: vec!["spirit-core".into()],
+            user_modules: vec!["vision-flow".into()],
         }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
@@ -412,6 +424,21 @@ fn configure_send_servers_has_a_concrete_datom() {
             }]
         ))
     );
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+}
+
+/// A metaflow declaration names the modules a Launch of its Address composes.
+#[test]
+fn configure_metaflows_has_a_concrete_datom() {
+    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit-core intent-psyche ] [ compensation-truth ] } ]";
+    let query = Potential::<meta_signal_flow::Query>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert!(matches!(
+        &query,
+        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::Metaflows(declared))
+            if declared.len() == 1 && declared[0].system_modules.len() == 2
+    ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
 }
 

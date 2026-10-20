@@ -40,7 +40,7 @@
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
-; LeaveOuts, Nexus or SendServers. The declared value replaces that family's committed
+; LeaveOuts, Nexus, SendServers or Metaflows. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
@@ -49,7 +49,8 @@
 ; per Layer, LeaveOuts one per Address and HarnessKind (the default
 ; leave-outs of one metaflow started on one harness, which a Start naming
 ; its own replaces; a Start whose harness has no entry for its Address takes
-; none), SendServers one per CodexAppServerBinary. ConfigureRejected changes
+; none), SendServers one per CodexAppServerBinary, Metaflows one per
+; Address: the declaration an ordinary Launch of that Address starts from. ConfigureRejected changes
 ; nothing: DuplicateEntry when a declaration names one key twice,
 ; CodexModelsOverlap when a Nexus names one model under both Codex
 ; endpoints, LeaveOutNotForHarness when an entry names a leave-out of
@@ -119,7 +120,7 @@
 ; be read).
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules ]
   flow_ethos:[ QueuedRequest OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -176,14 +177,18 @@ Signal
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
+  ; A metaflow's declaration: the context modules a Launch of its Address
+  ; composes into the system prompt and into the first user message.
+  ConfigureMetaflow.{ Address SystemModules UserModules }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
                          LeaveOuts.Vector<ConfigureLeaveOut>
                          Nexus.ConfigureNexus
-                         SendServers.Vector<ConfigureSendServer> ]
+                         SendServers.Vector<ConfigureSendServer>
+                         Metaflows.Vector<ConfigureMetaflow> ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
