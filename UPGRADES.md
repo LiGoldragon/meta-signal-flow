@@ -2,6 +2,14 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 32.0.0: a request Flow raised itself is sent by Flow
+
+- Pins signal-flow 25.0.0 and flow-ethos (flow dc2cba6), whose `SentBy` is
+  `[ Sender Unknown Flow ]`. A queue delivery read through
+  `ReadQueueDeliveries` may carry `{ Flow Order.«…» }`. The variant is
+  appended; every meta-socket peer repins with signal-flow 25.0.0. The
+  contract digest is unchanged.
+
 ## 31.0.0: a refresh threshold per model; the Investigation seat; PastThreshold
 
 - `ConfigureThreshold` is `{ ModelName Refresh.Integer }`, one per model:
