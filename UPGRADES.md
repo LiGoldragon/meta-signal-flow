@@ -2,6 +2,28 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 30.0.0: a refresh threshold per model; the Investigation seat; PastThreshold
+
+- `ConfigureThreshold` is `{ ModelName Refresh.Integer }`, one per model:
+  the context, in tokens, past which a flow running that model is
+  refreshed. `Layer` and `Handover` are gone; a refreshed flow writes no
+  handover. `Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol
+  150000 } ]`. A layer-keyed entry no longer reads. Compaction is judged
+  against the flow's model's threshold.
+- `ConfigurationChange` appends `Investigation.ConfigureInvestigation`,
+  `ConfigureInvestigation.{ Address SystemModules UserModules
+  HerdrSessionName }`: the seat Flow starts to investigate a flow that
+  compacted while it kept working.
+  `Configure.Investigation.{ { Psyche compaction Tertiary } [ spirit-core ]
+  [ knowledge-flow ] default }`. `ConfigurationSnapshot` appends
+  `Investigation.Option<ConfigureInvestigation>`.
+- `DeliveryRejection` appends `PastThreshold`: a Deliver into a flow whose
+  last measured context is at or past its model's threshold is refused
+  before anything reaches the pane.
+- The contract digest changes: every meta-wire peer repins. The Message
+  Nexus's live path speaks only the ordinary socket's Lock and Deliver; it
+  repins for its types.
+
 ## 29.0.0: no Refresh; compaction refused below the Refresh threshold; no Ended metaflow
 
 - `Query::Refresh`, `Response::Refreshed`, `Response::RefreshRejected` and

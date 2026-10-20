@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { Primary 300 900 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] Some.{ { Psyche compaction Tertiary } [ spirit-core ] [ knowledge-flow ] default } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -167,12 +167,16 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             .is_err()
     );
     assert_eq!(configuration.thresholds.len(), 1);
-    assert_eq!(
-        configuration.thresholds[0].layer,
-        meta_signal_flow::Layer::Primary
-    );
-    assert_eq!(configuration.thresholds[0].handover, 300);
-    assert_eq!(configuration.thresholds[0].refresh, 900);
+    assert_eq!(configuration.thresholds[0].model_name, "claude-opus-5-5");
+    assert_eq!(configuration.thresholds[0].refresh, 200000);
+    let investigation = configuration
+        .investigation
+        .as_ref()
+        .expect("the investigation seat is configured");
+    assert_eq!(investigation.address.topic, "compaction");
+    assert_eq!(investigation.system_modules, ["spirit-core"]);
+    assert_eq!(investigation.user_modules, ["knowledge-flow"]);
+    assert_eq!(investigation.herdr_session_name, "default");
     assert_eq!(configuration.default_leave_outs.len(), 1);
     assert_eq!(
         configuration.default_leave_outs[0].harness_kind,
@@ -299,6 +303,7 @@ fn delivery_replies_have_concrete_datoms() {
         "DeliveryRejected.FlowStopped",
         "DeliveryRejected.FlowRetired",
         "DeliveryRejected.FlowExited",
+        "DeliveryRejected.PastThreshold",
         "DeliveryRejected.BodyRefused.EmptyBody",
         "DeliveryRejected.BodyRefused.HarnessCommand./compact",
         "DeliveryRejected.BodyRefused.ControlCharacter.14",
@@ -344,7 +349,8 @@ fn a_message_textualizes_with_its_priority_head_first() {
 fn configure_declares_one_whole_family() {
     for text in [
         "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]",
-        "Configure.Thresholds.[ { Primary 600000 700000 } ]",
+        "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
+        "Configure.Investigation.{ { Psyche compaction Tertiary } [ spirit-core intent-flow ] [ knowledge-flow ] default }",
         "Configure.LeaveOuts.[ { { Field core Primary } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Secondary } Codex [ CodexAgentsMd ] } ]",
         "Configure.LeaveOuts.[]",
     ] {
@@ -369,6 +375,12 @@ fn configure_declares_one_whole_family() {
     // One entry is not a family: a declaration is always the whole vector.
     assert!(
         Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 }")
+            .actualize(&mut budget())
+            .is_err()
+    );
+    // A threshold belongs to a model, never to a layer, and has no handover.
+    assert!(
+        Potential::<Query>::from("Configure.Thresholds.[ { Primary 600000 700000 } ]")
             .actualize(&mut budget())
             .is_err()
     );

@@ -25,15 +25,12 @@ pub struct ConfigureModel {
     pub native: Native,
 }
 #[rustfmt::skip]
-pub type Handover = i64;
-#[rustfmt::skip]
 pub type Refresh = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureThreshold {
-    pub layer: flow_ethos::Layer,
-    pub handover: Handover,
+    pub model_name: signal_flow::ModelName,
     pub refresh: Refresh,
 }
 #[rustfmt::skip]
@@ -71,12 +68,22 @@ pub struct ConfigureSendServer {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureInvestigation {
+    pub address: flow_ethos::Address,
+    pub system_modules: signal_flow::SystemModules,
+    pub user_modules: signal_flow::UserModules,
+    pub herdr_session_name: signal_flow::HerdrSessionName,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
     Models(std::vec::Vec<ConfigureModel>),
     Thresholds(std::vec::Vec<ConfigureThreshold>),
     LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
+    Investigation(ConfigureInvestigation),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -96,6 +103,8 @@ pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
 #[rustfmt::skip]
 pub type SendServers = std::vec::Vec<ConfigureSendServer>;
 #[rustfmt::skip]
+pub type Investigation = std::option::Option<ConfigureInvestigation>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -104,6 +113,7 @@ pub struct ConfigurationSnapshot {
     pub thresholds: Thresholds,
     pub default_leave_outs: DefaultLeaveOuts,
     pub send_servers: SendServers,
+    pub investigation: Investigation,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
@@ -384,6 +394,7 @@ pub enum DeliveryRejection {
     PersistenceRefused,
     FlowRetired,
     FlowExited,
+    PastThreshold,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
