@@ -2,6 +2,24 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 31.0.0: a refresh threshold per model; the Investigation seat; PastThreshold
+
+- `ConfigureThreshold` is `{ ModelName Refresh.Integer }`, one per model:
+  the context, in tokens, past which a flow running that model is
+  refreshed. `Layer` and `Handover` are gone; a refreshed flow writes no
+  handover. `Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol
+  150000 } ]`. A layer-keyed entry no longer reads. Compaction is judged
+  against the flow's model's threshold.
+- `ConfigurationChange` appends `Investigation.Address`: the seat Flow
+  launches, from its `Metaflows` declaration, to investigate a flow that
+  compacted while it kept working. `Configure.Investigation.{ Psyche
+  compaction Tertiary }`. `ConfigurationSnapshot` appends
+  `Investigation.Option<Address>`.
+- `DeliveryRejection` appends `PastThreshold`: a Deliver into a flow whose
+  last measured context is at or past its model's threshold is refused
+  before anything reaches the pane.
+- The contract digest changes: every meta-wire peer repins.
+
 ## 30.0.0: a metaflow is declared in Flow's configuration
 
 - `ConfigurationChange` appends `Metaflows.Vector<ConfigureMetaflow>`,

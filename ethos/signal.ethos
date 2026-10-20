@@ -40,13 +40,13 @@
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
-; LeaveOuts, Nexus, SendServers or Metaflows. The declared value replaces that family's committed
+; LeaveOuts, Nexus, SendServers, Metaflows or Investigation. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
 ; value already equals the declaration and nothing is written. Each family
 ; holds one entry per key: Models one per Layer and Aspect, Thresholds one
-; per Layer, LeaveOuts one per Address and HarnessKind (the default
+; per ModelName, LeaveOuts one per Address and HarnessKind (the default
 ; leave-outs of one metaflow started on one harness, which a Start naming
 ; its own replaces; a Start whose harness has no entry for its Address takes
 ; none), SendServers one per CodexAppServerBinary, Metaflows one per
@@ -54,10 +54,23 @@
 ; nothing: DuplicateEntry when a declaration names one key twice,
 ; CodexModelsOverlap when a Nexus names one model under both Codex
 ; endpoints, LeaveOutNotForHarness when an entry names a leave-out of
-; another harness than its own. Configuration reads the committed Nexus and
-; the committed model, threshold, leave-out and send-server vectors; it
-; never returns defaults, and answers Unconfigured while no
-; Nexus has been declared. A seat's context is named by its launch, never
+; another harness than its own. Configuration reads the committed Nexus,
+; the committed model, threshold, leave-out, send-server and metaflow
+; vectors and the Investigation seat; it never returns defaults, and
+; answers Unconfigured while no Nexus has been declared.
+;
+; A model's refresh threshold is the context, in tokens, past which a flow
+; running that model is refreshed: it is given no new message, Flow keeps
+; the metaflow's next messages for its next flow, and the flow is replaced
+; as it goes idle and reaped in the same event. It is told nothing and
+; writes no handover. A model with no threshold configured is never
+; refreshed.
+;
+; Investigation is the Address of the seat Flow gives the investigation of
+; a flow that compacted while it kept working without being given more
+; work: Flow raises a warning and launches that seat from its Metaflows
+; declaration with the investigation as its brief, or queues it for the
+; seat when it is Awake. A seat's context is named by its launch, never
 ; configured here.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
@@ -101,13 +114,17 @@
 ; EmptyReason, StoreRefused.
 
 ; Compaction is an emergency measure. Command.Compact is refused, before
-; anything reaches the pane, unless the flow's context at its last Stop was
-; at or above the Refresh threshold configured for its layer (the Refresh
-; of that layer's ConfigureThreshold, declared by Configure.Thresholds):
+; anything reaches the pane, unless the flow's last measured context was
+; at or above the refresh threshold configured for its model (the Refresh
+; of that model's ConfigureThreshold, declared by Configure.Thresholds):
 ; CompactionRefused.BelowThreshold carries that context and that threshold,
 ; in tokens; Unmeasured says no context size is recorded for the flow;
-; NoThreshold says no Refresh threshold applies, its layer having none
-; configured or Flow holding no metaflow or launch that names its layer.
+; NoThreshold says no refresh threshold applies, its model having none
+; configured.
+;
+; Deliver is refused PastThreshold, before anything reaches the pane, when
+; the flow's last measured context is at or past its model's refresh
+; threshold: a flow past its threshold is given no new message.
 
 ; MetaBindExisting verifies each binding against Herdr before it is stored:
 ; PaneAbsent (the container's Herdr session shows no agent of the binding's
@@ -170,7 +187,8 @@ Signal
   ; The model a seat of one layer and aspect runs; a Start naming another
   ; model for that seat is refused.
   ConfigureModel.{ Layer Aspect Native.String }
-  ConfigureThreshold.{ Layer Handover.Integer Refresh.Integer }
+  ; The refresh threshold of the flows that run one model, in tokens.
+  ConfigureThreshold.{ ModelName Refresh.Integer }
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
@@ -186,9 +204,10 @@ Signal
                          LeaveOuts.Vector<ConfigureLeaveOut>
                          Nexus.ConfigureNexus
                          SendServers.Vector<ConfigureSendServer>
-                         Metaflows.Vector<ConfigureMetaflow> ]
+                         Metaflows.Vector<ConfigureMetaflow>
+                         Investigation.Address ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
@@ -250,7 +269,8 @@ Signal
                       NotDelivered
                       PersistenceRefused
                       FlowRetired
-                      FlowExited ]
+                      FlowExited
+                      PastThreshold ]
   HarnessCommand.[ Compact Interrupt ]
   CommandRequest.{ FlowId HarnessCommand }
   CommandGrade.[ Transported Observed Uncertain ]

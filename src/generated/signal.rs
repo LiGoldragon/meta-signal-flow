@@ -25,15 +25,12 @@ pub struct ConfigureModel {
     pub native: Native,
 }
 #[rustfmt::skip]
-pub type Handover = i64;
-#[rustfmt::skip]
 pub type Refresh = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureThreshold {
-    pub layer: flow_ethos::Layer,
-    pub handover: Handover,
+    pub model_name: signal_flow::ModelName,
     pub refresh: Refresh,
 }
 #[rustfmt::skip]
@@ -86,6 +83,7 @@ pub enum ConfigurationChange {
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
+    Investigation(flow_ethos::Address),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -107,6 +105,8 @@ pub type SendServers = std::vec::Vec<ConfigureSendServer>;
 #[rustfmt::skip]
 pub type Metaflows = std::vec::Vec<ConfigureMetaflow>;
 #[rustfmt::skip]
+pub type Investigation = std::option::Option<flow_ethos::Address>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -116,6 +116,7 @@ pub struct ConfigurationSnapshot {
     pub default_leave_outs: DefaultLeaveOuts,
     pub send_servers: SendServers,
     pub metaflows: Metaflows,
+    pub investigation: Investigation,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
@@ -396,6 +397,7 @@ pub enum DeliveryRejection {
     PersistenceRefused,
     FlowRetired,
     FlowExited,
+    PastThreshold,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
