@@ -198,6 +198,7 @@ pub type WorkingDirectory = String;
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum FlowLifecycle {
     RegisteredUnconfirmed,
+    AdoptedActive,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -231,7 +232,8 @@ pub struct FlowBinding {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct MetaBindExisting {
     pub flow_container: FlowContainer,
-    pub flow_binding_vector: std::vec::Vec<FlowBinding>,
+    pub address: flow_ethos::Address,
+    pub flow_binding: FlowBinding,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -254,6 +256,10 @@ pub enum FlowBindingRefusalReason {
     SessionUnreported,
     SessionUnproven,
     HerdrUnreadable,
+    RoleMismatch,
+    AddressOwnerLive,
+    AddressOwnerUnknown,
+    NativeIdentityMismatch,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -274,7 +280,7 @@ pub enum FlowBindingResult {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct BoundExisting {
     pub flow_container: FlowContainer,
-    pub flow_binding_result_vector: std::vec::Vec<FlowBindingResult>,
+    pub flow_binding_result: FlowBindingResult,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -282,6 +288,7 @@ pub struct BoundExisting {
 pub enum BindExistingRejection {
     ContainerUnavailable,
     ContainerIdentityMismatch,
+    OwnerMismatch,
     StoreRefused,
 }
 #[rustfmt::skip]

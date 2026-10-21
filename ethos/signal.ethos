@@ -235,17 +235,17 @@ Signal
   MetaFlowOwnerId.FlowId
   HerdrTabId.String
   WorkingDirectory.String
-  FlowLifecycle.[ RegisteredUnconfirmed ]
+  FlowLifecycle.[ RegisteredUnconfirmed AdoptedActive ]
   FlowContainer.{ HerdrSessionName HerdrServerSocketPath HerdrServerProcessIdentity MetaFlowOwnerId }
   FlowBinding.{ FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
-  MetaBindExisting.{ FlowContainer Vector<FlowBinding> }
+  MetaBindExisting.{ FlowContainer Address FlowBinding }
   BoundFlowBinding.{ FlowId FlowLifecycle }
-  FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch PaneAbsent ProcessMismatch SessionMismatch SessionUnreported SessionUnproven HerdrUnreadable ]
+  FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch PaneAbsent ProcessMismatch SessionMismatch SessionUnreported SessionUnproven HerdrUnreadable RoleMismatch AddressOwnerLive AddressOwnerUnknown NativeIdentityMismatch ]
   RefusedFlowBinding.{ FlowId FlowBindingRefusalReason }
   FlowBindingResult.[ Bound.BoundFlowBinding
                       Refused.RefusedFlowBinding ]
-  BoundExisting.{ FlowContainer Vector<FlowBindingResult> }
-  BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch StoreRefused ]
+  BoundExisting.{ FlowContainer FlowBindingResult }
+  BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch OwnerMismatch StoreRefused ]
   RetireRejection.[ UnknownFlow AlreadyGone StoreRefused ]
   DeliveryId.String
   MessageId.String
