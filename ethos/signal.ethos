@@ -144,7 +144,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules Process Refusal SendAcceptance SentBy Request ]
-  flow_ethos:[ QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
+  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -255,7 +255,8 @@ Signal
            Owner ]
   PsycheContext.String
   PsycheVerbatim.String
-  Content.[ Text.String
+  Content.[ NativeInput
+            Text.String
             Psyche.{ PsycheContext PsycheVerbatim } ]
   Letter.{ MessageId Sender Content }
   Message.[ HardAbrupt.Letter
