@@ -311,6 +311,7 @@ Signal
   SendOutcomeId.String
   RequestDigest.String
   QueueEvidence.[ Logical.QueueEntry Legacy.{ SentBy Request } ]
-  OrdinarySendOutcome.[ Accepted.SendAcceptance Refused.Refusal ]
+  PriorSendOutcome.[ Queued Delivered ]
+  OrdinarySendOutcome.[ Accepted.SendAcceptance Refused.Refusal PriorAdmission.PriorSendOutcome ]
   SendOutcomeRecord.{ SendOutcomeId Option<Process> Option<Address> Option<Address> RequestDigest OrdinarySendOutcome }
   ]
