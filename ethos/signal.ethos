@@ -143,8 +143,8 @@
 ; be read).
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules Process Refusal ]
-  flow_ethos:[ QueuedRequest OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules Process Refusal SendAcceptance SentBy Request ]
+  flow_ethos:[ QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -306,9 +306,10 @@ Signal
   QueueDeliveryResolution.{ QueueAttemptId QueueResolutionOutcome QueueResolutionReason }
   ResolverIdentity.{ ProcessIdentity Option<FlowId> }
   QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
-  QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueuedRequest QueueDeliveryStanding }
+  QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueueEvidence QueueDeliveryStanding }
   SendOutcomeId.String
   RequestDigest.String
-  OrdinarySendOutcome.[ Queued Delivered Refused.Refusal ]
+  QueueEvidence.[ Logical.QueueEntry Legacy.{ SentBy Request } ]
+  OrdinarySendOutcome.[ Accepted.SendAcceptance Refused.Refusal ]
   SendOutcomeRecord.{ SendOutcomeId Option<Process> Option<Address> Option<Address> RequestDigest OrdinarySendOutcome }
   ]

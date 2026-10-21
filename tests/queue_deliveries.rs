@@ -2,7 +2,7 @@
 //! metaflow's queue. The expected texts are written out here, not computed
 //! through the codec.
 
-use flow_ethos::{Address, Aspect, Layer, QueuedRequest, Request, SentBy};
+use flow_ethos::{Address, Aspect, Layer, Request, SentBy};
 use meta_signal_flow::{
     AbsenceProof, ProcessIdentity, Query, QueueDeliveriesRead_Data, QueueDelivery,
     QueueDeliveryResolution, QueueDeliveryResolved_Data, QueueDeliveryStanding,
@@ -25,14 +25,14 @@ fn delivery(standing: QueueDeliveryStanding) -> QueueDelivery {
         flow_id: "f1c841".into(),
         native_session_id: "s1".into(),
         harness_kind: HarnessKind::Claude,
-        queued_request: QueuedRequest {
+        queue_evidence: meta_signal_flow::QueueEvidence::Legacy(meta_signal_flow::Legacy_Data {
             sent_by: SentBy::Sender(Address {
                 aspect: Aspect::Psyche,
                 topic: "core".into(),
                 layer: Layer::Secondary,
             }),
             request: Request::Order("go".into()),
-        },
+        }),
         queue_delivery_standing: standing,
     }
 }
@@ -163,7 +163,7 @@ mod datom {
                 Undecided::PendingInHarness,
             )))],
         });
-        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { queue-attempt-3 f1c841 s1 Claude { Sender.{ Psyche core Secondary } Order.go } Uncertain.Some.PendingInHarness } ] }";
+        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { queue-attempt-3 f1c841 s1 Claude Legacy.{ Sender.{ Psyche core Secondary } Order.go } Uncertain.Some.PendingInHarness } ] }";
         assert_eq!(one.datomize(vec![]).protosize().compact(), text);
         assert_eq!(
             Potential::<Response>::from(text)
@@ -172,12 +172,10 @@ mod datom {
             one
         );
         assert_eq!(
-            Response::ReadQueueDeliveriesRejected(
-                ReadQueueDeliveriesRejected_Data::UnknownAddress
-            )
-            .datomize(vec![])
-            .protosize()
-            .compact(),
+            Response::ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data::UnknownAddress)
+                .datomize(vec![])
+                .protosize()
+                .compact(),
             "ReadQueueDeliveriesRejected.UnknownAddress"
         );
     }
@@ -197,7 +195,7 @@ mod datom {
             address: address(),
             queue_delivery_vector: vec![delivery(QueueDeliveryStanding::Resolved(record()))],
         });
-        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { queue-attempt-3 f1c841 s1 Claude { Sender.{ Psyche core Secondary } Order.go } Resolved.{ Absent { { 7 1001 99 } Some.aa034f } «seen in the pane» 1790000000 } } ] }";
+        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { queue-attempt-3 f1c841 s1 Claude Legacy.{ Sender.{ Psyche core Secondary } Order.go } Resolved.{ Absent { { 7 1001 99 } Some.aa034f } «seen in the pane» 1790000000 } } ] }";
         assert_eq!(one.datomize(vec![]).protosize().compact(), text);
         assert_eq!(
             Potential::<Response>::from(text)

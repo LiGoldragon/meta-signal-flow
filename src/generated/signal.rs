@@ -548,7 +548,7 @@ pub struct QueueDelivery {
     pub flow_id: signal_flow::FlowId,
     pub native_session_id: signal_flow::NativeSessionId,
     pub harness_kind: signal_flow::HarnessKind,
-    pub queued_request: flow_ethos::QueuedRequest,
+    pub queue_evidence: QueueEvidence,
     pub queue_delivery_standing: QueueDeliveryStanding,
 }
 #[rustfmt::skip]
@@ -558,9 +558,22 @@ pub type RequestDigest = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Legacy_Data {
+    pub sent_by: signal_flow::SentBy,
+    pub request: signal_flow::Request,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum QueueEvidence {
+    Logical(flow_ethos::QueueEntry),
+    Legacy(Legacy_Data),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum OrdinarySendOutcome {
-    Queued,
-    Delivered,
+    Accepted(signal_flow::SendAcceptance),
     Refused(signal_flow::Refusal),
 }
 #[rustfmt::skip]
