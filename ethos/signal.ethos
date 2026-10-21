@@ -255,7 +255,7 @@ Signal
            Owner ]
   PsycheContext.String
   PsycheVerbatim.String
-  Content.[ NativeInput
+  Content.[ NativeInput.NativeInput
             Text.String
             Psyche.{ PsycheContext PsycheVerbatim } ]
   Letter.{ MessageId Sender Content }
