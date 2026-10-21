@@ -143,7 +143,7 @@
 ; be read).
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules Process Refusal SendAcceptance SentBy Request ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -187,7 +187,7 @@ Signal
   SendOutcomesRead.Vector<SendOutcomeRecord>
   ReadSendOutcomesRejected.[ StoreRefused ]
   QueueDeliveryResolved.{ Address QueueDeliveryResolution }
-  ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ] ]
+  ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered.NativeReceipt ] ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this

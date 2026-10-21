@@ -665,6 +665,10 @@ pub enum ResolveQueueDeliveryRejected_Data {
     NotOldest,
     EmptyReason,
     StoreRefused,
+    NativeReceiptRequired,
+    LegacyUncorrelated,
+    AlreadyResolved(QueueResolutionRecord),
+    AlreadyDelivered(signal_flow::NativeReceipt),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
