@@ -113,6 +113,12 @@
 ; NotOldest (the attempt is no longer the oldest request of its address),
 ; EmptyReason, StoreRefused.
 
+; ReadSendOutcomes answers every completed ordinary Send invocation with the
+; typed response, caller when known, sender and recipient when known, and a
+; digest of its request. The private request body is not stored. Each outcome
+; is committed before its response is emitted. Count these rows to establish
+; the number of completed Send outcomes independently.
+
 ; Compaction is an emergency measure. Command.Compact is refused, before
 ; anything reaches the pane, unless the flow's last measured context was
 ; at or above the refresh threshold configured for its model (the Refresh
@@ -137,7 +143,7 @@
 ; be read).
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts SystemModules UserModules Process Refusal ]
   flow_ethos:[ QueuedRequest OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -151,6 +157,7 @@ Signal
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
   ReadQueueDeliveries.Address
+  ReadSendOutcomes
   ResolveQueueDelivery.QueueDeliveryResolution ]
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
@@ -172,11 +179,13 @@ Signal
   PeerResolved.Caller
   PeerResolutionRejected.CallerResolutionRejection
   MetaRefused.MetaRefusal
-  Refused.Refusal
+  Refused.StoreRefusal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   QueueDeliveriesRead.{ Address Vector<QueueDelivery> }
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
+  SendOutcomesRead.Vector<SendOutcomeRecord>
+  ReadSendOutcomesRejected.[ StoreRefused ]
   QueueDeliveryResolved.{ Address QueueDeliveryResolution }
   ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused ] ]
 [ ; Flow Library owns the shared configuration field types.
@@ -282,7 +291,7 @@ Signal
   CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited CompactionRefused.CompactionRefusal ]
   MetaRefusal.[ PeerUnknown
                 PeerNotAuthorized.Caller ]
-  Refusal.[ Store.String ]
+  StoreRefusal.[ Store.String ]
   QueueAttemptId.String
   Undecided.[ HistoryUnreadable HistoryReplaced PendingInHarness Ambiguous SeatNotResting AbsenceUnprovable ]
   AbsenceProof.[ HandOverRefused HistoryAbsent ]
@@ -298,4 +307,8 @@ Signal
   ResolverIdentity.{ ProcessIdentity Option<FlowId> }
   QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
   QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueuedRequest QueueDeliveryStanding }
+  SendOutcomeId.String
+  RequestDigest.String
+  OrdinarySendOutcome.[ Queued Delivered Refused.Refusal ]
+  SendOutcomeRecord.{ SendOutcomeId Option<Process> Option<Address> Option<Address> RequestDigest OrdinarySendOutcome }
   ]

@@ -472,7 +472,7 @@ pub enum MetaRefusal {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Refusal {
+pub enum StoreRefusal {
     Store(String),
 }
 #[rustfmt::skip]
@@ -552,6 +552,29 @@ pub struct QueueDelivery {
     pub queue_delivery_standing: QueueDeliveryStanding,
 }
 #[rustfmt::skip]
+pub type SendOutcomeId = String;
+#[rustfmt::skip]
+pub type RequestDigest = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum OrdinarySendOutcome {
+    Queued,
+    Delivered,
+    Refused(signal_flow::Refusal),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct SendOutcomeRecord {
+    pub send_outcome_id: SendOutcomeId,
+    pub process_option: std::option::Option<signal_flow::Process>,
+    pub first_address_option: std::option::Option<flow_ethos::Address>,
+    pub second_address_option: std::option::Option<flow_ethos::Address>,
+    pub request_digest: RequestDigest,
+    pub ordinary_send_outcome: OrdinarySendOutcome,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
@@ -567,6 +590,7 @@ pub enum Query {
     ResolvePeer(ProcessIdentity),
     ReadEvents(signal_flow::FlowId),
     ReadQueueDeliveries(flow_ethos::Address),
+    ReadSendOutcomes,
     ResolveQueueDelivery(QueueDeliveryResolution),
 }
 #[rustfmt::skip]
@@ -595,6 +619,12 @@ pub struct QueueDeliveriesRead_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ReadQueueDeliveriesRejected_Data {
     UnknownAddress,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadSendOutcomesRejected_Data {
     StoreRefused,
 }
 #[rustfmt::skip]
@@ -638,11 +668,13 @@ pub enum Response {
     PeerResolved(signal_flow::Caller),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
     MetaRefused(MetaRefusal),
-    Refused(Refusal),
+    Refused(StoreRefusal),
     EventsRead(EventsRead_Data),
     ReadEventsRejected(ReadEventsRejected_Data),
     QueueDeliveriesRead(QueueDeliveriesRead_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
+    SendOutcomesRead(std::vec::Vec<SendOutcomeRecord>),
+    ReadSendOutcomesRejected(ReadSendOutcomesRejected_Data),
     QueueDeliveryResolved(QueueDeliveryResolved_Data),
     ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data),
 }

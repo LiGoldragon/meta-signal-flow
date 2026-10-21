@@ -2,6 +2,14 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 34.0.0: every ordinary Send outcome is durably countable
+
+- `ReadSendOutcomes` returns each completed ordinary Send's server-minted
+  record ID, caller when known, sender and recipient when known, request
+  digest and typed response. The request body is not stored. Each response is
+  committed before emission. The contract digest changes; every meta-wire
+  peer repins.
+
 ## 32.0.0: a request Flow raised itself is sent by Flow
 
 - Pins signal-flow 25.0.0 and flow-ethos (flow dc2cba6), whose `SentBy` is
@@ -299,3 +307,5 @@ To deploy, in flow: repin meta-signal-flow and signal-flow together, repin
 protos and datom-codec to 0.32.2, replace `.textualize()` with `.compact()`
 where one line is meant, rebuild and restart the Nexus and both CLIs
 together. The rkyv archive of every value is unchanged.
+
+The ordinary Send ledger names only Send outcomes (Queued, Delivered, or its typed refusal). The owner socket's former Refusal type is named StoreRefusal so it is distinct from the imported ordinary Refusal.
