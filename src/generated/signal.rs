@@ -604,6 +604,8 @@ pub enum OrdinarySendOutcome {
     Accepted(signal_flow::SendAcceptance),
     Refused(signal_flow::Refusal),
     PriorAdmission(PriorSendOutcome),
+    Sent(signal_flow::SendReceipt),
+    Failed(signal_flow::SendFailure),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
