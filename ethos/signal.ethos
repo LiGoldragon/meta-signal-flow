@@ -158,6 +158,7 @@ Signal
   ReadEvents.FlowId
   ReadQueueDeliveries.Address
   ReadSendOutcomes
+  ObserveLegacyArchive
   ResolveQueueDelivery.QueueDeliveryResolution ]
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
@@ -186,6 +187,8 @@ Signal
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
   SendOutcomesRead.Vector<SendOutcomeRecord>
   ReadSendOutcomesRejected.[ StoreRefused ]
+  LegacyArchiveObserved.Vector<LegacyArchiveEntry>
+  ObserveLegacyArchiveRejected.StoreRefusal
   QueueDeliveryResolved.{ Address QueueDeliveryResolution }
   ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered.NativeReceipt ] ]
 [ ; Flow Library owns the shared configuration field types.
@@ -308,6 +311,8 @@ Signal
   ResolverIdentity.{ ProcessIdentity Option<FlowId> }
   QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
   QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueueEvidence QueueDeliveryStanding }
+  QueueRequestId.String
+  LegacyArchiveEntry.{ QueueRequestId Address QueueEvidence Vector<QueueAttemptId> }
   SendOutcomeId.String
   RequestDigest.String
   QueueEvidence.[ Logical.QueueEntry Legacy.{ SentBy Request } ]

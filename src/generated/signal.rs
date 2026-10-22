@@ -560,6 +560,17 @@ pub struct QueueDelivery {
     pub queue_delivery_standing: QueueDeliveryStanding,
 }
 #[rustfmt::skip]
+pub type QueueRequestId = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct LegacyArchiveEntry {
+    pub queue_request_id: QueueRequestId,
+    pub address: flow_ethos::Address,
+    pub queue_evidence: QueueEvidence,
+    pub queue_attempt_id_vector: std::vec::Vec<QueueAttemptId>,
+}
+#[rustfmt::skip]
 pub type SendOutcomeId = String;
 #[rustfmt::skip]
 pub type RequestDigest = String;
@@ -620,6 +631,7 @@ pub enum Query {
     ReadEvents(signal_flow::FlowId),
     ReadQueueDeliveries(flow_ethos::Address),
     ReadSendOutcomes,
+    ObserveLegacyArchive,
     ResolveQueueDelivery(QueueDeliveryResolution),
 }
 #[rustfmt::skip]
@@ -708,6 +720,8 @@ pub enum Response {
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
     SendOutcomesRead(std::vec::Vec<SendOutcomeRecord>),
     ReadSendOutcomesRejected(ReadSendOutcomesRejected_Data),
+    LegacyArchiveObserved(std::vec::Vec<LegacyArchiveEntry>),
+    ObserveLegacyArchiveRejected(StoreRefusal),
     QueueDeliveryResolved(QueueDeliveryResolved_Data),
     ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data),
 }
