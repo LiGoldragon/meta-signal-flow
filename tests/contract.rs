@@ -205,6 +205,8 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             },
             system_modules: vec!["spirit-core".into()],
             user_modules: vec!["vision-flow".into()],
+            flow_kind: signal_flow::FlowKind::Regular,
+            tool_set: signal_flow::ToolSet::Default,
         }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();

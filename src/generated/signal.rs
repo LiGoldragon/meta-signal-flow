@@ -72,6 +72,8 @@ pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
     pub system_modules: signal_flow::SystemModules,
     pub user_modules: signal_flow::UserModules,
+    pub flow_kind: signal_flow::FlowKind,
+    pub tool_set: signal_flow::ToolSet,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
