@@ -207,6 +207,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             user_modules: vec!["vision-flow".into()],
             flow_kind: signal_flow::FlowKind::Regular,
             tool_set: signal_flow::ToolSet::Default,
+            availability: meta_signal_flow::Availability::OnDemand,
         }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
@@ -443,14 +444,16 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit-core intent-psyche ] [ compensation-truth ] } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit-core intent-psyche ] [ compensation-truth ] Regular Default OnDemand } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert!(matches!(
         &query,
         meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::Metaflows(declared))
-            if declared.len() == 1 && declared[0].system_modules.len() == 2
+            if declared.len() == 1
+                && declared[0].system_modules.len() == 2
+                && declared[0].availability == meta_signal_flow::Availability::OnDemand
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
 }

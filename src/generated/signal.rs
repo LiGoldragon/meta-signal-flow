@@ -68,12 +68,20 @@ pub struct ConfigureSendServer {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Availability {
+    Required,
+    OnDemand,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
     pub system_modules: signal_flow::SystemModules,
     pub user_modules: signal_flow::UserModules,
     pub flow_kind: signal_flow::FlowKind,
     pub tool_set: signal_flow::ToolSet,
+    pub availability: Availability,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
