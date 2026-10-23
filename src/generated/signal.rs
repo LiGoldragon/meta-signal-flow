@@ -68,12 +68,28 @@ pub struct ConfigureSendServer {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Continuity {
+    OnDemand,
+    Maintained,
+}
+#[rustfmt::skip]
+pub type Purpose = String;
+#[rustfmt::skip]
+pub type RecordPath = String;
+#[rustfmt::skip]
+pub type Records = std::vec::Vec<RecordPath>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
     pub system_modules: signal_flow::SystemModules,
     pub user_modules: signal_flow::UserModules,
     pub flow_kind: signal_flow::FlowKind,
     pub tool_set: signal_flow::ToolSet,
+    pub continuity: Continuity,
+    pub purpose: Purpose,
+    pub records: Records,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -155,6 +171,7 @@ pub enum ConfigureRejection {
     DuplicateEntry,
     CodexModelsOverlap,
     LeaveOutNotForHarness,
+    TopicRefused(flow_ethos::Topic),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

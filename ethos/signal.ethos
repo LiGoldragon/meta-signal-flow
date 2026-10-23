@@ -52,6 +52,8 @@
 ; none), SendServers one per CodexAppServerBinary, Metaflows one per
 ; Address: the declaration an ordinary Launch of that Address starts from. ConfigureRejected changes
 ; nothing: DuplicateEntry when a declaration names one key twice,
+; TopicRefused when an entry's Address has a topic that is not an
+; uncapitalized camelCase identifier,
 ; CodexModelsOverlap when a Nexus names one model under both Codex
 ; endpoints, LeaveOutNotForHarness when an entry names a leave-out of
 ; another harness than its own. Configuration reads the committed Nexus,
@@ -207,9 +209,23 @@ Signal
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
+  ; How a metaflow continues. Maintained: it always has a flow; a flow
+  ; refreshed or ended unexpectedly (its pane gone) is followed by a
+  ; successor with no queued request needed, and an idle flow keeps its
+  ; harness. OnDemand: a flow whose turn ends with nothing queued closes
+  ; its harness, keeping its address and transcript, and a request that
+  ; wakes starts the next one.
+  Continuity.[ OnDemand Maintained ]
+  ; What the metaflow is for, composed with the brief into the first prompt.
+  Purpose.String
+  ; A record of the living the metaflow rests on, as a path under the
+  ; records root.
+  RecordPath.String
+  Records.Vector<RecordPath>
   ; A metaflow's declaration: the context modules a Launch of its Address
-  ; composes into the system prompt and into the first user message.
-  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet }
+  ; composes into the system prompt and into the first user message, how it
+  ; continues, its purpose and the records it rests on.
+  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
@@ -226,7 +242,7 @@ Signal
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
