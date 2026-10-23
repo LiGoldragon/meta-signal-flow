@@ -74,6 +74,8 @@ pub struct ConfigureMetaflow {
     pub user_modules: signal_flow::UserModules,
     pub flow_kind: signal_flow::FlowKind,
     pub tool_set: signal_flow::ToolSet,
+    pub record_topics: signal_flow::RecordTopics,
+    pub configured_lineage_option: std::option::Option<signal_flow::ConfiguredLineage>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
