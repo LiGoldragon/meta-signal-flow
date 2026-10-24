@@ -2,12 +2,12 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
-## 40.0.0: a metaflow declares how it continues, its purpose and records
+## 40.0.0: a metaflow declares its availability, purpose and records
 
-- `ConfigureMetaflow` appends `Continuity.[ OnDemand Maintained ]`,
+- `ConfigureMetaflow` appends `Availability.[ Required OnDemand ]`,
   `Purpose.String` and `Records.Vector<RecordPath>`:
-  `{ { Psyche core Primary } [ spirit:core ] [] Regular Default Maintained
-  «…» [ flows/a68420/vision/flow.md ] }`. A Maintained metaflow always has a
+  `{ { Psyche core Primary } [ spirit:core ] [] Regular Default Required
+  «…» [ flows/a68420/vision/flow.md ] }`. A Required metaflow always has a
   flow; an OnDemand one closes its harness when its turn ends with nothing
   queued. A store keeping archived declarations upgrades them.
 - `ConfigureRejection` appends `TopicRefused.Topic`.

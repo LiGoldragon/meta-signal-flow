@@ -209,13 +209,13 @@ Signal
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
-  ; How a metaflow continues. Maintained: it always has a flow; a flow
+  ; How available a metaflow is. Required: it always has a flow; a flow
   ; refreshed or ended unexpectedly (its pane gone) is followed by a
   ; successor with no queued request needed, and an idle flow keeps its
   ; harness. OnDemand: a flow whose turn ends with nothing queued closes
   ; its harness, keeping its address and transcript, and a request that
   ; wakes starts the next one.
-  Continuity.[ OnDemand Maintained ]
+  Availability.[ Required OnDemand ]
   ; What the metaflow is for, composed with the brief into the first prompt.
   Purpose.String
   ; A record of the living the metaflow rests on, as a path under the
@@ -223,9 +223,9 @@ Signal
   RecordPath.String
   Records.Vector<RecordPath>
   ; A metaflow's declaration: the context modules a Launch of its Address
-  ; composes into the system prompt and into the first user message, how it
-  ; continues, its purpose and the records it rests on.
-  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
+  ; composes into the system prompt and into the first user message, how
+  ; available it is, its purpose and the records it rests on.
+  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Availability Purpose Records }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
