@@ -638,6 +638,41 @@ pub struct SendOutcomeRecord {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Binding {
+    pub flow_node_option: std::option::Option<signal_flow::FlowNode>,
+    pub process_option: std::option::Option<signal_flow::Process>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Attempt {
+    Queued(QueueDelivery),
+    Launch(signal_flow::LaunchAttempt),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Rebinding {
+    Pane(signal_flow::HerdrPaneId),
+    Flow(signal_flow::FlowId),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Rebind_Data {
+    pub address: flow_ethos::Address,
+    pub rebinding: Rebinding,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Withdraw_Data {
+    pub address: flow_ethos::Address,
+    pub logical_delivery_id: flow_ethos::LogicalDeliveryId,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
     Configuration,
     Configure(ConfigurationChange),
@@ -654,6 +689,9 @@ pub enum Query {
     ReadSendOutcomes,
     ObserveLegacyArchive,
     ResolveQueueDelivery(QueueDeliveryResolution),
+    Inspect(flow_ethos::Address),
+    Rebind(Rebind_Data),
+    Withdraw(Withdraw_Data),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -713,6 +751,37 @@ pub enum ResolveQueueDeliveryRejected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Inspected_Data {
+    pub metaflow: flow_ethos::Metaflow,
+    pub binding: Binding,
+    pub lock_vector: std::vec::Vec<flow_ethos::Lock>,
+    pub attempt_vector: std::vec::Vec<Attempt>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum InspectRejected_Data {
+    UnknownAddress,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum RebindRejected_Data {
+    UnknownAddress,
+    PaneAbsent,
+    FlowUnknown,
+    NotAwake,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum WithdrawRejected_Data {
+    UnknownAddress,
+    NotQueued,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Response {
     Configured(ConfigureOutcome),
     Configuration(ConfigurationSnapshot),
@@ -745,4 +814,10 @@ pub enum Response {
     ObserveLegacyArchiveRejected(StoreRefusal),
     QueueDeliveryResolved(QueueDeliveryResolved_Data),
     ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data),
+    Inspected(Inspected_Data),
+    InspectRejected(InspectRejected_Data),
+    Rebound(flow_ethos::Address),
+    RebindRejected(RebindRejected_Data),
+    Withdrawn(flow_ethos::LogicalDeliveryId),
+    WithdrawRejected(WithdrawRejected_Data),
 }

@@ -144,9 +144,39 @@
 ; HerdrUnreadable (the session's snapshot or the pane's processes could not
 ; be read).
 
+; Inspect answers the metaflow at Address whole, as Flow holds it now: its
+; state, its Past and its queue; its binding, the row of the flow it is
+; Awake as with the Herdr pane that flow lives in, and the process bound to
+; its Address; the sender lock held on it; and every attempt outstanding
+; for it, a queued request handed to a seat and not settled, or a launch at
+; its Address not settled. It changes nothing. InspectRejected.UnknownAddress
+; names an Address Flow holds no metaflow for.
+
+; Rebind repairs where a metaflow's flow lives, with no harness action.
+; Rebinding.Pane: the flow the metaflow is Awake as now lives in this pane
+; of the Herdr session its route names; Flow reads the pane's terminal and
+; agent from Herdr and records them as the flow's route, so the flow is
+; reached in that pane and a process in it is identified as that flow.
+; Rebinding.Flow: the metaflow's current flow is now this flow, and the flow
+; it was Awake as joins Past; its queue, locks and declaration stay. Rebound
+; names the Address. RebindRejected changes nothing: UnknownAddress, Flow
+; holds no metaflow for the Address; NotAwake, the metaflow is Asleep, so no
+; flow is current; PaneAbsent, Herdr shows no agent of the flow's harness in
+; that pane of the flow's session, or cannot be read; FlowUnknown, Flow
+; holds no row for the flow.
+
+; Withdraw takes one queued request, by its LogicalDeliveryId, out of its
+; metaflow's queue, and closes any attempt outstanding for it: one handed
+; to a seat that may have reached it stays recorded as it stands and is
+; never handed over again, one whose receipt is recorded settles as
+; delivered, and a request that never reached the seat ends Withdrawn for
+; its sender. Withdrawn names the request. WithdrawRejected changes nothing:
+; UnknownAddress, Flow holds no metaflow for the Address; NotQueued, the
+; metaflow's queue holds no request of that id.
+
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address ] ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt ]
+  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -161,7 +191,12 @@ Signal
   ReadQueueDeliveries.Address
   ReadSendOutcomes
   ObserveLegacyArchive
-  ResolveQueueDelivery.QueueDeliveryResolution ]
+  ResolveQueueDelivery.QueueDeliveryResolution
+  Inspect.Address                               ; the metaflow whole: state, binding, queue, locks, attempts
+  Rebind.{ Address
+           Rebinding.[ Pane.HerdrPaneId         ; the current flow now lives in this pane
+                       Flow.FlowId ] }          ; the metaflow's current flow is now this flow
+  Withdraw.{ Address LogicalDeliveryId } ]      ; one queued delivery leaves the queue
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -192,7 +227,13 @@ Signal
   LegacyArchiveObserved.Vector<LegacyArchiveEntry>
   ObserveLegacyArchiveRejected.StoreRefusal
   QueueDeliveryResolved.{ Address QueueDeliveryResolution }
-  ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered.NativeReceipt ] ]
+  ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered.NativeReceipt ]
+  Inspected.{ Metaflow Binding Vector<Lock> Vector<Attempt> }
+  InspectRejected.[ UnknownAddress ]
+  Rebound.Address
+  RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake ]
+  Withdrawn.LogicalDeliveryId
+  WithdrawRejected.[ UnknownAddress NotQueued ] ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
@@ -335,4 +376,11 @@ Signal
   PriorSendOutcome.[ Queued Delivered ]
   OrdinarySendOutcome.[ Accepted.SendAcceptance Refused.Refusal PriorAdmission.PriorSendOutcome Sent.SendReceipt Failed.SendFailure ]
   SendOutcomeRecord.{ SendOutcomeId Option<Process> Option<Address> Option<Address> RequestDigest OrdinarySendOutcome }
+  ; What binds a metaflow to a running seat: the row of the flow it is
+  ; Awake as, with the Herdr pane it lives in, none while it is Asleep; and
+  ; the process bound to its Address, if one is.
+  Binding.{ Option<FlowNode> Option<Process> }
+  ; One attempt Flow holds outstanding for a metaflow.
+  Attempt.[ Queued.QueueDelivery                ; a queued request handed to a seat and not settled
+            Launch.LaunchAttempt ]              ; a launch at the metaflow's Address not settled
   ]
