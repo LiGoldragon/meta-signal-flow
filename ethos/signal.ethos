@@ -162,8 +162,9 @@
 ; names the Address. RebindRejected changes nothing: UnknownAddress, Flow
 ; holds no metaflow for the Address; NotAwake, the metaflow is Asleep, so no
 ; flow is current; PaneAbsent, Herdr shows no agent of the flow's harness in
-; that pane of the flow's session, or cannot be read; FlowUnknown, Flow
-; holds no row for the flow.
+; that pane of the flow's session; HerdrUnavailable, Herdr could not be
+; read; FlowUnknown, Flow holds no row for the flow; FlowTaken, the flow is
+; already another metaflow's current flow, the Address of that metaflow.
 
 ; Withdraw takes one queued request, by its LogicalDeliveryId, out of its
 ; metaflow's queue, and closes any attempt outstanding for it: one handed
@@ -231,7 +232,7 @@ Signal
   Inspected.{ Metaflow Binding Vector<Lock> Vector<Attempt> }
   InspectRejected.[ UnknownAddress ]
   Rebound.Address
-  RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake ]
+  RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
   Withdrawn.LogicalDeliveryId
   WithdrawRejected.[ UnknownAddress NotQueued ] ]
 [ ; Flow Library owns the shared configuration field types.
@@ -250,13 +251,16 @@ Signal
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
-  ; How available a metaflow is. Required: it always has a flow; a flow
-  ; refreshed or ended unexpectedly (its pane gone) is followed by a
-  ; successor with no queued request needed, and an idle flow keeps its
-  ; harness. OnDemand: a flow whose turn ends with nothing queued closes
-  ; its harness, keeping its address and transcript, and a request that
-  ; wakes starts the next one.
-  Availability.[ Required OnDemand ]
+  ; How a metaflow continues. OnDemand: a flow whose turn ends with nothing
+  ; queued has its harness and pane closed, the metaflow Asleep with its
+  ; address and transcript kept, and a request that wakes starts the next
+  ; flow with the whole queue. Maintained: the metaflow is never without a
+  ; running flow; a flow refreshed, at its threshold or by order, or ended
+  ; unexpectedly (its harness gone) is followed by a successor whether or
+  ; not anything is queued, the successor confirmed before the predecessor
+  ; is reaped, and an idle flow keeps its harness. A metaflow is Maintained
+  ; by its exact Address, never by its layer.
+  Continuity.[ OnDemand Maintained ]
   ; What the metaflow is for, composed with the brief into the first prompt.
   Purpose.String
   ; A record of the living the metaflow rests on, as a path under the
@@ -265,8 +269,8 @@ Signal
   Records.Vector<RecordPath>
   ; A metaflow's declaration: the context modules a Launch of its Address
   ; composes into the system prompt and into the first user message, how
-  ; available it is, its purpose and the records it rests on.
-  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Availability Purpose Records }
+  ; it continues, its purpose and the records it rests on.
+  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>

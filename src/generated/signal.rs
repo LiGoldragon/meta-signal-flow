@@ -68,9 +68,9 @@ pub struct ConfigureSendServer {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Availability {
-    Required,
+pub enum Continuity {
     OnDemand,
+    Maintained,
 }
 #[rustfmt::skip]
 pub type Purpose = String;
@@ -87,7 +87,7 @@ pub struct ConfigureMetaflow {
     pub user_modules: signal_flow::UserModules,
     pub flow_kind: signal_flow::FlowKind,
     pub tool_set: signal_flow::ToolSet,
-    pub availability: Availability,
+    pub continuity: Continuity,
     pub purpose: Purpose,
     pub records: Records,
 }
@@ -771,6 +771,8 @@ pub enum RebindRejected_Data {
     PaneAbsent,
     FlowUnknown,
     NotAwake,
+    HerdrUnavailable,
+    FlowTaken(flow_ethos::Address),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
