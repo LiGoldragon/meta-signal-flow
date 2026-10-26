@@ -41,10 +41,15 @@ How to deploy each breaking change of meta-signal-flow.
   still there and whose close Herdr refuses records nothing and answers
   `RetireRejected.CloseRefused`. A Retire closes the flow's pane where it
   is still there.
+- `RetireRejection` appends `Maintained`: a Retire of the flow a Maintained
+  metaflow is Awake as changes nothing and answers
+  `RetireRejected.Maintained`; its declaration's continuity is changed to
+  `OnDemand` first.
 - Pins signal-flow 32.0.0 (`Refresh.Address`, `DeliveryState.Withdrawn`,
   `Event.Started.Option<NativeSessionId>`, `Event.Cleared`,
-  `StartRejection.CompositionRefused.CompositionRefusal`): `EventsRead`
-  carries `Started.Some.«session»`.
+  `StartRejection.CompositionRefused.CompositionRefusal`,
+  `RetryCause.WakeRefused.StartRejection`): `EventsRead` carries
+  `Started.Some.«session»`.
 
 ## 34.0.0: every ordinary Send outcome is durably countable
 

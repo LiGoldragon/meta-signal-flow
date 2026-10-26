@@ -281,6 +281,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
         "RetireRejected.AlreadyGone",
         "RetireRejected.StoreRefused",
         "RetireRejected.CloseRefused",
+        "RetireRejected.Maintained",
     ] {
         let response = Potential::<Response>::from(text)
             .actualize(&mut budget())

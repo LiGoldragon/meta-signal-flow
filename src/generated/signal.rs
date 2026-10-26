@@ -321,6 +321,7 @@ pub enum RetireRejection {
     AlreadyGone,
     StoreRefused,
     CloseRefused,
+    Maintained,
 }
 #[rustfmt::skip]
 pub type DeliveryId = String;

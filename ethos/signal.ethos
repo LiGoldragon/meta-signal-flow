@@ -315,7 +315,9 @@ Signal
   BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch OwnerMismatch StoreRefused ]
   ; CloseRefused: the retired flow's pane is still there and Herdr refused
   ; to close it; nothing is recorded and the flow is not retired.
-  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused ]
+  ; Maintained: the flow is the one a Maintained metaflow is Awake as;
+  ; nothing changes, and its declaration's continuity is changed first.
+  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained ]
   DeliveryId.String
   MessageId.String
   CommandLine.String
