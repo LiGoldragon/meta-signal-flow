@@ -42,7 +42,8 @@ How to deploy each breaking change of meta-signal-flow.
   `RetireRejected.CloseRefused`. A Retire closes the flow's pane where it
   is still there.
 - Pins signal-flow 32.0.0 (`Refresh.Address`, `DeliveryState.Withdrawn`,
-  `Event.Started.Option<NativeSessionId>`, `Event.Cleared`): `EventsRead`
+  `Event.Started.Option<NativeSessionId>`, `Event.Cleared`,
+  `StartRejection.CompositionRefused.CompositionRefusal`): `EventsRead`
   carries `Started.Some.«session»`.
 
 ## 34.0.0: every ordinary Send outcome is durably countable
