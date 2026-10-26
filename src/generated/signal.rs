@@ -42,6 +42,8 @@ pub struct ConfigureLeaveOut {
     pub leave_outs: signal_flow::LeaveOuts,
 }
 #[rustfmt::skip]
+pub type CurriculumNexusPath = String;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureNexus {
@@ -52,6 +54,7 @@ pub struct ConfigureNexus {
     pub meta_aspects: flow_ethos::MetaAspects,
     pub message_nexus_path: flow_ethos::MessageNexusPath,
     pub message_nexus_binary: flow_ethos::MessageNexusBinary,
+    pub curriculum_nexus_path: CurriculumNexusPath,
     pub lease: flow_ethos::Lease,
 }
 #[rustfmt::skip]

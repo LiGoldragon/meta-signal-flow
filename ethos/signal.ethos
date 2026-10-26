@@ -76,8 +76,10 @@
 ; configured here.
 ; Configure.Nexus names the actual Message executable in MessageNexusBinary.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
-; A running Nexus reads its Codex endpoints when it opens, so a replaced
-; endpoint is served from the next start.
+; CurriculumNexusPath is the socket of the Curriculum Nexus that composes
+; every launch's context. A running Nexus reads its Codex endpoints and its
+; Curriculum socket when it opens, so a replaced one is served from the
+; next start.
 ;
 ; A send server is an MCP server a Codex app-server runs for one thread,
 ; trusted to name the thread whose tool calls it serves (signal-flow
@@ -247,7 +249,8 @@ Signal
   ConfigureThreshold.{ ModelName Refresh.Integer }
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
-  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease }
+  CurriculumNexusPath.String
+  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary CurriculumNexusPath Lease }
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }

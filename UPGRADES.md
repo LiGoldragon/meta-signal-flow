@@ -12,6 +12,13 @@ How to deploy each breaking change of meta-signal-flow.
   when its turn ends with nothing queued. A store keeping archived
   declarations upgrades them.
 - `ConfigureRejection` appends `TopicRefused.Topic`.
+- `ConfigureNexus` gains `CurriculumNexusPath.String` after
+  `MessageNexusBinary`: the socket of the Curriculum Nexus that composes
+  every launch's context, read when the Nexus opens. `Configure.Nexus.{ …
+  /run/user/1001/message.sock /etc/profiles/per-user/li/bin/message-nexus
+  /run/user/1001/curriculum/curriculum.sock 60 }`. A store's archived Nexus
+  configuration upgrades with `$XDG_RUNTIME_DIR/curriculum/curriculum.sock`
+  of the process that opens it.
 - `Query` appends `Inspect.Address`, answered `Inspected.{ Metaflow Binding
   Vector<Lock> Vector<Attempt> }` or `InspectRejected.UnknownAddress`: the
   metaflow whole, its binding `Binding.{ Option<FlowNode> Option<Process> }`
