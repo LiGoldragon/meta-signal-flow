@@ -2,7 +2,7 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
-## 40.0.0: a metaflow declares its continuity, purpose and records
+## 40.0.0: a metaflow declares its continuity, purpose and records; Inspect, Rebind and Withdraw repair one
 
 - `ConfigureMetaflow` appends `Continuity.[ OnDemand Maintained ]`,
   `Purpose.String` and `Records.Vector<RecordPath>`:
@@ -12,7 +12,31 @@ How to deploy each breaking change of meta-signal-flow.
   when its turn ends with nothing queued. A store keeping archived
   declarations upgrades them.
 - `ConfigureRejection` appends `TopicRefused.Topic`.
-- Pins signal-flow 31.0.0 (`StartRejection.TopicRefused`).
+- `Query` appends `Inspect.Address`, answered `Inspected.{ Metaflow Binding
+  Vector<Lock> Vector<Attempt> }` or `InspectRejected.UnknownAddress`: the
+  metaflow whole, its binding `Binding.{ Option<FlowNode> Option<Process> }`
+  (the row of the flow it is Awake as, and the process bound to its
+  Address), the sender locks held on it, and every attempt outstanding for
+  it, `Attempt.[ Queued.QueueDelivery Launch.LaunchAttempt ]`. It changes
+  nothing.
+- `Query` appends `Rebind.{ Address Rebinding.[ Pane.HerdrPaneId
+  Flow.FlowId ] }`, answered `Rebound.Address` or `RebindRejected.[
+  UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable
+  FlowTaken.Address ]`: `Rebind.{ { Mind flow Secondary } Pane.w7B }`
+  records the pane the current flow lives in; `Rebind.{ { Mind flow
+  Secondary } Flow.f1c841 }` makes that flow current, the one before it
+  joining Past. No harness is touched.
+- `Query` appends `Withdraw.{ Address LogicalDeliveryId }`, answered
+  `Withdrawn.LogicalDeliveryId` or `WithdrawRejected.[ UnknownAddress
+  NotQueued ]`: the request leaves the queue, and one that never reached
+  the seat ends `Withdrawn` for its sender.
+- `RetireRejection` appends `CloseRefused`: a Retire whose flow's pane is
+  still there and whose close Herdr refuses records nothing and answers
+  `RetireRejected.CloseRefused`. A Retire closes the flow's pane where it
+  is still there.
+- Pins signal-flow 32.0.0 (`Refresh.Address`, `DeliveryState.Withdrawn`,
+  `Event.Started.Option<NativeSessionId>`, `Event.Cleared`): `EventsRead`
+  carries `Started.Some.«session»`.
 
 ## 34.0.0: every ordinary Send outcome is durably countable
 

@@ -310,7 +310,9 @@ Signal
                       Refused.RefusedFlowBinding ]
   BoundExisting.{ FlowContainer FlowBindingResult }
   BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch OwnerMismatch StoreRefused ]
-  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused ]
+  ; CloseRefused: the retired flow's pane is still there and Herdr refused
+  ; to close it; nothing is recorded and the flow is not retired.
+  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused ]
   DeliveryId.String
   MessageId.String
   CommandLine.String
