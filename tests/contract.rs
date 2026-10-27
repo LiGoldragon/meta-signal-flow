@@ -298,10 +298,10 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ m-81b0e4 Owner Text.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ m-90c1aa Flow.88475f Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
-        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ m-a2d913 Flow.e167d8 Text./compact } }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words.«Stage 1 is deployed; run the tier tests.» } }",
+        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Order { { Mind flow Secondary } 88475f } Words.«Stop the ouranos build now.» } }",
+        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Psyche { { Psyche core Secondary } 88475f } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
+        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words./compact } }",
         "Command.{ 7d41e0 Compact }",
         "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",
@@ -357,13 +357,20 @@ fn delivery_replies_have_concrete_datoms() {
 #[test]
 fn a_message_textualizes_with_its_priority_head_first() {
     let message = meta_signal_flow::Message::Soft(meta_signal_flow::Letter {
-        message_id: "m-7f3a2c".into(),
-        sender: meta_signal_flow::Sender::Flow("e167d8".into()),
-        content: meta_signal_flow::Content::Text("Stage 1 is deployed; run the tier tests.".into()),
+        kind: meta_signal_flow::Kind::Notice,
+        sender: meta_signal_flow::Sender {
+            address: flow_ethos::Address {
+                aspect: flow_ethos::Aspect::Psyche,
+                topic: "core".into(),
+                layer: flow_ethos::Layer::Secondary,
+            },
+            flow_id: "e167d8".into(),
+        },
+        body: meta_signal_flow::Body::Words("Stage 1 is deployed; run the tier tests.".into()),
     });
     assert_eq!(
         message.datomize(vec![]).protosize().compact(),
-        "Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» }"
+        "Soft.{ Notice { { Psyche core Secondary } e167d8 } Words.«Stage 1 is deployed; run the tier tests.» }"
     );
 }
 

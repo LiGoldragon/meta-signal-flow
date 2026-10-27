@@ -326,44 +326,48 @@ pub enum RetireRejection {
 #[rustfmt::skip]
 pub type DeliveryId = String;
 #[rustfmt::skip]
-pub type MessageId = String;
-#[rustfmt::skip]
 pub type CommandLine = String;
 #[rustfmt::skip]
 pub type ByteOffset = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Sender {
-    Flow(signal_flow::FlowId),
-    Owner,
-}
-#[rustfmt::skip]
-pub type PsycheContext = String;
-#[rustfmt::skip]
-pub type PsycheVerbatim = String;
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct Psyche_Data {
-    pub psyche_context: PsycheContext,
-    pub psyche_verbatim: PsycheVerbatim,
+pub enum Kind {
+    Order,
+    Result,
+    Notice,
+    Question,
+    Psyche,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Content {
-    NativeInput(flow_ethos::NativeInput),
-    Text(String),
-    Psyche(Psyche_Data),
+pub struct Sender {
+    pub address: flow_ethos::Address,
+    pub flow_id: signal_flow::FlowId,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct PsycheWords {
+    pub first_string: String,
+    pub second_string: String,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Body {
+    Words(String),
+    Psyche(PsycheWords),
+    Psyches(std::vec::Vec<PsycheWords>),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Letter {
-    pub message_id: MessageId,
+    pub kind: Kind,
     pub sender: Sender,
-    pub content: Content,
+    pub body: Body,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

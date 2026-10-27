@@ -1,5 +1,14 @@
 # Upgrades
 
+## 41.0.0: delivered messages are complete datoms
+
+`Message` is a priority head carrying `Letter.{ Kind Sender Body }`.
+`Sender` names the address and Flow ID that Flow resolved from the calling
+process; `Body` is `Words.String`, `Psyche.{ String String }`, or
+`Psyches.Vector<PsycheWords>`. The former message ID, owner marker,
+native-input content, and text content shapes are replaced rather than
+retained.
+
 How to deploy each breaking change of meta-signal-flow.
 
 ## 40.0.0: a metaflow declares its continuity, purpose and records; Inspect, Rebind and Withdraw repair one

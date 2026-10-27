@@ -7,9 +7,9 @@
 ;
 ; Deliver carries a typed Message addressed by FlowId; Flow renders it,
 ; so the pane text always begins with its Priority head (HardAbrupt.,
-; MiddleAbrupt. or Soft.). A Letter names its MessageId first: the id the
-; sender's Message Nexus minted, carried through untouched so the
-; recipient reading the pane can Acknowledge it. Flow never interprets it. The Content may hold no control character but
+; MiddleAbrupt. or Soft.). A Letter names its Kind, its Flow-resolved
+; Sender and its Body. A Body is Words, one Psyche relay, or a vector of
+; Psyche relays. The Body may hold no control character but
 ; LF and TAB (ControlCharacter carries the byte offset in the rendered
 ; pane text), and a first line that is a harness command (a sigil of the
 ; recipient's HarnessProfile, then a command word) is refused as
@@ -319,17 +319,15 @@ Signal
   ; nothing changes, and its declaration's continuity is changed first.
   RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained ]
   DeliveryId.String
-  MessageId.String
   CommandLine.String
   ByteOffset.Integer
-  Sender.[ Flow.FlowId
-           Owner ]
-  PsycheContext.String
-  PsycheVerbatim.String
-  Content.[ NativeInput.NativeInput
-            Text.String
-            Psyche.{ PsycheContext PsycheVerbatim } ]
-  Letter.{ MessageId Sender Content }
+  Kind.[ Order Result Notice Question Psyche ]
+  Sender.{ Address FlowId }
+  PsycheWords.{ String String }
+  Body.[ Words.String
+         Psyche.PsycheWords
+         Psyches.Vector<PsycheWords> ]
+  Letter.{ Kind Sender Body }
   Message.[ HardAbrupt.Letter
             MiddleAbrupt.Letter
             Soft.Letter ]
