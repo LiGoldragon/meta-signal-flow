@@ -44,18 +44,223 @@ pub struct ConfigureLeaveOut {
 #[rustfmt::skip]
 pub type CurriculumNexusPath = String;
 #[rustfmt::skip]
+pub type Herdr = String;
+#[rustfmt::skip]
+pub type FlowIdClaimer = String;
+#[rustfmt::skip]
+pub type Hook = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Executables {
+    pub herdr: Herdr,
+    pub flow_id_claimer: FlowIdClaimer,
+    pub hook: Hook,
+}
+#[rustfmt::skip]
+pub type FlowsRoot = String;
+#[rustfmt::skip]
+pub type DefaultHerdrSession = signal_flow::HerdrSessionName;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureNexus {
     pub source_root: flow_ethos::SourceRoot,
-    pub stable_codex: flow_ethos::StableCodex,
-    pub next_codex: flow_ethos::NextCodex,
-    pub harness_profiles: flow_ethos::HarnessProfiles,
+    pub flows_root: FlowsRoot,
     pub meta_aspects: flow_ethos::MetaAspects,
     pub message_nexus_path: flow_ethos::MessageNexusPath,
     pub message_nexus_binary: flow_ethos::MessageNexusBinary,
     pub curriculum_nexus_path: CurriculumNexusPath,
     pub lease: flow_ethos::Lease,
+    pub executables: Executables,
+    pub default_herdr_session: DefaultHerdrSession,
+}
+#[rustfmt::skip]
+pub type HarnessName = String;
+#[rustfmt::skip]
+pub type HarnessVersion = String;
+#[rustfmt::skip]
+pub type ToolName = String;
+#[rustfmt::skip]
+pub type EnvironmentName = String;
+#[rustfmt::skip]
+pub type EnvironmentValue = String;
+#[rustfmt::skip]
+pub type SettingKey = String;
+#[rustfmt::skip]
+pub type SettingValue = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Assignment {
+    pub environment_name: EnvironmentName,
+    pub environment_value: EnvironmentValue,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Setting {
+    pub setting_key: SettingKey,
+    pub setting_value: SettingValue,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Switch {
+    Flag(std::vec::Vec<String>),
+    Environment(Assignment),
+    Setting(Setting),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ModuleText {
+    Injected(String),
+    Retained(String),
+    Absent,
+}
+#[rustfmt::skip]
+pub type Tools = std::vec::Vec<ToolName>;
+#[rustfmt::skip]
+pub type Switches = std::vec::Vec<Switch>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessModule {
+    pub harness_module_name: flow_ethos::HarnessModuleName,
+    pub module_text: ModuleText,
+    pub tools: Tools,
+    pub switches: Switches,
+}
+#[rustfmt::skip]
+pub type Recorded = signal_flow::ModelName;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessModel {
+    pub model_name: signal_flow::ModelName,
+    pub recorded: Recorded,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Slot {
+    Title,
+    ModuleSwitches,
+    DeniedTools,
+    AllowedTools,
+    SessionId,
+    PromptFile,
+    SettingsText,
+    LaunchModel,
+    LaunchEffort,
+    RemoteSocket,
+    ThreadId,
+    MetaflowAddress,
+    LaunchFlowId,
+    PredecessorId,
+    RememberedFlows,
+    PartNumber,
+    PartCount,
+    HerdrSession,
+    PurposeText,
+    BriefText,
+    ContextSize,
+    TranscriptFile,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Flagged_Data {
+    pub string: String,
+    pub slot: Slot,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Joined_Data {
+    pub string: String,
+    pub slot: Slot,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Piece {
+    Text(String),
+    Slot(Slot),
+    Flagged(Flagged_Data),
+    Joined(Joined_Data),
+}
+#[rustfmt::skip]
+pub type Template = std::vec::Vec<Piece>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Retraction {
+    Keys(Keys),
+    LineByLine(Keys),
+}
+#[rustfmt::skip]
+pub type Keys = std::vec::Vec<flow_ethos::KeyName>;
+#[rustfmt::skip]
+pub type Glyph = String;
+#[rustfmt::skip]
+pub type ComposerLines = i64;
+#[rustfmt::skip]
+pub type RetractedLines = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Composer {
+    pub glyph: Glyph,
+    pub retraction: Retraction,
+    pub composer_lines: ComposerLines,
+    pub retracted_lines: RetractedLines,
+}
+#[rustfmt::skip]
+pub type CompactLine = CommandLine;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct PaneProfile {
+    pub command_sigil_vector: std::vec::Vec<flow_ethos::CommandSigil>,
+    pub interrupt_keys: flow_ethos::InterruptKeys,
+    pub submit_keys: flow_ethos::SubmitKeys,
+    pub compact_line: CompactLine,
+    pub composer: Composer,
+}
+#[rustfmt::skip]
+pub type Executable = String;
+#[rustfmt::skip]
+pub type ServedModels = std::vec::Vec<HarnessModel>;
+#[rustfmt::skip]
+pub type Modules = std::vec::Vec<HarnessModule>;
+#[rustfmt::skip]
+pub type Arguments = Template;
+#[rustfmt::skip]
+pub type Settings = std::vec::Vec<Setting>;
+#[rustfmt::skip]
+pub type Parameters = std::vec::Vec<Setting>;
+#[rustfmt::skip]
+pub type Unset = std::vec::Vec<EnvironmentName>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Harness {
+    pub harness_name: HarnessName,
+    pub harness_kind: signal_flow::HarnessKind,
+    pub harness_version: HarnessVersion,
+    pub executable: Executable,
+    pub home: flow_ethos::Home,
+    pub control_socket_path_option: std::option::Option<flow_ethos::ControlSocketPath>,
+    pub served_models: ServedModels,
+    pub modules: Modules,
+    pub left_out: flow_ethos::LeftOut,
+    pub arguments: Arguments,
+    pub settings: Settings,
+    pub parameters: Parameters,
+    pub unset: Unset,
+    pub pane_profile: PaneProfile,
 }
 #[rustfmt::skip]
 pub type CodexAppServerBinary = String;
@@ -221,6 +426,7 @@ pub struct Limits {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
+    Harnesses(std::vec::Vec<Harness>),
     Models(std::vec::Vec<ConfigureModel>),
     Thresholds(std::vec::Vec<ConfigureThreshold>),
     LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
@@ -241,6 +447,8 @@ pub enum ConfigureOutcome {
 #[rustfmt::skip]
 pub type Nexus = ConfigureNexus;
 #[rustfmt::skip]
+pub type Harnesses = std::vec::Vec<Harness>;
+#[rustfmt::skip]
 pub type Models = std::vec::Vec<ConfigureModel>;
 #[rustfmt::skip]
 pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
@@ -257,6 +465,7 @@ pub type Investigation = std::option::Option<flow_ethos::Address>;
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
     pub nexus: Nexus,
+    pub harnesses: Harnesses,
     pub models: Models,
     pub thresholds: Thresholds,
     pub default_leave_outs: DefaultLeaveOuts,
@@ -299,7 +508,7 @@ pub enum ResetOutcome {
 pub enum ConfigureRejection {
     StoreRefused,
     DuplicateEntry,
-    CodexModelsOverlap,
+    ModelServedTwice(signal_flow::ModelName),
     LeaveOutNotForHarness,
     TopicRefused(flow_ethos::Topic),
 }

@@ -1,6 +1,6 @@
 [package]
 name = "meta-signal-flow"
-version = "45.0.0"
+version = "46.0.0"
 edition = "2024"
 rust-version = "1.89"
 license = "MIT OR Apache-2.0"
@@ -18,7 +18,7 @@ datom-codec = { git = "https://github.com/LiGoldragon/datom-codec", rev = "4dff1
 protos = { git = "https://github.com/LiGoldragon/protos", rev = "15b41da8f2579e73ead59bc0c2b97529b8ac32d3", optional = true }
 signal = { git = "https://github.com/LiGoldragon/signal", rev = "e0e3c05573405e793037205640e54cfd769bb1b4", default-features = false }
 signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "f615e358fa0a7b5a43734ac065836740be101ace" }
-flow-ethos = { git = "https://github.com/LiGoldragon/flow", rev = "be9aaa73a75d186b0b674c6f9f1c743ca9d715a1", default-features = false }
+flow-ethos = { git = "https://github.com/LiGoldragon/flow", rev = "75a6454a60aa73e6118c7e9700afb474bd745f3a", default-features = false }
 rkyv = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 
 [build-dependencies]
