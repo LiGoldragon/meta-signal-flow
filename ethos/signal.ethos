@@ -178,7 +178,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
+  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles HarnessModuleName LeftOut MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -285,7 +285,31 @@ Signal
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
-  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary CurriculumNexusPath Lease }
+  Executables.{ Herdr.String FlowIdClaimer.String Hook.String }
+  FlowsRoot.String
+  DefaultHerdrSession.HerdrSessionName
+  ConfigureNexus.{ SourceRoot FlowsRoot MetaAspects MessageNexusPath MessageNexusBinary CurriculumNexusPath Lease Executables DefaultHerdrSession }
+  HarnessName.String
+  HarnessVersion.String
+  ToolName.String
+  EnvironmentName.String
+  EnvironmentValue.String
+  SettingKey.String
+  SettingValue.String
+  Assignment.{ EnvironmentName EnvironmentValue }
+  Setting.{ SettingKey SettingValue }
+  Switch.[ Flag.Vector<String> Environment.Assignment Setting ]
+  ModuleText.[ Injected.String Retained.String Absent ]
+  HarnessModule.{ HarnessModuleName ModuleText Tools.Vector<ToolName> Switches.Vector<Switch> }
+  HarnessModel.{ ModelName Recorded.ModelName }
+  Slot.[ Title ModuleSwitches DeniedTools AllowedTools SessionId PromptFile SettingsText LaunchModel LaunchEffort RemoteSocket ThreadId MetaflowAddress LaunchFlowId PredecessorId RememberedFlows PartNumber PartCount HerdrSession PurposeText BriefText ContextSize TranscriptFile ]
+  Piece.[ Text.String Slot Flagged.{ String Slot } Joined.{ String Slot } ]
+  Template.Vector<Piece>
+  Retraction.[ Keys LineByLine.Keys ]
+  Keys.Vector<KeyName>
+  Composer.{ Glyph.String Retraction ComposerLines.Integer RetractedLines.Integer }
+  PaneProfile.{ Vector<CommandSigil> InterruptKeys SubmitKeys CompactLine.CommandLine Composer }
+  Harness.{ HarnessName HarnessKind HarnessVersion Executable.String Home Option<ControlSocketPath> ServedModels.Vector<HarnessModel> Modules.Vector<HarnessModule> LeftOut Arguments.Template Settings.Vector<Setting> Parameters.Vector<Setting> Unset.Vector<EnvironmentName> PaneProfile }
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
@@ -348,7 +372,8 @@ Signal
            TitleReadbacks.Count
            OutputLines.Count }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
-  ConfigurationChange.[ Models.Vector<ConfigureModel>
+  ConfigurationChange.[ Harnesses.Vector<Harness>
+                         Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
                          LeaveOuts.Vector<ConfigureLeaveOut>
                          Nexus.ConfigureNexus
@@ -358,14 +383,14 @@ Signal
                          Timings
                          Limits ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> Timings Limits }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Harnesses.Vector<Harness> Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> Timings Limits }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry ModelServedTwice.ModelName LeaveOutNotForHarness TopicRefused.Topic ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
