@@ -352,7 +352,11 @@ Signal
                       FlowRetired
                       FlowExited
                       PastThreshold ]
-  HarnessCommand.[ Compact Interrupt ]
+  HarnessCommand.[ Compact Interrupt
+                  Line.CommandLine
+                  Keys.Vector<KeyName>
+                  Clear
+                  ReadPane ]
   CommandRequest.{ FlowId HarnessCommand }
   CommandGrade.[ Transported Observed Uncertain ]
   CommandOutcome.{ FlowId HarnessCommand CommandGrade }

@@ -1,5 +1,9 @@
 # Upgrades
 
+## 42.0.0: commands can write and read a harness pane
+
+`HarnessCommand` adds `Line.CommandLine`, `Keys.Vector<KeyName>`, `Clear`, and `ReadPane`; existing command variants remain unchanged.
+
 ## 41.0.0: abrupt requests may queue
 
 Pins signal-flow 34.0.0. Meta records that embed ordinary Send answers use

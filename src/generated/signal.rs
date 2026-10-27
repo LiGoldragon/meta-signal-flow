@@ -437,6 +437,10 @@ pub enum DeliveryRejection {
 pub enum HarnessCommand {
     Compact,
     Interrupt,
+    Line(CommandLine),
+    Keys(std::vec::Vec<flow_ethos::KeyName>),
+    Clear,
+    ReadPane,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
