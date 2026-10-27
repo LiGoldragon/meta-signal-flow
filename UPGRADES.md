@@ -16,3 +16,8 @@ and `RoleMismatch` are removed.
 
 `ConfigureThreshold` names its numeric value `RefreshTokens`; `Refresh` is
 therefore a unit succession cause rather than an integer-bearing variant.
+
+
+## 44.0.0
+
+Repins signal-flow 36.0.0 so privileged clients share the ordinary `Reporter` and `Notified` vocabulary with Flow. No meta wire type changes.
