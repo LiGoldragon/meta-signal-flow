@@ -13,3 +13,6 @@ row lifecycle is the `signal-flow` type.
 Repins signal-flow 35. A `FlowBinding` carries the observed model and native
 binding only; its role is the `Address` it is bound to. `Aspect`, `PowerLevel`,
 and `RoleMismatch` are removed.
+
+`ConfigureThreshold` names its numeric value `RefreshTokens`; `Refresh` is
+therefore a unit succession cause rather than an integer-bearing variant.

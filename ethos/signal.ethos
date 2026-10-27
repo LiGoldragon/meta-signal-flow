@@ -273,7 +273,7 @@ Signal
   ; model for that seat is refused.
   ConfigureModel.{ Layer Aspect Native.String }
   ; The refresh threshold of the flows that run one model, in tokens.
-  ConfigureThreshold.{ ModelName Refresh.Integer }
+  ConfigureThreshold.{ ModelName RefreshTokens }
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
