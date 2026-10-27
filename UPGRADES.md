@@ -1,5 +1,12 @@
 # Upgrades
 
+## 50.0.0: runtime prose is configured as typed templates
+
+`Texts` owns the launch-section, prompt-part, brief, compaction-warning and
+send-tool wording. Its templates interleave literal text with typed slots;
+guarded slots carry their authored before and after text only when the raw
+slot value exists.
+
 ## 49.0.0: retire carries the exact pane-close failure
 
 This contract pins signal-flow 39.0.0. `RetireRejection.CloseRefused`

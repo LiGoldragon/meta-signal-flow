@@ -268,7 +268,7 @@ Signal
   HarnessModule.{ HarnessModuleName ModuleText Tools.Vector<ToolName> Switches.Vector<Switch> }
   HarnessModel.{ ModelName Recorded.ModelName }
   Slot.[ Title ModuleSwitches DeniedTools AllowedTools SessionId PromptFile SettingsText LaunchModel LaunchEffort RemoteSocket ThreadId MetaflowAddress LaunchFlowId PredecessorId RememberedFlows PartNumber PartCount HerdrSession PurposeText BriefText ContextSize TranscriptFile ]
-  Piece.[ Text.String Slot Flagged.{ String Slot } Joined.{ String Slot } ]
+  Piece.[ Text.String Slot Flagged.{ String Slot String } Joined.{ String Slot } ] ; Flagged positions are before text, guarded raw slot, after text.
   Template.Vector<Piece>
   Retraction.[ Keys LineByLine.Keys ]
   Keys.Vector<KeyName>
