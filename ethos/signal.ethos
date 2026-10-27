@@ -177,7 +177,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -379,10 +379,10 @@ Signal
   WorkingDirectory.String
   BindingLifecycle.[ RegisteredUnconfirmed AdoptedActive ]
   FlowContainer.{ HerdrSessionName HerdrServerSocketPath HerdrServerProcessIdentity MetaFlowOwnerId }
-  FlowBinding.{ FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
+  FlowBinding.{ FlowId ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
   MetaBindExisting.{ FlowContainer Address FlowBinding }
   BoundFlowBinding.{ FlowId BindingLifecycle }
-  FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch PaneAbsent ProcessMismatch SessionMismatch SessionUnreported SessionUnproven HerdrUnreadable RoleMismatch AddressOwnerLive AddressOwnerUnknown NativeIdentityMismatch ]
+  FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch PaneAbsent ProcessMismatch SessionMismatch SessionUnreported SessionUnproven HerdrUnreadable AddressOwnerLive AddressOwnerUnknown NativeIdentityMismatch ]
   RefusedFlowBinding.{ FlowId FlowBindingRefusalReason }
   FlowBindingResult.[ Bound.BoundFlowBinding
                       Refused.RefusedFlowBinding ]

@@ -4,6 +4,12 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 50.0.0: a binding's address owns its role
+
+Repins signal-flow 36. A `FlowBinding` carries observed model and native
+binding only; its role is the `Address` it is bound to. `Aspect`,
+`PowerLevel`, and `RoleMismatch` are removed.
+
 ## 49.0.0: timings and limits are configuration families
 
 ConfigurationChange and ConfigurationSnapshot gain complete Timings and Limits singletons. Fresh stores seed today's values.
