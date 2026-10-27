@@ -409,7 +409,6 @@ Signal
   InterruptWitness.[ NotRequested Observed Unobserved ]
   DeliveryGrade.[ Transported Presented Uncertain NotPresented ]
   Delivery.{ DeliveryId FlowId InterruptWitness DeliveryGrade }
-  Count.Integer
   Page.{ After.Integer Count }
   NextPage.Option<Integer>
   DeliveryOutcome.[ Presented NotPresented ]

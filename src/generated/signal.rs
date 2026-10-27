@@ -546,8 +546,6 @@ pub struct Delivery {
     pub delivery_grade: DeliveryGrade,
 }
 #[rustfmt::skip]
-pub type Count = i64;
-#[rustfmt::skip]
 pub type After = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
