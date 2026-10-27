@@ -409,6 +409,7 @@ pub enum DeliveryGrade {
     Transported,
     Presented,
     Uncertain,
+    NotPresented,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -418,6 +419,34 @@ pub struct Delivery {
     pub flow_id: signal_flow::FlowId,
     pub interrupt_witness: InterruptWitness,
     pub delivery_grade: DeliveryGrade,
+}
+#[rustfmt::skip]
+pub type Count = i64;
+#[rustfmt::skip]
+pub type After = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Page {
+    pub after: After,
+    pub count: Count,
+}
+#[rustfmt::skip]
+pub type NextPage = std::option::Option<i64>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum DeliveryOutcome {
+    Presented,
+    NotPresented,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DeliveryResolution {
+    pub delivery_id: DeliveryId,
+    pub delivery_outcome: DeliveryOutcome,
+    pub queue_resolution_reason: QueueResolutionReason,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -719,6 +748,13 @@ pub struct Retire_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ReadEvents_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub page: Page,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Rebinding {
     Pane(signal_flow::HerdrPaneId),
     Flow(signal_flow::FlowId),
@@ -785,9 +821,11 @@ pub enum Query {
     Command(CommandRequest),
     ReadPane(signal_flow::FlowId),
     ResolvePeer(ProcessIdentity),
-    ReadEvents(signal_flow::FlowId),
+    ReadEvents(ReadEvents_Data),
     ReadQueueDeliveries(flow_ethos::Address),
-    ReadSendOutcomes,
+    ReadSendOutcomes(Page),
+    ResolveDelivery(DeliveryResolution),
+    ListFlows(Page),
     ObserveLegacyArchive,
     ResolveQueueDelivery(QueueDeliveryResolution),
     Inspect(flow_ethos::Address),
@@ -828,6 +866,7 @@ pub enum ReadPaneRejected_Data {
 pub struct EventsRead_Data {
     pub flow_id: signal_flow::FlowId,
     pub event_vector: std::vec::Vec<signal_flow::Event>,
+    pub next_page: NextPage,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -853,8 +892,38 @@ pub enum ReadQueueDeliveriesRejected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct SendOutcomesRead_Data {
+    pub send_outcome_record_vector: std::vec::Vec<SendOutcomeRecord>,
+    pub next_page: NextPage,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ReadSendOutcomesRejected_Data {
     StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ResolveDeliveryRejected_Data {
+    UnknownDelivery,
+    NotUncertain,
+    EmptyReason,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct FlowsListed_Data {
+    pub flow_node_vector: std::vec::Vec<signal_flow::FlowNode>,
+    pub next_page: NextPage,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ListFlowsRejected_Data {
+    StoreRefused,
+    PageRefused,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -990,8 +1059,12 @@ pub enum Response {
     ReadEventsRejected(ReadEventsRejected_Data),
     QueueDeliveriesRead(QueueDeliveriesRead_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
-    SendOutcomesRead(std::vec::Vec<SendOutcomeRecord>),
+    SendOutcomesRead(SendOutcomesRead_Data),
     ReadSendOutcomesRejected(ReadSendOutcomesRejected_Data),
+    DeliveryResolved(Delivery),
+    ResolveDeliveryRejected(ResolveDeliveryRejected_Data),
+    FlowsListed(FlowsListed_Data),
+    ListFlowsRejected(ListFlowsRejected_Data),
     LegacyArchiveObserved(std::vec::Vec<LegacyArchiveEntry>),
     ObserveLegacyArchiveRejected(StoreRefusal),
     QueueDeliveryResolved(QueueDeliveryResolved_Data),

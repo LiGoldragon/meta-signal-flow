@@ -190,9 +190,11 @@ Signal
   Command.CommandRequest
   ReadPane.FlowId
   ResolvePeer.ProcessIdentity
-  ReadEvents.FlowId
+  ReadEvents.{ FlowId Page }
   ReadQueueDeliveries.Address
-  ReadSendOutcomes
+  ReadSendOutcomes.Page
+  ResolveDelivery.DeliveryResolution
+  ListFlows.Page
   ObserveLegacyArchive
   ResolveQueueDelivery.QueueDeliveryResolution
   Inspect.Address                               ; the metaflow whole: state, binding, queue, locks, attempts
@@ -235,12 +237,16 @@ Signal
   PeerResolutionRejected.CallerResolutionRejection
   MetaRefused.MetaRefusal
   Refused.StoreRefusal
-  EventsRead.{ FlowId Vector<Event> }
+  EventsRead.{ FlowId Vector<Event> NextPage }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   QueueDeliveriesRead.{ Address Vector<QueueDelivery> }
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
-  SendOutcomesRead.Vector<SendOutcomeRecord>
+  SendOutcomesRead.{ Vector<SendOutcomeRecord> NextPage }
   ReadSendOutcomesRejected.[ StoreRefused ]
+  DeliveryResolved.Delivery
+  ResolveDeliveryRejected.[ UnknownDelivery NotUncertain EmptyReason StoreRefused ]
+  FlowsListed.{ Vector<FlowNode> NextPage }
+  ListFlowsRejected.[ StoreRefused PageRefused ]
   LegacyArchiveObserved.Vector<LegacyArchiveEntry>
   ObserveLegacyArchiveRejected.StoreRefusal
   QueueDeliveryResolved.{ Address QueueDeliveryResolution }
@@ -361,8 +367,13 @@ Signal
   Gate.[ Kept Forced ]
   DeliveryRequest.{ DeliveryId FlowId Message Gate }
   InterruptWitness.[ NotRequested Observed Unobserved ]
-  DeliveryGrade.[ Transported Presented Uncertain ]
+  DeliveryGrade.[ Transported Presented Uncertain NotPresented ]
   Delivery.{ DeliveryId FlowId InterruptWitness DeliveryGrade }
+  Count.Integer
+  Page.{ After.Integer Count }
+  NextPage.Option<Integer>
+  DeliveryOutcome.[ Presented NotPresented ]
+  DeliveryResolution.{ DeliveryId DeliveryOutcome QueueResolutionReason }
   BodyRefusal.[ EmptyBody
                 HarnessCommand.CommandLine
                 ControlCharacter.ByteOffset ]
