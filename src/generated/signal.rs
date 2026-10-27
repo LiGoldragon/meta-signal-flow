@@ -376,10 +376,18 @@ pub enum Message {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Gate {
+    Kept,
+    Forced,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct DeliveryRequest {
     pub delivery_id: DeliveryId,
     pub flow_id: signal_flow::FlowId,
     pub message: Message,
+    pub gate: Gate,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -444,6 +452,7 @@ pub enum HarnessCommand {
 pub struct CommandRequest {
     pub flow_id: signal_flow::FlowId,
     pub harness_command: HarnessCommand,
+    pub gate: Gate,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -657,6 +666,13 @@ pub enum Attempt {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Retire_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub gate: Gate,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Rebinding {
     Pane(signal_flow::HerdrPaneId),
     Flow(signal_flow::FlowId),
@@ -684,7 +700,7 @@ pub enum Query {
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
-    Retire(signal_flow::FlowId),
+    Retire(Retire_Data),
     Deliver(DeliveryRequest),
     Vet(DeliveryRequest),
     Command(CommandRequest),
