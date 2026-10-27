@@ -1,35 +1,24 @@
 # Upgrades
 
-<<<<<<< HEAD
+## 46.0.0: metaflows declare their requirements
+
+ConfigureMetaflow appends Requires.Vector<Address>. Stored declarations upgrade with an empty vector.
+
 ## 45.0.0: model configuration carries its effort
 
-`ConfigureModel` replaces `Native.String` with `ModelName` and adds the
-configured `Effort.String`. Existing model rows upgrade with the prior name
-and the former defaults: `low` for Mind or Field Quaternary, `medium`
-otherwise.
->>>>>>> 83c0365 (meta-signal-flow 42: configure model effort)
+ConfigureModel carries ModelName and configured Effort.String.
+
 ## 44.0.0: pane commands and reads
 
-`HarnessCommand` carries `Line`, `Keys`, and `Clear`; the owner can `ReadPane`.
+HarnessCommand carries Line, Keys, and Clear; the owner can ReadPane.
 
 ## 43.0.0: delivery and command requests carry a gate
 
-`Deliver`, `Vet`, `Command`, and `Retire` carry `Gate.Kept` or `Gate.Forced`.
+Deliver, Vet, Command, and Retire carry Gate.Kept or Gate.Forced.
 
 ## 42.0.0: delivered messages are complete datoms
 
-`Message` is a priority head carrying `Letter.{ Kind Sender Body }`.
-`Sender` names the address and Flow ID that Flow resolved from the calling
-process; `Body` is `Words.String` or `Psyche.{ String String }`.
-=======
-## 43.0.0: metaflows declare their requirements
-
-`ConfigureMetaflow` appends `Requires.Vector<Address>`. Stored declarations
-upgrade with an empty vector.
-
-## 42.0.0: delivery and command requests carry a gate
->>>>>>> e2aef1f (meta-signal-flow 43: declare metaflow requirements)
-
+Message is a priority head carrying Letter with Kind, Sender and Body.
 
 ## 41.0.0: abrupt requests may queue
 
