@@ -15,7 +15,6 @@ pub struct NexusRuntimeSettings {
     pub lease: flow_ethos::Lease,
 }
 #[rustfmt::skip]
-#[rustfmt::skip]
 pub type Effort = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
