@@ -177,7 +177,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -308,7 +308,7 @@ Signal
   ; A metaflow's declaration: the context modules a Launch of its Address
   ; composes into the system prompt and into the first user message, how
   ; it continues, its purpose and the records it rests on.
-  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records Requires.Vector<Address> }
+  ConfigureMetaflow.{ Address SystemModules UserModules ToolSet Continuity Purpose Records Requires.Vector<Address> }
   Milliseconds.Integer
   Timings.{ SocketTimeout.Milliseconds
             CurriculumTimeout.Milliseconds

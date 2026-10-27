@@ -4,6 +4,11 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 52.0.0: every configured metaflow uses one launch behavior
+
+Repins signal-flow 38.0.0. `ConfigureMetaflow` no longer carries
+`FlowKind`; every configured metaflow uses the regular launch path.
+
 ## 51.0.0: share harness event reporting vocabulary
 
 Repins signal-flow 37.0.0 so privileged clients share the ordinary
