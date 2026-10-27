@@ -236,7 +236,6 @@ pub struct FlowContainer {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct FlowBinding {
     pub flow_id: signal_flow::FlowId,
-    pub aspect: signal_flow::Aspect,
     pub model_name: signal_flow::ModelName,
     pub harness_kind: signal_flow::HarnessKind,
     pub native_session_id: signal_flow::NativeSessionId,

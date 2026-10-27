@@ -331,7 +331,7 @@ Signal
   WorkingDirectory.String
   BindingLifecycle.[ RegisteredUnconfirmed AdoptedActive ]
   FlowContainer.{ HerdrSessionName HerdrServerSocketPath HerdrServerProcessIdentity MetaFlowOwnerId }
-  FlowBinding.{ FlowId Aspect ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
+  FlowBinding.{ FlowId ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
   MetaBindExisting.{ FlowContainer Address FlowBinding }
   BoundFlowBinding.{ FlowId BindingLifecycle }
   FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch PaneAbsent ProcessMismatch SessionMismatch SessionUnreported SessionUnproven HerdrUnreadable AddressOwnerLive AddressOwnerUnknown NativeIdentityMismatch ]
