@@ -177,7 +177,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -188,6 +188,7 @@ Signal
   Deliver.DeliveryRequest
   Vet.DeliveryRequest
   Command.CommandRequest
+  ReadPane.FlowId
   ResolvePeer.ProcessIdentity
   ReadEvents.FlowId
   ReadQueueDeliveries.Address
@@ -216,6 +217,8 @@ Signal
   Vetted.FlowId
   Commanded.CommandOutcome
   CommandRejected.CommandRejection
+  PaneRead.{ FlowId AgentState Screen.String }
+  ReadPaneRejected.[ UnknownFlow RouteUnavailable HerdrUnavailable ]
   PeerResolved.Caller
   PeerResolutionRejected.CallerResolutionRejection
   MetaRefused.MetaRefusal
@@ -348,7 +351,11 @@ Signal
                       FlowRetired
                       FlowExited
                       PastThreshold ]
-  HarnessCommand.[ Compact Interrupt ]
+  Keys.Vector<KeyName>
+  HarnessCommand.[ Compact Interrupt
+                   Line.CommandLine
+                   Keys
+                   Clear ]
   CommandRequest.{ FlowId HarnessCommand Gate }
   CommandGrade.[ Transported Observed Uncertain ]
   CommandOutcome.{ FlowId HarnessCommand CommandGrade }

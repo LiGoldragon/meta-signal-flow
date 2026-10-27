@@ -1,3 +1,11 @@
+# meta-signal-flow 43.0.0
+
+Batch 4 adds Line, Keys and Clear commands and the ReadPane owner query.
+
+## 42.0.0: pane commands
+
+`HarnessCommand` now carries line, keys, and clear operations.
+
 # Upgrades
 
 ## 42.0.0: delivered messages are complete datoms
