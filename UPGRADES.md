@@ -1,3 +1,7 @@
+# meta-signal-flow 42.0.0
+
+Batch 8 pages event, send-outcome and flow reads and adds owner settlement of uncertain pane deliveries. DeliveryGrade gains NotPresented so both settlement outcomes are typed.
+
 # Upgrades
 
 ## 41.0.0: abrupt requests may queue
