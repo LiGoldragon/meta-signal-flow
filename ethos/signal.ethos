@@ -178,7 +178,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt PaneCloseFailure ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt PaneCloseFailure ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles HarnessModuleName LeftOut MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -247,8 +247,6 @@ Signal
   ConfigureModel.{ Layer Aspect Native.String }
   ; The refresh threshold of the flows that run one model, in tokens.
   ConfigureThreshold.{ ModelName Refresh.Integer }
-  ; The leave-outs a metaflow's Start on one harness takes when it names none.
-  ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
   Executables.{ Herdr.String FlowIdClaimer.String Hook.String }
   FlowsRoot.String
@@ -297,7 +295,7 @@ Signal
   ; A metaflow's declaration: the context modules a Launch of its Address
   ; composes into the system prompt and into the first user message, how
   ; it continues, its purpose and the records it rests on.
-  ConfigureMetaflow.{ Address SystemModules UserModules ToolSet Continuity Purpose Records Requires.Vector<Address> }
+  ConfigureMetaflow.{ Address SystemModules UserModules ToolSet Continuity Purpose Records LeftOut Requires.Vector<Address> }
   Milliseconds.Integer
   Timings.{ SocketTimeout.Milliseconds
             CurriculumTimeout.Milliseconds
@@ -342,7 +340,6 @@ Signal
   ConfigurationChange.[ Harnesses.Vector<Harness>
                          Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
-                         LeaveOuts.Vector<ConfigureLeaveOut>
                          Nexus.ConfigureNexus
                          SendServers.Vector<ConfigureSendServer>
                          Metaflows.Vector<ConfigureMetaflow>
@@ -350,14 +347,14 @@ Signal
                          Timings
                          Limits ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Harnesses.Vector<Harness> Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> Timings Limits }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Harnesses.Vector<Harness> Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> Timings Limits }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry ModelServedTwice.ModelName LeaveOutNotForHarness TopicRefused.Topic TimingOutOfRange ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry ModelServedTwice.ModelName UnknownHarnessModule.HarnessModuleName Irremovable.HarnessModuleName TopicRefused.Topic TimingOutOfRange ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

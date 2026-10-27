@@ -400,3 +400,7 @@ The ordinary Send ledger names only Send outcomes (Queued, Delivered, or its typ
 ## 42.0.0
 
 ConfigureMetaflow no longer carries FlowKind. Every configured metaflow uses the one launch behavior.
+
+## 50.0.0
+
+Metaflow declarations carry `LeftOut` module names. The separate leave-out configuration family is retired; configuration rejects module names unknown to every harness and modules whose removal has no effect.
