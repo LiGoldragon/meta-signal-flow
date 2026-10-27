@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source /srv/source/flows [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 { /usr/bin/herdr /usr/bin/flow-id /usr/bin/flow-hook } default } [ { codex Codex fixture /usr/bin/codex /home/someone/.codex Some./home/someone/.codex/control.sock [ { gpt-6.1 gpt-6.1 } ] [] [] [] [] [] [] { [ / «!» ] [ esc ] [] /compact { › LineByLine.[ ctrl+u backspace ] 12 32 } } } ] [ { Secondary Psyche claude-opus medium } { Secondary Mind gpt-6.1 medium } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
+    let text = "Configuration.{ { /srv/source /srv/source/flows [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 { /usr/bin/herdr /usr/bin/flow-id /usr/bin/flow-hook } default } [ { codex Codex fixture /usr/bin/codex /home/someone/.codex Some./home/someone/.codex/control.sock [ { gpt-6.1 gpt-6.1 } ] [] [] [] [] [] [] { [ / «!» ] [ esc ] [] /compact { › LineByLine.[ ctrl+u backspace ] 12 32 } } } ] [ { Secondary Psyche claude-opus medium } { Secondary Mind gpt-6.1 medium } ] [ { claude-opus-5-5 200000 } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ Skill Workflow ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -161,18 +161,6 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             .map(|address| address.topic.as_str()),
         Some("compaction")
     );
-    assert_eq!(configuration.default_leave_outs.len(), 1);
-    assert_eq!(
-        configuration.default_leave_outs[0].harness_kind,
-        meta_signal_flow::HarnessKind::Claude
-    );
-    assert_eq!(
-        configuration.default_leave_outs[0].leave_outs,
-        [
-            signal_flow::LeaveOut::SkillTool,
-            signal_flow::LeaveOut::WorkflowTool
-        ]
-    );
     assert_eq!(
         configuration.send_servers,
         vec![meta_signal_flow::ConfigureSendServer {
@@ -194,6 +182,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             continuity: meta_signal_flow::Continuity::Maintained,
             purpose: "Keeps Flow running.".into(),
             records: vec!["flows/a68420/vision/flow.md".into()],
+            left_out: vec!["Skill".into(), "Workflow".into()],
             requires: vec![signal_flow::Address {
                 aspect: signal_flow::Aspect::Field,
                 topic: "helper".into(),
@@ -226,9 +215,11 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
 #[test]
 fn configure_missing_a_required_nexus_field_is_refused_by_the_reader() {
     let text = "Configure.Nexus.{ /srv/source { stable-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { next-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock }";
-    assert!(Potential::<Query>::from(text)
-        .actualize(&mut budget())
-        .is_err());
+    assert!(
+        Potential::<Query>::from(text)
+            .actualize(&mut budget())
+            .is_err()
+    );
 }
 
 #[test]
@@ -368,8 +359,7 @@ fn configure_declares_one_whole_family() {
         "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 medium } { Secondary Psyche claude-opus-5-5 medium } { Secondary Mind gpt-6-sol medium } { Secondary Field gpt-6-sol medium } ]",
         "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
         "Configure.Investigation.{ Psyche compaction Tertiary }",
-        "Configure.LeaveOuts.[ { { Field core Primary } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Secondary } Codex [ CodexAgentsMd ] } ]",
-        "Configure.LeaveOuts.[]",
+        "Configure.Metaflows.[]",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
@@ -392,11 +382,11 @@ fn configure_declares_one_whole_family() {
     };
     assert_eq!(models.len(), 1);
     // One entry is not a family: a declaration is always the whole vector.
-    assert!(Potential::<Query>::from(
-        "Configure.Models.{ Quaternary Psyche claude-haiku-5-5 medium }"
-    )
-    .actualize(&mut budget())
-    .is_err());
+    assert!(
+        Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 medium }")
+            .actualize(&mut budget())
+            .is_err()
+    );
     // A threshold belongs to a model, never to a layer, and has no handover.
     assert!(
         Potential::<Query>::from("Configure.Thresholds.[ { Primary 600000 700000 } ]")
@@ -404,9 +394,11 @@ fn configure_declares_one_whole_family() {
             .is_err()
     );
     // Configure.Nexus is the one way to set or replace the Nexus.
-    assert!(Potential::<Query>::from("Reconfigure.{ /srv }")
-        .actualize(&mut budget())
-        .is_err());
+    assert!(
+        Potential::<Query>::from("Reconfigure.{ /srv }")
+            .actualize(&mut budget())
+            .is_err()
+    );
     for reply in [
         "ConfigureRejected.DuplicateEntry",
         "ConfigureRejected.ModelServedTwice.gpt-6-sol",
@@ -447,7 +439,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Default OnDemand «» [] [] } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Default OnDemand «» [] [ Skill Workflow ] [] } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -473,27 +465,21 @@ fn timings_and_limits_have_concrete_datoms() {
 }
 
 #[test]
-fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_rejection() {
-    // An entry without its harness is no longer a ConfigureLeaveOut.
-    assert!(Potential::<Query>::from(
-        "Configure.LeaveOuts.[ { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]"
-    )
-    .actualize(&mut budget())
-    .is_err());
-    let text = "ConfigureRejected.LeaveOutNotForHarness";
-    let response = Potential::<Response>::from(text)
-        .actualize(&mut budget())
-        .unwrap();
-    assert_eq!(
-        response,
-        Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::LeaveOutNotForHarness)
-    );
-    assert_eq!(response.datomize(vec![]).protosize().compact(), text);
-    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
-    assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
-        response
-    );
+fn module_configuration_rejections_carry_the_module_name() {
+    for text in [
+        "ConfigureRejected.UnknownHarnessModule.Skill",
+        "ConfigureRejected.Irremovable.Identity",
+    ] {
+        let response = Potential::<Response>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            response
+        );
+    }
 }
 
 /// A configuration entry whose topic is not camelCase is refused by type,

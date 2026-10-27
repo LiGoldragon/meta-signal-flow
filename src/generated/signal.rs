@@ -33,14 +33,6 @@ pub struct ConfigureThreshold {
     pub refresh_tokens: RefreshTokens,
 }
 #[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ConfigureLeaveOut {
-    pub address: flow_ethos::Address,
-    pub harness_kind: signal_flow::HarnessKind,
-    pub leave_outs: signal_flow::LeaveOuts,
-}
-#[rustfmt::skip]
 pub type CurriculumNexusPath = String;
 #[rustfmt::skip]
 pub type Herdr = String;
@@ -296,6 +288,7 @@ pub struct ConfigureMetaflow {
     pub continuity: Continuity,
     pub purpose: Purpose,
     pub records: Records,
+    pub left_out: flow_ethos::LeftOut,
     pub requires: Requires,
 }
 #[rustfmt::skip]
@@ -429,7 +422,6 @@ pub enum ConfigurationChange {
     Harnesses(std::vec::Vec<Harness>),
     Models(std::vec::Vec<ConfigureModel>),
     Thresholds(std::vec::Vec<ConfigureThreshold>),
-    LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
@@ -453,8 +445,6 @@ pub type Models = std::vec::Vec<ConfigureModel>;
 #[rustfmt::skip]
 pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
 #[rustfmt::skip]
-pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
-#[rustfmt::skip]
 pub type SendServers = std::vec::Vec<ConfigureSendServer>;
 #[rustfmt::skip]
 pub type Metaflows = std::vec::Vec<ConfigureMetaflow>;
@@ -468,7 +458,6 @@ pub struct ConfigurationSnapshot {
     pub harnesses: Harnesses,
     pub models: Models,
     pub thresholds: Thresholds,
-    pub default_leave_outs: DefaultLeaveOuts,
     pub send_servers: SendServers,
     pub metaflows: Metaflows,
     pub investigation: Investigation,
@@ -509,7 +498,8 @@ pub enum ConfigureRejection {
     StoreRefused,
     DuplicateEntry,
     ModelServedTwice(signal_flow::ModelName),
-    LeaveOutNotForHarness,
+    UnknownHarnessModule(flow_ethos::HarnessModuleName),
+    Irremovable(flow_ethos::HarnessModuleName),
     TopicRefused(flow_ethos::Topic),
     TimingOutOfRange,
 }

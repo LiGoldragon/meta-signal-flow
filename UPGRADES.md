@@ -4,6 +4,10 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 54.0.0
+
+Metaflow declarations carry `LeftOut` module names. The separate leave-out configuration family is retired; configuration rejects module names unknown to every harness and modules whose removal has no effect.
+
 ## 53.0.0: configure harness installations and their lifecycle
 
 Adds configured harness installations to the whole configuration snapshot.
