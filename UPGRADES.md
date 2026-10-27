@@ -1,5 +1,11 @@
 # Upgrades
 
+## 42.0.0: delivery and command requests carry a gate
+
+Pins the Gate contract. `Deliver`, `Vet`, `Command`, and `Retire` requests
+carry `Gate.Kept` or `Gate.Forced`; stored requests and queued deliveries
+must be upgraded to `Kept`.
+
 ## 41.0.0: abrupt requests may queue
 
 Pins signal-flow 34.0.0. Meta records that embed ordinary Send answers use
