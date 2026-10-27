@@ -178,7 +178,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -273,7 +273,7 @@ Signal
   ; A metaflow's declaration: the context modules a Launch of its Address
   ; composes into the system prompt and into the first user message, how
   ; it continues, its purpose and the records it rests on.
-  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
+  ConfigureMetaflow.{ Address SystemModules UserModules ToolSet Continuity Purpose Records }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
