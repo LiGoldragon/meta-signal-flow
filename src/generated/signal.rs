@@ -26,13 +26,11 @@ pub struct ConfigureModel {
     pub effort: Effort,
 }
 #[rustfmt::skip]
-pub type Refresh = i64;
-#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureThreshold {
     pub model_name: signal_flow::ModelName,
-    pub refresh: Refresh,
+    pub refresh_tokens: RefreshTokens,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -672,7 +670,7 @@ pub enum Settlement {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum SuccessionCause {
-    Refresh(Refresh),
+    Refresh,
     Exit,
     Ordered,
     Replace,
