@@ -396,7 +396,7 @@ fn configure_declares_one_whole_family() {
     );
     for reply in [
         "ConfigureRejected.DuplicateEntry",
-        "ConfigureRejected.CodexModelsOverlap",
+        "ConfigureRejected.ModelServedTwice.gpt-6-sol",
         "ConfigureRejected.StoreRefused",
     ] {
         let response = Potential::<Response>::from(reply)
@@ -434,7 +434,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] [] } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Default OnDemand «» [] [] } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
