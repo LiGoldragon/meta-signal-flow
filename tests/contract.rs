@@ -16,7 +16,7 @@ fn budget() -> Budget {
 #[test]
 fn privileged_requests_have_concrete_datoms() {
     for text in [
-        "Configure.Nexus.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus /run/user/1001/curriculum/curriculum.sock 60 }",
+        "Configure.Nexus.{ /home/li/primary /home/li/primary/flows [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus /run/user/1001/curriculum/curriculum.sock 60 { herdr flow-id flow-hook } default }",
         "Configuration",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
+    let text = "Configuration.{ { /srv/source /srv/source/flows [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 { /usr/bin/herdr /usr/bin/flow-id /usr/bin/flow-hook } default } [ { codex Codex fixture /usr/bin/codex /home/someone/.codex Some./home/someone/.codex/control.sock [ { gpt-6.1 gpt-6.1 } ] [] [] [] [] [] [] { [ / «!» ] [ esc ] [] /compact { › LineByLine.[ ctrl+u backspace ] 12 32 } } } ] [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -94,42 +94,14 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         panic!("expected Configuration snapshot");
     };
     assert_eq!(configuration.nexus.source_root, "/srv/source");
+    assert_eq!(configuration.nexus.flows_root, "/srv/source/flows");
+    assert_eq!(configuration.harnesses.len(), 1);
+    assert_eq!(configuration.harnesses[0].harness_name, "codex");
+    assert_eq!(configuration.harnesses[0].executable, "/usr/bin/codex");
+    assert_eq!(configuration.harnesses[0].served_models[0].model_name, "gpt-6.1");
     assert_eq!(
-        configuration.nexus.stable_codex.client_path,
-        "codex-stable-flow-client"
-    );
-    assert_eq!(
-        configuration.nexus.stable_codex.home,
-        "/home/someone/.codex"
-    );
-    assert_eq!(
-        configuration.nexus.stable_codex.control_socket_path,
-        "/home/someone/.codex/app-server-control/app-server-control.sock"
-    );
-    assert_eq!(
-        configuration.nexus.stable_codex.model_name_vector,
-        vec!["gpt-5.6-terra".to_owned()]
-    );
-    assert_eq!(
-        configuration.nexus.next_codex.model_name_vector,
-        vec!["gpt-6.1".to_owned()]
-    );
-    assert_eq!(configuration.nexus.harness_profiles.len(), 1);
-    assert_eq!(
-        configuration.nexus.harness_profiles[0].harness_kind,
-        meta_signal_flow::HarnessKind::Claude
-    );
-    assert_eq!(
-        configuration.nexus.harness_profiles[0].command_sigil_vector,
-        vec!["/".to_owned(), "!".to_owned(), "#".to_owned()]
-    );
-    assert_eq!(
-        configuration.nexus.harness_profiles[0].interrupt_keys,
-        vec!["esc".to_owned(), "esc".to_owned()]
-    );
-    assert_eq!(
-        configuration.nexus.harness_profiles[0].submit_keys,
-        vec!["enter".to_owned()]
+        configuration.harnesses[0].pane_profile.interrupt_keys,
+        vec!["esc".to_owned()]
     );
     assert_eq!(
         configuration.nexus.meta_aspects.as_slice(),
@@ -213,7 +185,6 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             },
             system_modules: vec!["spirit:core".into()],
             user_modules: vec!["vision:flow".into()],
-            flow_kind: signal_flow::FlowKind::Regular,
             tool_set: signal_flow::ToolSet::Default,
             continuity: meta_signal_flow::Continuity::Maintained,
             purpose: "Keeps Flow running.".into(),

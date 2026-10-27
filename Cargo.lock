@@ -391,7 +391,7 @@ dependencies = [
 
 [[package]]
 name = "signal-flow"
-version = "36.0.0"
+version = "37.0.0"
 source = "git+https://github.com/LiGoldragon/signal-flow?rev=331a70df1ce11ba418525169db2a0c20f95617e9#331a70df1ce11ba418525169db2a0c20f95617e9"
 dependencies = [
  "datom-codec",
