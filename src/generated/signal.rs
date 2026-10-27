@@ -82,6 +82,8 @@ pub type RecordPath = String;
 #[rustfmt::skip]
 pub type Records = std::vec::Vec<RecordPath>;
 #[rustfmt::skip]
+pub type Requires = std::vec::Vec<flow_ethos::Address>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureMetaflow {
@@ -93,6 +95,7 @@ pub struct ConfigureMetaflow {
     pub continuity: Continuity,
     pub purpose: Purpose,
     pub records: Records,
+    pub requires: Requires,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] Some.{ Psyche compaction Tertiary } }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -214,6 +214,11 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             continuity: meta_signal_flow::Continuity::Maintained,
             purpose: "Keeps Flow running.".into(),
             records: vec!["flows/a68420/vision/flow.md".into()],
+            requires: vec![signal_flow::Address {
+                aspect: signal_flow::Aspect::Field,
+                topic: "helper".into(),
+                layer: signal_flow::Layer::Tertiary
+            }],
         }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
@@ -268,11 +273,13 @@ fn store_refusal_preserves_its_error_text() {
 /// history that was kept rather than an acknowledgement that it is gone.
 #[test]
 fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
-    let request = "Retire.d8df70";
+    let request = "Retire.{ d8df70 Kept }";
     let query = Potential::<Query>::from(request)
         .actualize(&mut budget())
         .unwrap();
-    assert!(matches!(&query, Query::Retire(flow_id) if flow_id == "d8df70"));
+    assert!(
+        matches!(&query, Query::Retire(request) if request.flow_id == "d8df70" && request.gate == meta_signal_flow::Gate::Kept)
+    );
     assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
@@ -298,12 +305,12 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ m-81b0e4 Owner Text.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ m-90c1aa Flow.88475f Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
-        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ m-a2d913 Flow.e167d8 Text./compact } }",
-        "Command.{ 7d41e0 Compact }",
-        "Command.{ 7d41e0 Interrupt }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» } Kept }",
+        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ m-81b0e4 Owner Text.«Stop the ouranos build now.» } Kept }",
+        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ m-90c1aa Flow.88475f Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } Kept }",
+        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ m-a2d913 Flow.e167d8 Text./compact } Kept }",
+        "Command.{ 7d41e0 Compact Kept }",
+        "Command.{ 7d41e0 Interrupt Kept }",
         "ResolvePeer.{ 48211 1001 8841220 }",
     ] {
         let query = Potential::<Query>::from(text)
@@ -452,7 +459,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] [] } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();

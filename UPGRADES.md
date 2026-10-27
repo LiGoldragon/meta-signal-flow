@@ -1,5 +1,10 @@
 # Upgrades
 
+## 43.0.0: metaflows declare their requirements
+
+`ConfigureMetaflow` appends `Requires.Vector<Address>`. Stored declarations
+upgrade with an empty vector.
+
 ## 42.0.0: delivery and command requests carry a gate
 
 Pins the Gate contract. `Deliver`, `Vet`, `Command`, and `Retire` requests
