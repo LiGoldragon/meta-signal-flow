@@ -7,8 +7,8 @@ use flow_ethos::{
 };
 use meta_signal_flow::{
     Attempt, Binding, InspectRejected_Data, Inspected_Data, Query, QueueDelivery,
-    QueueDeliveryStanding, RebindRejected_Data, Rebind_Data, Rebinding, Response,
-    WithdrawRejected_Data, Withdraw_Data,
+    QueueDeliveryStanding, Rebind_Data, RebindRejected_Data, Rebinding, Response, Withdraw_Data,
+    WithdrawRejected_Data,
 };
 use signal_flow::{
     EndpointSelection, FlowLifecycle, FlowNode, HarnessKind, HerdrRoute, HerdrRouteSelection,
@@ -89,7 +89,6 @@ fn inspected() -> Response {
             until: 1_790_000_060,
         }],
         attempt_vector: vec![attempt()],
-        successor_option: None,
     })
 }
 
@@ -127,14 +126,13 @@ fn replies() -> Vec<Response> {
             },
             lock_vector: vec![],
             attempt_vector: vec![],
-            successor_option: None,
         }),
         Response::InspectRejected(InspectRejected_Data::UnknownAddress),
         Response::Rebound(address()),
         Response::RebindRejected(RebindRejected_Data::UnknownAddress),
         Response::RebindRejected(RebindRejected_Data::PaneAbsent),
         Response::RebindRejected(RebindRejected_Data::FlowUnknown),
-        Response::RebindRejected(RebindRejected_Data::FlowNotLive),
+        Response::RebindRejected(RebindRejected_Data::NotAwake),
         Response::RebindRejected(RebindRejected_Data::HerdrUnavailable),
         Response::RebindRejected(RebindRejected_Data::FlowTaken(address())),
         Response::Withdrawn("logical-7".into()),
@@ -198,14 +196,14 @@ mod datom {
     #[test]
     fn repair_replies_have_concrete_datoms() {
         let texts = [
-            "Inspected.{ { { Mind flow Secondary } Awake.f1c841 [ 9a83ec ] [ { logical-7 Sender.{ Psyche core Secondary } Queue Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Secondary } { Mind flow Secondary } 1790000060 } ] [ Queued.{ queue-attempt-3 f1c841 s1 Claude Logical.{ logical-7 Sender.{ Psyche core Secondary } Queue Soft.Order.go } Prepared } ] None }",
-            "Inspected.{ { { Mind flow Secondary } Asleep [] [] } { None None } [] [] None }",
+            "Inspected.{ { { Mind flow Secondary } Awake.f1c841 [ 9a83ec ] [ { logical-7 Sender.{ Psyche core Secondary } Queue Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Secondary } { Mind flow Secondary } 1790000060 } ] [ Queued.{ queue-attempt-3 f1c841 s1 Claude Logical.{ logical-7 Sender.{ Psyche core Secondary } Queue Soft.Order.go } Prepared } ] }",
+            "Inspected.{ { { Mind flow Secondary } Asleep [] [] } { None None } [] [] }",
             "InspectRejected.UnknownAddress",
             "Rebound.{ Mind flow Secondary }",
             "RebindRejected.UnknownAddress",
             "RebindRejected.PaneAbsent",
             "RebindRejected.FlowUnknown",
-            "RebindRejected.FlowNotLive",
+            "RebindRejected.NotAwake",
             "RebindRejected.HerdrUnavailable",
             "RebindRejected.FlowTaken.{ Mind flow Secondary }",
             "Withdrawn.logical-7",

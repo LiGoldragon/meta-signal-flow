@@ -16,12 +16,12 @@ fn budget() -> Budget {
 #[test]
 fn privileged_requests_have_concrete_datoms() {
     for text in [
-        "Configure.Nexus.{ /home/li/primary /home/li/primary/flows [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus /run/user/1001/curriculum/curriculum.sock 60 { herdr flow-id flow-hook } default }",
+        "Configure.Nexus.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus /run/user/1001/curriculum/curriculum.sock 60 }",
         "Configuration",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable Unbound Pending }",
-        "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Primary } { mind-flow gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }",
+        "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Primary } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source /srv/source/flows [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 { /usr/bin/herdr /usr/bin/flow-id /usr/bin/flow-hook } default } [ { codex Codex fixture /usr/bin/codex /home/someone/.codex Some./home/someone/.codex/control.sock [ { gpt-6.1 gpt-6.1 } ] [] [] [] [] [] [] { [ / «!» ] [ esc ] [] /compact { › LineByLine.[ ctrl+u backspace ] 12 32 } } } ] [ { Secondary Psyche claude-opus medium } { Secondary Mind gpt-6.1 medium } ] [ { claude-opus-5-5 200000 } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ Skill Workflow ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] Some.{ Psyche compaction Tertiary } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -94,17 +94,42 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         panic!("expected Configuration snapshot");
     };
     assert_eq!(configuration.nexus.source_root, "/srv/source");
-    assert_eq!(configuration.nexus.flows_root, "/srv/source/flows");
-    assert_eq!(configuration.harnesses.len(), 1);
-    assert_eq!(configuration.harnesses[0].harness_name, "codex");
-    assert_eq!(configuration.harnesses[0].executable, "/usr/bin/codex");
     assert_eq!(
-        configuration.harnesses[0].served_models[0].model_name,
-        "gpt-6.1"
+        configuration.nexus.stable_codex.client_path,
+        "codex-stable-flow-client"
     );
     assert_eq!(
-        configuration.harnesses[0].pane_profile.interrupt_keys,
-        vec!["esc".to_owned()]
+        configuration.nexus.stable_codex.home,
+        "/home/someone/.codex"
+    );
+    assert_eq!(
+        configuration.nexus.stable_codex.control_socket_path,
+        "/home/someone/.codex/app-server-control/app-server-control.sock"
+    );
+    assert_eq!(
+        configuration.nexus.stable_codex.model_name_vector,
+        vec!["gpt-5.6-terra".to_owned()]
+    );
+    assert_eq!(
+        configuration.nexus.next_codex.model_name_vector,
+        vec!["gpt-6.1".to_owned()]
+    );
+    assert_eq!(configuration.nexus.harness_profiles.len(), 1);
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].harness_kind,
+        meta_signal_flow::HarnessKind::Claude
+    );
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].command_sigil_vector,
+        vec!["/".to_owned(), "!".to_owned(), "#".to_owned()]
+    );
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].interrupt_keys,
+        vec!["esc".to_owned(), "esc".to_owned()]
+    );
+    assert_eq!(
+        configuration.nexus.harness_profiles[0].submit_keys,
+        vec!["enter".to_owned()]
     );
     assert_eq!(
         configuration.nexus.meta_aspects.as_slice(),
@@ -123,10 +148,6 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         "/srv/curriculum/curriculum.sock"
     );
     assert_eq!(configuration.nexus.lease, 60);
-    assert_eq!(configuration.timings.socket_timeout, 5000);
-    assert_eq!(configuration.timings.compaction_watch_margin, 600000);
-    assert_eq!(configuration.limits.send_body, 65536);
-    assert_eq!(configuration.limits.output_lines, 50);
     // One layer holds a model per aspect.
     assert_eq!(
         configuration.models,
@@ -134,32 +155,42 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             meta_signal_flow::ConfigureModel {
                 layer: meta_signal_flow::Layer::Secondary,
                 aspect: meta_signal_flow::Aspect::Psyche,
-                model_name: "claude-opus".into(),
-                effort: "medium".into(),
+                native: "claude-opus".into(),
             },
             meta_signal_flow::ConfigureModel {
                 layer: meta_signal_flow::Layer::Secondary,
                 aspect: meta_signal_flow::Aspect::Mind,
-                model_name: "gpt-6.1".into(),
-                effort: "medium".into(),
+                native: "gpt-6.1".into(),
             },
         ]
     );
     // A model that names no aspect is no longer a declaration.
     assert!(
-        Potential::<Query>::from("Configure.Models.[ { Secondary claude-opus-5-5 medium } ]")
+        Potential::<Query>::from("Configure.Models.[ { Secondary claude-opus-5-5 } ]")
             .actualize(&mut budget())
             .is_err()
     );
     assert_eq!(configuration.thresholds.len(), 1);
     assert_eq!(configuration.thresholds[0].model_name, "claude-opus-5-5");
-    assert_eq!(configuration.thresholds[0].refresh_tokens, 200000);
+    assert_eq!(configuration.thresholds[0].refresh, 200000);
     assert_eq!(
         configuration
             .investigation
             .as_ref()
             .map(|address| address.topic.as_str()),
         Some("compaction")
+    );
+    assert_eq!(configuration.default_leave_outs.len(), 1);
+    assert_eq!(
+        configuration.default_leave_outs[0].harness_kind,
+        meta_signal_flow::HarnessKind::Claude
+    );
+    assert_eq!(
+        configuration.default_leave_outs[0].leave_outs,
+        [
+            signal_flow::LeaveOut::SkillTool,
+            signal_flow::LeaveOut::WorkflowTool
+        ]
     );
     assert_eq!(
         configuration.send_servers,
@@ -178,16 +209,11 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             },
             system_modules: vec!["spirit:core".into()],
             user_modules: vec!["vision:flow".into()],
+            flow_kind: signal_flow::FlowKind::Regular,
             tool_set: signal_flow::ToolSet::Default,
             continuity: meta_signal_flow::Continuity::Maintained,
             purpose: "Keeps Flow running.".into(),
             records: vec!["flows/a68420/vision/flow.md".into()],
-            left_out: vec!["Skill".into(), "Workflow".into()],
-            requires: vec![signal_flow::Address {
-                aspect: signal_flow::Aspect::Field,
-                topic: "helper".into(),
-                layer: signal_flow::Layer::Tertiary
-            }],
         }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
@@ -242,13 +268,11 @@ fn store_refusal_preserves_its_error_text() {
 /// history that was kept rather than an acknowledgement that it is gone.
 #[test]
 fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
-    let request = "Retire.{ d8df70 Kept }";
+    let request = "Retire.d8df70";
     let query = Potential::<Query>::from(request)
         .actualize(&mut budget())
         .unwrap();
-    assert!(
-        matches!(&query, Query::Retire(request) if request.flow_id == "d8df70" && request.gate == meta_signal_flow::Gate::Kept)
-    );
+    assert!(matches!(&query, Query::Retire(flow_id) if flow_id == "d8df70"));
     assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
@@ -256,10 +280,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
         "RetireRejected.UnknownFlow",
         "RetireRejected.AlreadyGone",
         "RetireRejected.StoreRefused",
-        "RetireRejected.CloseRefused.IdentityUnavailable",
-        "RetireRejected.CloseRefused.IdentityMismatch",
-        "RetireRejected.CloseRefused.StopTimedOut",
-        "RetireRejected.CloseRefused.HerdrCloseFailed",
+        "RetireRejected.CloseRefused",
         "RetireRejected.Maintained",
     ] {
         let response = Potential::<Response>::from(text)
@@ -277,12 +298,12 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words.«Stage 1 is deployed; run the tier tests.» } Kept }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Order { { Mind flow Secondary } 88475f } Words.«Stop the ouranos build now.» } Kept }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Psyche { { Psyche core Secondary } 88475f } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } Kept }",
-        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words./compact } Kept }",
-        "Command.{ 7d41e0 Compact Kept }",
-        "Command.{ 7d41e0 Interrupt Kept }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words.«Stage 1 is deployed; run the tier tests.» } }",
+        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Order { { Mind flow Secondary } 88475f } Words.«Stop the ouranos build now.» } }",
+        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Psyche { { Psyche core Secondary } 88475f } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
+        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words./compact } }",
+        "Command.{ 7d41e0 Compact }",
+        "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",
     ] {
         let query = Potential::<Query>::from(text)
@@ -316,9 +337,9 @@ fn delivery_replies_have_concrete_datoms() {
         "CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }",
         "CommandRejected.CompactionRefused.Unmeasured",
         "CommandRejected.CompactionRefused.NoThreshold",
-        "PeerResolved.{ e167d8 Psyche Primary claude-opus-5-5 }",
+        "PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
-        "MetaRefused.PeerNotAuthorized.{ da88cf Field Secondary gpt-5.5 }",
+        "MetaRefused.PeerNotAuthorized.{ da88cf Field Medium gpt-5.5 }",
         "MetaRefused.PeerUnknown",
     ] {
         let response = Potential::<Response>::from(text)
@@ -356,10 +377,11 @@ fn a_message_textualizes_with_its_priority_head_first() {
 #[test]
 fn configure_declares_one_whole_family() {
     for text in [
-        "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 medium } { Secondary Psyche claude-opus-5-5 medium } { Secondary Mind gpt-6-sol medium } { Secondary Field gpt-6-sol medium } ]",
+        "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]",
         "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
         "Configure.Investigation.{ Psyche compaction Tertiary }",
-        "Configure.Metaflows.[]",
+        "Configure.LeaveOuts.[ { { Field core Primary } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Secondary } Codex [ CodexAgentsMd ] } ]",
+        "Configure.LeaveOuts.[]",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
@@ -372,18 +394,16 @@ fn configure_declares_one_whole_family() {
         );
     }
     let Query::Configure(meta_signal_flow::Configuration::Models(models)) =
-        Potential::<Query>::from(
-            "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 medium } ]",
-        )
-        .actualize(&mut budget())
-        .unwrap()
+        Potential::<Query>::from("Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } ]")
+            .actualize(&mut budget())
+            .unwrap()
     else {
         panic!("not a Models declaration")
     };
     assert_eq!(models.len(), 1);
     // One entry is not a family: a declaration is always the whole vector.
     assert!(
-        Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 medium }")
+        Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 }")
             .actualize(&mut budget())
             .is_err()
     );
@@ -401,7 +421,7 @@ fn configure_declares_one_whole_family() {
     );
     for reply in [
         "ConfigureRejected.DuplicateEntry",
-        "ConfigureRejected.ModelServedTwice.gpt-6-sol",
+        "ConfigureRejected.CodexModelsOverlap",
         "ConfigureRejected.StoreRefused",
     ] {
         let response = Potential::<Response>::from(reply)
@@ -439,7 +459,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Default OnDemand «» [] [ Skill Workflow ] [] } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -452,34 +472,29 @@ fn configure_metaflows_has_a_concrete_datom() {
 }
 
 #[test]
-fn timings_and_limits_have_concrete_datoms() {
-    for text in [
-        "Configure.Timings.{ 5000 30000 10000 10000 30000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 }",
-        "Configure.Limits.{ 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 }",
-    ] {
-        let query = Potential::<Query>::from(text)
-            .actualize(&mut budget())
-            .unwrap();
-        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
-    }
-}
-
-#[test]
-fn module_configuration_rejections_carry_the_module_name() {
-    for text in [
-        "ConfigureRejected.UnknownHarnessModule.Skill",
-        "ConfigureRejected.Irremovable.Identity",
-    ] {
-        let response = Potential::<Response>::from(text)
-            .actualize(&mut budget())
-            .unwrap();
-        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
-        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
-        assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
-            response
-        );
-    }
+fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_rejection() {
+    // An entry without its harness is no longer a ConfigureLeaveOut.
+    assert!(
+        Potential::<Query>::from(
+            "Configure.LeaveOuts.[ { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]"
+        )
+        .actualize(&mut budget())
+        .is_err()
+    );
+    let text = "ConfigureRejected.LeaveOutNotForHarness";
+    let response = Potential::<Response>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(
+        response,
+        Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::LeaveOutNotForHarness)
+    );
+    assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        response
+    );
 }
 
 /// A configuration entry whose topic is not camelCase is refused by type,
@@ -497,103 +512,4 @@ fn configure_topic_refusal_round_trips() {
         ))
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
-}
-
-/// Text configuration keeps source alternatives typed while the raw-value
-/// slots remain bare variants. A globally colliding alias would make one of
-/// these constructors carry data and fail this contract at compile time.
-#[test]
-fn text_templates_keep_launch_and_compaction_alternatives_distinct() {
-    use meta_signal_flow::{
-        CompactionWarningTemplates, Flagged_Data, LaunchSectionTemplates, Piece,
-        SeatedCompactionWarningTemplates, Slot, Texts, UnseatedCompactionWarningTemplates,
-    };
-
-    let launch_section = LaunchSectionTemplates {
-        pending_launch: vec![Piece::Text("pending".into())],
-        bound_launch: vec![Piece::Slot(Slot::LaunchFlowId)],
-    };
-    let compaction_warning = CompactionWarningTemplates {
-        seated_compaction: SeatedCompactionWarningTemplates {
-            seated_compaction_transcript: vec![Piece::Slot(Slot::TranscriptFile)],
-            seated_compaction_claude_session: vec![Piece::Slot(Slot::SessionId)],
-            seated_compaction_codex_thread: vec![Piece::Slot(Slot::ThreadId)],
-        },
-        unseated_compaction: UnseatedCompactionWarningTemplates {
-            unseated_compaction_transcript: vec![Piece::Slot(Slot::TranscriptFile)],
-            unseated_compaction_claude_session: vec![Piece::Slot(Slot::SessionId)],
-            unseated_compaction_codex_thread: vec![Piece::Slot(Slot::ThreadId)],
-        },
-    };
-    let texts = Texts {
-        launch_section,
-        part_header: vec![Piece::Slot(Slot::PartNumber)],
-        last_part_header: vec![Piece::Slot(Slot::PartCount)],
-        codex_brief: vec![Piece::Slot(Slot::BriefText)],
-        purposed_brief: vec![Piece::Slot(Slot::PurposeText)],
-        compaction_warning,
-        send_tool_descriptions: vec!["send".into()],
-    };
-
-    assert_eq!(texts.launch_section.bound_launch.len(), 1);
-    assert_eq!(
-        Piece::Flagged(Flagged_Data {
-            first_string: "before".into(),
-            slot: Slot::ContextSize,
-            second_string: "after".into(),
-        }),
-        Piece::Flagged(Flagged_Data {
-            first_string: "before".into(),
-            slot: Slot::ContextSize,
-            second_string: "after".into(),
-        })
-    );
-    assert_eq!(
-        texts
-            .compaction_warning
-            .seated_compaction
-            .seated_compaction_transcript
-            .len(),
-        1
-    );
-    assert_eq!(
-        texts
-            .compaction_warning
-            .seated_compaction
-            .seated_compaction_claude_session
-            .len(),
-        1
-    );
-    assert_eq!(
-        texts
-            .compaction_warning
-            .seated_compaction
-            .seated_compaction_codex_thread
-            .len(),
-        1
-    );
-    assert_eq!(
-        texts
-            .compaction_warning
-            .unseated_compaction
-            .unseated_compaction_transcript
-            .len(),
-        1
-    );
-    assert_eq!(
-        texts
-            .compaction_warning
-            .unseated_compaction
-            .unseated_compaction_claude_session
-            .len(),
-        1
-    );
-    assert_eq!(
-        texts
-            .compaction_warning
-            .unseated_compaction
-            .unseated_compaction_codex_thread
-            .len(),
-        1
-    );
 }

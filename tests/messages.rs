@@ -25,7 +25,7 @@ fn messages_round_trip_as_archives() {
         Message::MiddleAbrupt(Letter {
             kind: Kind::Psyche,
             sender: sender(),
-            body: Body::Psyche(meta_signal_flow::Psyche_Data {
+            body: Body::Psyche(meta_signal_flow::PsycheWords {
                 first_string: "the living, direct, 12:40".into(),
                 second_string: "his words here".into(),
             }),
@@ -64,4 +64,42 @@ fn a_guillemet_string_inside_the_letter_struct_reads_and_writes() {
             .unwrap(),
         expected
     );
+}
+
+#[cfg(feature = "datom")]
+#[test]
+fn a_cohort_is_one_vector_of_complete_messages() {
+    use datom_codec::{Actualizing, Budget, Datomizable, Potential};
+    use protos::{Compactable, Protosizable, ReaderBudget};
+    let cohort = vec![
+        Message::HardAbrupt(Letter {
+            kind: Kind::Order,
+            sender: sender(),
+            body: Body::Words("first".into()),
+        }),
+        Message::Soft(Letter {
+            kind: Kind::Question,
+            sender: Sender {
+                address: Address {
+                    aspect: Aspect::Mind,
+                    topic: "flow".into(),
+                    layer: Layer::Tertiary,
+                },
+                flow_id: "4d5e6f".into(),
+            },
+            body: Body::Words("second?".into()),
+        }),
+    ];
+    let text = cohort.datomize(vec![]).protosize().compact();
+    let mut budget = Budget {
+        remaining: 4096,
+        reader: ReaderBudget { remaining: 4096 },
+        depth: 0,
+        maximum_depth: 1024,
+    };
+    let read = Potential::<Vec<Message>>::from(text.as_str())
+        .actualize(&mut budget)
+        .unwrap();
+    assert_eq!(read, cohort);
+    assert_eq!(read.datomize(vec![]).protosize().compact(), text);
 }
