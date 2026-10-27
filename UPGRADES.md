@@ -380,3 +380,7 @@ where one line is meant, rebuild and restart the Nexus and both CLIs
 together. The rkyv archive of every value is unchanged.
 
 The ordinary Send ledger names only Send outcomes (Queued, Delivered, or its typed refusal). The owner socket's former Refusal type is named StoreRefusal so it is distinct from the imported ordinary Refusal.
+
+## 42.0.0
+
+ConfigureMetaflow no longer carries FlowKind. Every configured metaflow uses the one launch behavior.
