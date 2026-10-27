@@ -1,5 +1,11 @@
 # Upgrades
 
+## 41.0.0: abrupt requests may queue
+
+Pins signal-flow 34.0.0. Meta records that embed ordinary Send answers use
+the ordinary contract without `SendFailureReason.QueueNotPermitted`; Flow
+upgrades stored failures to `NotSent.«queue not permitted»`.
+
 How to deploy each breaking change of meta-signal-flow.
 
 ## 40.0.0: a metaflow declares its continuity, purpose and records; Inspect, Rebind and Withdraw repair one
