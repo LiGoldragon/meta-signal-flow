@@ -440,11 +440,16 @@ pub enum DeliveryRejection {
     PastThreshold,
 }
 #[rustfmt::skip]
+pub type Keys = std::vec::Vec<flow_ethos::KeyName>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum HarnessCommand {
     Compact,
     Interrupt,
+    Line(CommandLine),
+    Keys(Keys),
+    Clear,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -704,6 +709,7 @@ pub enum Query {
     Deliver(DeliveryRequest),
     Vet(DeliveryRequest),
     Command(CommandRequest),
+    ReadPane(signal_flow::FlowId),
     ResolvePeer(ProcessIdentity),
     ReadEvents(signal_flow::FlowId),
     ReadQueueDeliveries(flow_ethos::Address),
@@ -713,6 +719,24 @@ pub enum Query {
     Inspect(flow_ethos::Address),
     Rebind(Rebind_Data),
     Withdraw(Withdraw_Data),
+}
+#[rustfmt::skip]
+pub type Screen = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct PaneRead_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub agent_state: signal_flow::AgentState,
+    pub screen: Screen,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadPaneRejected_Data {
+    UnknownFlow,
+    RouteUnavailable,
+    HerdrUnavailable,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -823,6 +847,8 @@ pub enum Response {
     Vetted(signal_flow::FlowId),
     Commanded(CommandOutcome),
     CommandRejected(CommandRejection),
+    PaneRead(PaneRead_Data),
+    ReadPaneRejected(ReadPaneRejected_Data),
     PeerResolved(signal_flow::Caller),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
     MetaRefused(MetaRefusal),
