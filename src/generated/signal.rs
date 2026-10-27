@@ -97,6 +97,127 @@ pub struct ConfigureMetaflow {
     pub requires: Requires,
 }
 #[rustfmt::skip]
+pub type Milliseconds = i64;
+#[rustfmt::skip]
+pub type SocketTimeout = Milliseconds;
+#[rustfmt::skip]
+pub type CurriculumTimeout = Milliseconds;
+#[rustfmt::skip]
+pub type AppServerTimeout = Milliseconds;
+#[rustfmt::skip]
+pub type SendWait = Milliseconds;
+#[rustfmt::skip]
+pub type PromptReplyTimeout = Milliseconds;
+#[rustfmt::skip]
+pub type LaunchRestWait = Milliseconds;
+#[rustfmt::skip]
+pub type PaneRestWait = Milliseconds;
+#[rustfmt::skip]
+pub type AgentStartTimeout = Milliseconds;
+#[rustfmt::skip]
+pub type EnvironmentReadyTimeout = Milliseconds;
+#[rustfmt::skip]
+pub type PromptObservationTimeout = Milliseconds;
+#[rustfmt::skip]
+pub type InterruptWait = Milliseconds;
+#[rustfmt::skip]
+pub type SubmissionSpacing = Milliseconds;
+#[rustfmt::skip]
+pub type TitleReadbackInterval = Milliseconds;
+#[rustfmt::skip]
+pub type AgentObservePoll = Milliseconds;
+#[rustfmt::skip]
+pub type SendToolFirstWait = Milliseconds;
+#[rustfmt::skip]
+pub type SendToolLongestWait = Milliseconds;
+#[rustfmt::skip]
+pub type SendToolServingSlice = Milliseconds;
+#[rustfmt::skip]
+pub type SendToolReplayWindow = Milliseconds;
+#[rustfmt::skip]
+pub type CompactionWatchMargin = Milliseconds;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Timings {
+    pub socket_timeout: SocketTimeout,
+    pub curriculum_timeout: CurriculumTimeout,
+    pub app_server_timeout: AppServerTimeout,
+    pub send_wait: SendWait,
+    pub prompt_reply_timeout: PromptReplyTimeout,
+    pub launch_rest_wait: LaunchRestWait,
+    pub pane_rest_wait: PaneRestWait,
+    pub agent_start_timeout: AgentStartTimeout,
+    pub environment_ready_timeout: EnvironmentReadyTimeout,
+    pub prompt_observation_timeout: PromptObservationTimeout,
+    pub interrupt_wait: InterruptWait,
+    pub submission_spacing: SubmissionSpacing,
+    pub title_readback_interval: TitleReadbackInterval,
+    pub agent_observe_poll: AgentObservePoll,
+    pub send_tool_first_wait: SendToolFirstWait,
+    pub send_tool_longest_wait: SendToolLongestWait,
+    pub send_tool_serving_slice: SendToolServingSlice,
+    pub send_tool_replay_window: SendToolReplayWindow,
+    pub compaction_watch_margin: CompactionWatchMargin,
+}
+#[rustfmt::skip]
+pub type Bytes = i64;
+#[rustfmt::skip]
+pub type Count = i64;
+#[rustfmt::skip]
+pub type SendBody = Bytes;
+#[rustfmt::skip]
+pub type Frame = Bytes;
+#[rustfmt::skip]
+pub type CurriculumAnswer = Bytes;
+#[rustfmt::skip]
+pub type AppServerHeader = Bytes;
+#[rustfmt::skip]
+pub type AppServerMessage = Bytes;
+#[rustfmt::skip]
+pub type ContextTail = Bytes;
+#[rustfmt::skip]
+pub type HerdrLine = Bytes;
+#[rustfmt::skip]
+pub type HerdrEnvelope = Bytes;
+#[rustfmt::skip]
+pub type CodexText = Count;
+#[rustfmt::skip]
+pub type HistoryPage = Count;
+#[rustfmt::skip]
+pub type HistoryPages = Count;
+#[rustfmt::skip]
+pub type RememberedTurns = Count;
+#[rustfmt::skip]
+pub type InterruptPresses = Count;
+#[rustfmt::skip]
+pub type SubmissionReads = Count;
+#[rustfmt::skip]
+pub type TitleReadbacks = Count;
+#[rustfmt::skip]
+pub type OutputLines = Count;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Limits {
+    pub send_body: SendBody,
+    pub frame: Frame,
+    pub curriculum_answer: CurriculumAnswer,
+    pub app_server_header: AppServerHeader,
+    pub app_server_message: AppServerMessage,
+    pub context_tail: ContextTail,
+    pub herdr_line: HerdrLine,
+    pub herdr_envelope: HerdrEnvelope,
+    pub codex_text: CodexText,
+    pub history_page: HistoryPage,
+    pub history_pages: HistoryPages,
+    pub remembered_turns: RememberedTurns,
+    pub interrupt_presses: InterruptPresses,
+    pub submission_reads: SubmissionReads,
+    pub title_readbacks: TitleReadbacks,
+    pub output_lines: OutputLines,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
@@ -107,6 +228,8 @@ pub enum ConfigurationChange {
     SendServers(std::vec::Vec<ConfigureSendServer>),
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
     Investigation(flow_ethos::Address),
+    Timings(Timings),
+    Limits(Limits),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -140,6 +263,8 @@ pub struct ConfigurationSnapshot {
     pub send_servers: SendServers,
     pub metaflows: Metaflows,
     pub investigation: Investigation,
+    pub timings: Timings,
+    pub limits: Limits,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;

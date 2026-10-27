@@ -4,7 +4,12 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 49.0.0: timings and limits are configuration families
+
+ConfigurationChange and ConfigurationSnapshot gain complete Timings and Limits singletons. Fresh stores seed today's values.
+
 ## 47.0.0: store recovery operations
+
 
 Adds queue, metaflow, launch, successor, lifecycle, hold, context and quarantine repairs; extends inspection and rebind.
 
