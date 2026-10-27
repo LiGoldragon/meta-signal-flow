@@ -1,5 +1,12 @@
 # Upgrades
 
+## 45.0.0: model configuration carries its effort
+
+`ConfigureModel` replaces `Native.String` with `ModelName` and adds the
+configured `Effort.String`. Existing model rows upgrade with the prior name
+and the former defaults: `low` for Mind or Field Quaternary, `medium`
+otherwise.
+>>>>>>> 83c0365 (meta-signal-flow 42: configure model effort)
 ## 44.0.0: pane commands and reads
 
 `HarnessCommand` carries `Line`, `Keys`, and `Clear`; the owner can `ReadPane`.
@@ -13,6 +20,7 @@
 `Message` is a priority head carrying `Letter.{ Kind Sender Body }`.
 `Sender` names the address and Flow ID that Flow resolved from the calling
 process; `Body` is `Words.String` or `Psyche.{ String String }`.
+
 
 ## 41.0.0: abrupt requests may queue
 
