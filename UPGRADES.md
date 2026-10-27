@@ -1,27 +1,18 @@
-# meta-signal-flow 43.0.0
-
-Batch 4 adds Line, Keys and Clear commands and the ReadPane owner query.
-
-## 42.0.0: pane commands
-
-`HarnessCommand` now carries line, keys, and clear operations.
-
 # Upgrades
+
+## 44.0.0: pane commands and reads
+
+`HarnessCommand` carries `Line`, `Keys`, and `Clear`; the owner can `ReadPane`.
+
+## 43.0.0: delivery and command requests carry a gate
+
+`Deliver`, `Vet`, `Command`, and `Retire` carry `Gate.Kept` or `Gate.Forced`.
 
 ## 42.0.0: delivered messages are complete datoms
 
 `Message` is a priority head carrying `Letter.{ Kind Sender Body }`.
 `Sender` names the address and Flow ID that Flow resolved from the calling
-process; `Body` is `Words.String` or `Psyche.{ String String }`. The former
-message ID, owner marker, native-input content, and text content shapes are
-replaced rather than retained.
-
-## 43.0.0: delivery and command requests carry a gate
-
-Pins the Gate contract. `Deliver`, `Vet`, `Command`, and `Retire` requests
-carry `Gate.Kept` or `Gate.Forced`; stored requests and queued deliveries
-must be upgraded to `Kept`.
->>>>>>> 8aaffa9 (meta-signal-flow 42: gate delivery and command requests)
+process; `Body` is `Words.String` or `Psyche.{ String String }`.
 
 ## 41.0.0: abrupt requests may queue
 
