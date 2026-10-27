@@ -218,7 +218,7 @@ pub type WorkingDirectory = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum FlowLifecycle {
+pub enum BindingLifecycle {
     RegisteredUnconfirmed,
     AdoptedActive,
 }
@@ -262,7 +262,7 @@ pub struct MetaBindExisting {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct BoundFlowBinding {
     pub flow_id: signal_flow::FlowId,
-    pub flow_lifecycle: FlowLifecycle,
+    pub binding_lifecycle: BindingLifecycle,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -643,6 +643,42 @@ pub struct SendOutcomeRecord {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Settlement {
+    Abandoned,
+    Started(signal_flow::FlowId),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum SuccessionCause {
+    Refresh(Refresh),
+    Exit,
+    Ordered,
+    Replace,
+}
+#[rustfmt::skip]
+pub type Predecessor = signal_flow::FlowId;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Successor {
+    pub address: flow_ethos::Address,
+    pub predecessor: Predecessor,
+    pub succession_cause: SuccessionCause,
+    pub launch_request_id: signal_flow::LaunchRequestId,
+}
+#[rustfmt::skip]
+pub type QuarantineNumber = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QuarantinedAttempt {
+    pub launch_request_id: signal_flow::LaunchRequestId,
+    pub quarantine_number: QuarantineNumber,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Binding {
     pub flow_node_option: std::option::Option<signal_flow::FlowNode>,
     pub process_option: std::option::Option<signal_flow::Process>,
@@ -660,6 +696,8 @@ pub enum Attempt {
 pub enum Rebinding {
     Pane(signal_flow::HerdrPaneId),
     Flow(signal_flow::FlowId),
+    Native(signal_flow::NativeSessionId),
+    Session(signal_flow::HerdrSessionName),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -667,6 +705,37 @@ pub enum Rebinding {
 pub struct Rebind_Data {
     pub address: flow_ethos::Address,
     pub rebinding: Rebinding,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Enqueue_Data {
+    pub address: flow_ethos::Address,
+    pub queue_entry: flow_ethos::QueueEntry,
+}
+#[rustfmt::skip]
+pub type Position = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Requeue_Data {
+    pub address: flow_ethos::Address,
+    pub logical_delivery_id: flow_ethos::LogicalDeliveryId,
+    pub position: Position,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct SettleLaunch_Data {
+    pub launch_request_id: signal_flow::LaunchRequestId,
+    pub settlement: Settlement,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct SetLifecycle_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub flow_lifecycle: signal_flow::FlowLifecycle,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -696,6 +765,16 @@ pub enum Query {
     ResolveQueueDelivery(QueueDeliveryResolution),
     Inspect(flow_ethos::Address),
     Rebind(Rebind_Data),
+    Enqueue(Enqueue_Data),
+    Requeue(Requeue_Data),
+    Sleep(flow_ethos::Address),
+    Forget(flow_ethos::Address),
+    SettleLaunch(SettleLaunch_Data),
+    ForgetSuccessor(flow_ethos::Address),
+    SetLifecycle(SetLifecycle_Data),
+    ReleaseHolds(flow_ethos::Address),
+    ReadContext(signal_flow::FlowId),
+    ReadQuarantine,
     Withdraw(Withdraw_Data),
 }
 #[rustfmt::skip]
@@ -761,6 +840,7 @@ pub struct Inspected_Data {
     pub binding: Binding,
     pub lock_vector: std::vec::Vec<flow_ethos::Lock>,
     pub attempt_vector: std::vec::Vec<Attempt>,
+    pub successor_option: std::option::Option<Successor>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -775,9 +855,57 @@ pub enum RebindRejected_Data {
     UnknownAddress,
     PaneAbsent,
     FlowUnknown,
-    NotAwake,
+    FlowNotLive,
     HerdrUnavailable,
     FlowTaken(flow_ethos::Address),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum QueueRepairRejected_Data {
+    UnknownAddress,
+    NotQueued,
+    DuplicateRequest,
+    Locked,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum SettleLaunchRejected_Data {
+    UnknownLaunch,
+    AlreadySettled,
+    FlowUnknown,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ForgetSuccessorRejected_Data {
+    NotOwed,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum SetLifecycleRejected_Data {
+    UnknownFlow,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ContextRead_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub context_tokens_option: std::option::Option<ContextTokens>,
+    pub refresh_tokens_option: std::option::Option<RefreshTokens>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadContextRejected_Data {
+    UnknownFlow,
+    StoreRefused,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -825,6 +953,21 @@ pub enum Response {
     InspectRejected(InspectRejected_Data),
     Rebound(flow_ethos::Address),
     RebindRejected(RebindRejected_Data),
+    Enqueued(flow_ethos::LogicalDeliveryId),
+    Requeued(flow_ethos::LogicalDeliveryId),
+    Slept(flow_ethos::Address),
+    Forgotten(flow_ethos::Address),
+    QueueRepairRejected(QueueRepairRejected_Data),
+    LaunchSettled(signal_flow::LaunchRequestId),
+    SettleLaunchRejected(SettleLaunchRejected_Data),
+    SuccessorForgotten(flow_ethos::Address),
+    ForgetSuccessorRejected(ForgetSuccessorRejected_Data),
+    LifecycleSet(signal_flow::FlowId),
+    SetLifecycleRejected(SetLifecycleRejected_Data),
+    HoldsReleased(flow_ethos::Address),
+    ContextRead(ContextRead_Data),
+    ReadContextRejected(ReadContextRejected_Data),
+    QuarantineRead(std::vec::Vec<QuarantinedAttempt>),
     Withdrawn(flow_ethos::LogicalDeliveryId),
     WithdrawRejected(WithdrawRejected_Data),
 }
