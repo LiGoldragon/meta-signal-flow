@@ -7,3 +7,9 @@ lifecycle, hold, context and quarantine repairs; extends inspection with the
 owed successor and rebind with native-session and Herdr-session repairs.
 `FlowLifecycle` on an adopted binding is renamed `BindingLifecycle`; the flow
 row lifecycle is the `signal-flow` type.
+
+## 43.0.0
+
+Repins signal-flow 35. A `FlowBinding` carries the observed model and native
+binding only; its role is the `Address` it is bound to. `Aspect`, `PowerLevel`,
+and `RoleMismatch` are removed.

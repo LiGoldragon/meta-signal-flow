@@ -237,7 +237,6 @@ pub struct FlowContainer {
 pub struct FlowBinding {
     pub flow_id: signal_flow::FlowId,
     pub aspect: signal_flow::Aspect,
-    pub power_level: signal_flow::PowerLevel,
     pub model_name: signal_flow::ModelName,
     pub harness_kind: signal_flow::HarnessKind,
     pub native_session_id: signal_flow::NativeSessionId,
@@ -278,7 +277,6 @@ pub enum FlowBindingRefusalReason {
     SessionUnreported,
     SessionUnproven,
     HerdrUnreadable,
-    RoleMismatch,
     AddressOwnerLive,
     AddressOwnerUnknown,
     NativeIdentityMismatch,
