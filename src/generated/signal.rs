@@ -426,6 +426,82 @@ pub struct Limits {
     pub output_lines: OutputLines,
 }
 #[rustfmt::skip]
+pub type PendingLaunch = Template;
+#[rustfmt::skip]
+pub type BoundLaunch = Template;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct LaunchSectionTemplates {
+    pub pending_launch: PendingLaunch,
+    pub bound_launch: BoundLaunch,
+}
+#[rustfmt::skip]
+pub type SeatedCompactionTranscript = Template;
+#[rustfmt::skip]
+pub type SeatedCompactionClaudeSession = Template;
+#[rustfmt::skip]
+pub type SeatedCompactionCodexThread = Template;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct SeatedCompactionWarningTemplates {
+    pub seated_compaction_transcript: SeatedCompactionTranscript,
+    pub seated_compaction_claude_session: SeatedCompactionClaudeSession,
+    pub seated_compaction_codex_thread: SeatedCompactionCodexThread,
+}
+#[rustfmt::skip]
+pub type UnseatedCompactionTranscript = Template;
+#[rustfmt::skip]
+pub type UnseatedCompactionClaudeSession = Template;
+#[rustfmt::skip]
+pub type UnseatedCompactionCodexThread = Template;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct UnseatedCompactionWarningTemplates {
+    pub unseated_compaction_transcript: UnseatedCompactionTranscript,
+    pub unseated_compaction_claude_session: UnseatedCompactionClaudeSession,
+    pub unseated_compaction_codex_thread: UnseatedCompactionCodexThread,
+}
+#[rustfmt::skip]
+pub type SeatedCompaction = SeatedCompactionWarningTemplates;
+#[rustfmt::skip]
+pub type UnseatedCompaction = UnseatedCompactionWarningTemplates;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct CompactionWarningTemplates {
+    pub seated_compaction: SeatedCompaction,
+    pub unseated_compaction: UnseatedCompaction,
+}
+#[rustfmt::skip]
+pub type LaunchSection = LaunchSectionTemplates;
+#[rustfmt::skip]
+pub type PartHeader = Template;
+#[rustfmt::skip]
+pub type LastPartHeader = Template;
+#[rustfmt::skip]
+pub type CodexBrief = Template;
+#[rustfmt::skip]
+pub type PurposedBrief = Template;
+#[rustfmt::skip]
+pub type CompactionWarning = CompactionWarningTemplates;
+#[rustfmt::skip]
+pub type SendToolDescriptions = std::vec::Vec<String>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Texts {
+    pub launch_section: LaunchSection,
+    pub part_header: PartHeader,
+    pub last_part_header: LastPartHeader,
+    pub codex_brief: CodexBrief,
+    pub purposed_brief: PurposedBrief,
+    pub compaction_warning: CompactionWarning,
+    pub send_tool_descriptions: SendToolDescriptions,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
@@ -439,6 +515,7 @@ pub enum ConfigurationChange {
     Investigation(flow_ethos::Address),
     Timings(Timings),
     Limits(Limits),
+    Texts(Texts),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
