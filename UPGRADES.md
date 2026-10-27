@@ -4,6 +4,11 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 51.0.0: share harness event reporting vocabulary
+
+Repins signal-flow 37.0.0 so privileged clients share the ordinary
+`Reporter` and `Notified` vocabulary with Flow. No meta wire type changes.
+
 ## 50.0.0: a binding's address owns its role
 
 Repins signal-flow 36. A `FlowBinding` carries observed model and native
