@@ -301,7 +301,7 @@ Signal
   HarnessModule.{ HarnessModuleName ModuleText Tools.Vector<ToolName> Switches.Vector<Switch> }
   HarnessModel.{ ModelName Recorded.ModelName }
   Slot.[ Title ModuleSwitches DeniedTools AllowedTools SessionId PromptFile SettingsText LaunchModel LaunchEffort RemoteSocket ThreadId MetaflowAddress LaunchFlowId PredecessorId RememberedFlows PartNumber PartCount HerdrSession PurposeText BriefText ContextSize TranscriptFile ]
-  Piece.[ Text.String Slot Flagged.{ String Slot } Joined.{ String Slot } ]
+  Piece.[ Text.String Slot Flagged.{ String Slot String } Joined.{ String Slot } ] ; Flagged positions are before text, guarded raw slot, after text.
   Template.Vector<Piece>
   Retraction.[ Keys LineByLine.Keys ]
   Composer.{ Glyph.String Retraction ComposerLines.Integer RetractedLines.Integer }
@@ -378,7 +378,8 @@ Signal
                          Metaflows.Vector<ConfigureMetaflow>
                          Investigation.Address
                          Timings
-                         Limits ]
+                         Limits
+                         Texts ]
   ConfigureOutcome.[ Replaced Unchanged ]
   ConfigurationSnapshot.{ Nexus.ConfigureNexus Harnesses.Vector<Harness> Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> Timings Limits }
   IdempotencyKey.String

@@ -498,3 +498,102 @@ fn configure_topic_refusal_round_trips() {
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
 }
+
+///  while the raw-value
+/// slots remain bare variants. A globally colliding alias would make one of
+/// these constructors carry data and fail this contract at compile time.
+#[test]
+fn text_templates_keep_launch_and_compaction_alternatives_distinct() {
+    use meta_signal_flow::{
+        CompactionWarningTemplates, Flagged_Data, LaunchSectionTemplates, Piece,
+        SeatedCompactionWarningTemplates, Slot, Texts, UnseatedCompactionWarningTemplates,
+    };
+
+    let launch_section = LaunchSectionTemplates {
+        pending_launch: vec![Piece::Text("pending".into())],
+        bound_launch: vec![Piece::Slot(Slot::LaunchFlowId)],
+    };
+    let compaction_warning = CompactionWarningTemplates {
+        seated_compaction: SeatedCompactionWarningTemplates {
+            seated_compaction_transcript: vec![Piece::Slot(Slot::TranscriptFile)],
+            seated_compaction_claude_session: vec![Piece::Slot(Slot::SessionId)],
+            seated_compaction_codex_thread: vec![Piece::Slot(Slot::ThreadId)],
+        },
+        unseated_compaction: UnseatedCompactionWarningTemplates {
+            unseated_compaction_transcript: vec![Piece::Slot(Slot::TranscriptFile)],
+            unseated_compaction_claude_session: vec![Piece::Slot(Slot::SessionId)],
+            unseated_compaction_codex_thread: vec![Piece::Slot(Slot::ThreadId)],
+        },
+    };
+    let texts = Texts {
+        launch_section,
+        part_header: vec![Piece::Slot(Slot::PartNumber)],
+        last_part_header: vec![Piece::Slot(Slot::PartCount)],
+        codex_brief: vec![Piece::Slot(Slot::BriefText)],
+        purposed_brief: vec![Piece::Slot(Slot::PurposeText)],
+        compaction_warning,
+        send_tool_descriptions: vec!["send".into()],
+    };
+
+    assert_eq!(texts.launch_section.bound_launch.len(), 1);
+    assert_eq!(
+        Piece::Flagged(Flagged_Data {
+            first_string: "before".into(),
+            slot: Slot::ContextSize,
+            second_string: "after".into(),
+        }),
+        Piece::Flagged(Flagged_Data {
+            first_string: "before".into(),
+            slot: Slot::ContextSize,
+            second_string: "after".into(),
+        })
+    );
+    assert_eq!(
+        texts
+            .compaction_warning
+            .seated_compaction
+            .seated_compaction_transcript
+            .len(),
+        1
+    );
+    assert_eq!(
+        texts
+            .compaction_warning
+            .seated_compaction
+            .seated_compaction_claude_session
+            .len(),
+        1
+    );
+    assert_eq!(
+        texts
+            .compaction_warning
+            .seated_compaction
+            .seated_compaction_codex_thread
+            .len(),
+        1
+    );
+    assert_eq!(
+        texts
+            .compaction_warning
+            .unseated_compaction
+            .unseated_compaction_transcript
+            .len(),
+        1
+    );
+    assert_eq!(
+        texts
+            .compaction_warning
+            .unseated_compaction
+            .unseated_compaction_claude_session
+            .len(),
+        1
+    );
+    assert_eq!(
+        texts
+            .compaction_warning
+            .unseated_compaction
+            .unseated_compaction_codex_thread
+            .len(),
+        1
+    );
+}
