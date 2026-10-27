@@ -1,5 +1,13 @@
 # Upgrades
 
+## 42.0.0: delivered messages are complete datoms
+
+`Message` is a priority head carrying `Letter.{ Kind Sender Body }`.
+`Sender` names the address and Flow ID that Flow resolved from the calling
+process; `Body` is `Words.String` or `Psyche.{ String String }`. The former
+message ID, owner marker, native-input content, and text content shapes are
+replaced rather than retained.
+
 ## 41.0.0: abrupt requests may queue
 
 Pins signal-flow 34.0.0. Meta records that embed ordinary Send answers use

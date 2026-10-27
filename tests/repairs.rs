@@ -7,8 +7,8 @@ use flow_ethos::{
 };
 use meta_signal_flow::{
     Attempt, Binding, InspectRejected_Data, Inspected_Data, Query, QueueDelivery,
-    QueueDeliveryStanding, Rebind_Data, RebindRejected_Data, Rebinding, Response,
-    WithdrawRejected_Data, Withdraw_Data,
+    QueueDeliveryStanding, Rebind_Data, RebindRejected_Data, Rebinding, Response, Withdraw_Data,
+    WithdrawRejected_Data,
 };
 use signal_flow::{
     EndpointSelection, FlowLifecycle, FlowNode, HarnessKind, HerdrRoute, HerdrRouteSelection,
