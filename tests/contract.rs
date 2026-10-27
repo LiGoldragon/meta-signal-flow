@@ -505,7 +505,7 @@ fn configure_topic_refusal_round_trips() {
 #[test]
 fn text_templates_keep_launch_and_compaction_alternatives_distinct() {
     use meta_signal_flow::{
-        CompactionWarningTemplates, LaunchSectionTemplates, Piece,
+        CompactionWarningTemplates, Flagged_Data, LaunchSectionTemplates, Piece,
         SeatedCompactionWarningTemplates, Slot, Texts, UnseatedCompactionWarningTemplates,
     };
 
@@ -536,6 +536,18 @@ fn text_templates_keep_launch_and_compaction_alternatives_distinct() {
     };
 
     assert_eq!(texts.launch_section.bound_launch.len(), 1);
+    assert_eq!(
+        Piece::Flagged(Flagged_Data {
+            first_string: "before".into(),
+            slot: Slot::ContextSize,
+            second_string: "after".into(),
+        }),
+        Piece::Flagged(Flagged_Data {
+            first_string: "before".into(),
+            slot: Slot::ContextSize,
+            second_string: "after".into(),
+        })
+    );
     assert_eq!(
         texts
             .compaction_warning

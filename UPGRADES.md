@@ -4,6 +4,13 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 56.0.0: runtime prose is configured as typed templates
+
+`Texts` owns the launch-section, prompt-part, brief, compaction-warning and
+send-tool wording. Its templates interleave literal text with typed slots;
+guarded slots carry their authored before and after text only when the raw
+slot value exists.
+
 ## 54.0.0
 
 Metaflow declarations carry `LeftOut` module names. The separate leave-out configuration family is retired; configuration rejects module names unknown to every harness and modules whose removal has no effect.
