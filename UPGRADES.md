@@ -8,6 +8,13 @@ process; `Body` is `Words.String` or `Psyche.{ String String }`. The former
 message ID, owner marker, native-input content, and text content shapes are
 replaced rather than retained.
 
+## 43.0.0: delivery and command requests carry a gate
+
+Pins the Gate contract. `Deliver`, `Vet`, `Command`, and `Retire` requests
+carry `Gate.Kept` or `Gate.Forced`; stored requests and queued deliveries
+must be upgraded to `Kept`.
+>>>>>>> 8aaffa9 (meta-signal-flow 42: gate delivery and command requests)
+
 ## 41.0.0: abrupt requests may queue
 
 Pins signal-flow 34.0.0. Meta records that embed ordinary Send answers use

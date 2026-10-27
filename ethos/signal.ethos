@@ -184,7 +184,7 @@ Signal
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting.MetaBindExisting
-  Retire.FlowId
+  Retire.{ FlowId Gate }
   Deliver.DeliveryRequest
   Vet.DeliveryRequest
   Command.CommandRequest
@@ -328,7 +328,8 @@ Signal
   Message.[ HardAbrupt.Letter
             MiddleAbrupt.Letter
             Soft.Letter ]
-  DeliveryRequest.{ DeliveryId FlowId Message }
+  Gate.[ Kept Forced ]
+  DeliveryRequest.{ DeliveryId FlowId Message Gate }
   InterruptWitness.[ NotRequested Observed Unobserved ]
   DeliveryGrade.[ Transported Presented Uncertain ]
   Delivery.{ DeliveryId FlowId InterruptWitness DeliveryGrade }
@@ -348,7 +349,7 @@ Signal
                       FlowExited
                       PastThreshold ]
   HarnessCommand.[ Compact Interrupt ]
-  CommandRequest.{ FlowId HarnessCommand }
+  CommandRequest.{ FlowId HarnessCommand Gate }
   CommandGrade.[ Transported Observed Uncertain ]
   CommandOutcome.{ FlowId HarnessCommand CommandGrade }
   ContextTokens.Integer
