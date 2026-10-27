@@ -15,14 +15,16 @@ pub struct NexusRuntimeSettings {
     pub lease: flow_ethos::Lease,
 }
 #[rustfmt::skip]
-pub type Native = String;
+#[rustfmt::skip]
+pub type Effort = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureModel {
     pub layer: flow_ethos::Layer,
     pub aspect: signal_flow::Aspect,
-    pub native: Native,
+    pub model_name: signal_flow::ModelName,
+    pub effort: Effort,
 }
 #[rustfmt::skip]
 pub type Refresh = i64;

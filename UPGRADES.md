@@ -1,5 +1,12 @@
 # Upgrades
 
+## 42.0.0: model configuration carries its effort
+
+`ConfigureModel` replaces `Native.String` with `ModelName` and adds the
+configured `Effort.String`. Existing model rows upgrade with the prior name
+and the former defaults: `low` for Mind or Field Quaternary, `medium`
+otherwise.
+
 ## 41.0.0: abrupt requests may queue
 
 Pins signal-flow 34.0.0. Meta records that embed ordinary Send answers use

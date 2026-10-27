@@ -244,7 +244,7 @@ Signal
   NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease }
   ; The model a seat of one layer and aspect runs; a Start naming another
   ; model for that seat is refused.
-  ConfigureModel.{ Layer Aspect Native.String }
+  ConfigureModel.{ Layer Aspect ModelName Effort.String }
   ; The refresh threshold of the flows that run one model, in tokens.
   ConfigureThreshold.{ ModelName Refresh.Integer }
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
