@@ -274,6 +274,44 @@ Signal
   ; composes into the system prompt and into the first user message, how
   ; it continues, its purpose and the records it rests on.
   ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records Requires.Vector<Address> }
+  Milliseconds.Integer
+  Timings.{ SocketTimeout.Milliseconds
+            CurriculumTimeout.Milliseconds
+            AppServerTimeout.Milliseconds
+            SendWait.Milliseconds
+            PromptReplyTimeout.Milliseconds
+            LaunchRestWait.Milliseconds
+            PaneRestWait.Milliseconds
+            AgentStartTimeout.Milliseconds
+            EnvironmentReadyTimeout.Milliseconds
+            PromptObservationTimeout.Milliseconds
+            InterruptWait.Milliseconds
+            SubmissionSpacing.Milliseconds
+            TitleReadbackInterval.Milliseconds
+            AgentObservePoll.Milliseconds
+            SendToolFirstWait.Milliseconds
+            SendToolLongestWait.Milliseconds
+            SendToolServingSlice.Milliseconds
+            SendToolReplayWindow.Milliseconds
+            CompactionWatchMargin.Milliseconds }
+  Bytes.Integer
+  Count.Integer
+  Limits.{ SendBody.Bytes
+           Frame.Bytes
+           CurriculumAnswer.Bytes
+           AppServerHeader.Bytes
+           AppServerMessage.Bytes
+           ContextTail.Bytes
+           HerdrLine.Bytes
+           HerdrEnvelope.Bytes
+           CodexText.Count
+           HistoryPage.Count
+           HistoryPages.Count
+           RememberedTurns.Count
+           InterruptPresses.Count
+           SubmissionReads.Count
+           TitleReadbacks.Count
+           OutputLines.Count }
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
@@ -281,9 +319,11 @@ Signal
                          Nexus.ConfigureNexus
                          SendServers.Vector<ConfigureSendServer>
                          Metaflows.Vector<ConfigureMetaflow>
-                         Investigation.Address ]
+                         Investigation.Address
+                         Timings
+                         Limits ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> Timings Limits }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next

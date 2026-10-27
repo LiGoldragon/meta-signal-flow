@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -148,6 +148,10 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         "/srv/curriculum/curriculum.sock"
     );
     assert_eq!(configuration.nexus.lease, 60);
+    assert_eq!(configuration.timings.socket_timeout, 5000);
+    assert_eq!(configuration.timings.compaction_watch_margin, 600000);
+    assert_eq!(configuration.limits.send_body, 65536);
+    assert_eq!(configuration.limits.output_lines, 50);
     // One layer holds a model per aspect.
     assert_eq!(
         configuration.models,
@@ -469,6 +473,19 @@ fn configure_metaflows_has_a_concrete_datom() {
             if declared.len() == 1 && declared[0].system_modules.len() == 2
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+}
+
+#[test]
+fn timings_and_limits_have_concrete_datoms() {
+    for text in [
+        "Configure.Timings.{ 5000 30000 10000 10000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 }",
+        "Configure.Limits.{ 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 }",
+    ] {
+        let query = Potential::<Query>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+    }
 }
 
 #[test]

@@ -1,5 +1,10 @@
 # Upgrades
 
+## 44.0.0: timings and limits are configuration families
+
+`ConfigurationChange` and `ConfigurationSnapshot` gain the complete `Timings`
+and `Limits` singletons. Fresh Flow stores seed today’s values.
+
 ## 43.0.0: metaflows declare their requirements
 
 `ConfigureMetaflow` appends `Requires.Vector<Address>`. Stored declarations
