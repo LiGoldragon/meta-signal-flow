@@ -315,6 +315,8 @@ pub type PromptReplyTimeout = Milliseconds;
 #[rustfmt::skip]
 pub type LaunchRestWait = Milliseconds;
 #[rustfmt::skip]
+pub type StopWait = Milliseconds;
+#[rustfmt::skip]
 pub type PaneRestWait = Milliseconds;
 #[rustfmt::skip]
 pub type AgentStartTimeout = Milliseconds;
@@ -350,6 +352,7 @@ pub struct Timings {
     pub send_wait: SendWait,
     pub prompt_reply_timeout: PromptReplyTimeout,
     pub launch_rest_wait: LaunchRestWait,
+    pub stop_wait: StopWait,
     pub pane_rest_wait: PaneRestWait,
     pub agent_start_timeout: AgentStartTimeout,
     pub environment_ready_timeout: EnvironmentReadyTimeout,

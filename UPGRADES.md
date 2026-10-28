@@ -4,6 +4,13 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 53.0.0: configure harness installations and their lifecycle
+
+Adds configured harness installations to the whole configuration snapshot.
+`Timings` appends the bounded native `StopWait`; an out-of-range value is
+`TimingOutOfRange`. `RetireRejection.CloseRefused` carries the exact
+ordinary-signal `PaneCloseFailure`. The contract repins signal-flow 39.0.0.
+
 ## 52.0.0: every configured metaflow uses one launch behavior
 
 Repins signal-flow 38.0.0. `ConfigureMetaflow` no longer carries
