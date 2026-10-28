@@ -5,11 +5,12 @@
 ; per-pane lease: an exclusive hold over the whole key sequence, never
 ; handed out on the wire.
 ;
-; Deliver carries a typed Message addressed by FlowId; Flow renders it,
-; so the pane text always begins with its Priority head (HardAbrupt.,
-; MiddleAbrupt. or Soft.). A Letter names its Kind, its Flow-resolved
-; Sender and its Body. A Body is Words, one Psyche relay, or a vector of
-; Psyche relays. The Body may hold no control character but
+; Deliver carries only a durable DeliveryId. Flow resolves the exact
+; authenticated cohort, sender identities and recipient binding owned by
+; that prepared attempt, and renders one Vector<Message>; the privileged
+; caller supplies none of them. Every Message keeps its Priority head. A
+; Letter names its Kind, its authenticated Sender and its Body. A Body is
+; Words, one Psyche relay, or a vector of Psyche relays. The Body may hold no control character but
 ; LF and TAB (ControlCharacter carries the byte offset in the rendered
 ; pane text), and a first line that is a harness command (a sigil of the
 ; recipient's HarnessProfile, then a command word) is refused as
