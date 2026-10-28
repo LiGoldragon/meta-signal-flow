@@ -180,7 +180,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState PaneCloseFailure ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance SendPayloadSize NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState PaneCloseFailure ]
   flow_ethos:[ Start NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles HarnessModuleName LeftOut MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -500,7 +500,9 @@ Signal
                       PersistenceRefused
                       FlowRetired
                       FlowExited
-                      PastThreshold ]
+                      PastThreshold
+                      UnknownDelivery
+                      TransportOverlimit.SendPayloadSize ]
   Keys.Vector<KeyName>
   HarnessCommand.[ Compact Interrupt
                    Line.CommandLine
@@ -524,7 +526,8 @@ Signal
                           Uncertain.Option<Undecided>
                           ReceiptRecorded
                           Absent.AbsenceProof
-                          Resolved.QueueResolutionRecord ]
+                          Resolved.QueueResolutionRecord
+                          TransportOverlimit.SendPayloadSize ]
   QueueResolutionReason.String
   UnixSeconds.Integer
   QueueResolutionOutcome.[ Delivered Absent ]

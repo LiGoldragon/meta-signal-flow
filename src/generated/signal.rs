@@ -907,6 +907,8 @@ pub enum DeliveryRejection {
     FlowRetired,
     FlowExited,
     PastThreshold,
+    UnknownDelivery,
+    TransportOverlimit(signal_flow::SendPayloadSize),
 }
 #[rustfmt::skip]
 pub type Keys = std::vec::Vec<flow_ethos::KeyName>;
@@ -1019,6 +1021,7 @@ pub enum QueueDeliveryStanding {
     ReceiptRecorded,
     Absent(AbsenceProof),
     Resolved(QueueResolutionRecord),
+    TransportOverlimit(signal_flow::SendPayloadSize),
 }
 #[rustfmt::skip]
 pub type QueueResolutionReason = String;
