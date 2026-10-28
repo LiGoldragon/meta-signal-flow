@@ -28,3 +28,8 @@ ethos-zero = { git = "https://github.com/LiGoldragon/ethos-zero", rev = "07714b0
 unsafe_code = "forbid"
 unused = { level = "warn", priority = -1 }
 dead_code = "warn"
+
+# Every transitive Flow vocabulary edge compiles the same immutable
+# flow-ethos source as this contract, rather than fetching its predecessor.
+[patch."https://github.com/LiGoldragon/flow"]
+flow-ethos = { git = "https://github.com/LiGoldragon/flow", rev = "9626b902c948b3d489dffa74449fab4797d8efff" }
