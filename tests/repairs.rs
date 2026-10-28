@@ -205,7 +205,7 @@ mod datom {
             "RebindRejected.UnknownAddress",
             "RebindRejected.PaneAbsent",
             "RebindRejected.FlowUnknown",
-            "RebindRejected.NotAwake",
+            "RebindRejected.FlowNotLive",
             "RebindRejected.HerdrUnavailable",
             "RebindRejected.FlowTaken.{ Mind flow Secondary }",
             "Withdrawn.logical-7",
