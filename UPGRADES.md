@@ -71,3 +71,7 @@ row lifecycle is the `signal-flow` type.
 
 `ConfigureThreshold` names its numeric value `RefreshTokens`; `Refresh` is
 therefore a unit succession cause rather than an integer-bearing variant.
+
+## 55.0.0
+
+The ordinary contract is signal-flow 41.0.0, whose launch-status vocabulary returns explicit references to losslessly archived historical outcomes.
