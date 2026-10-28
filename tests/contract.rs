@@ -262,7 +262,10 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
         "RetireRejected.UnknownFlow",
         "RetireRejected.AlreadyGone",
         "RetireRejected.StoreRefused",
-        "RetireRejected.CloseRefused",
+        "RetireRejected.CloseRefused.IdentityUnavailable",
+        "RetireRejected.CloseRefused.IdentityMismatch",
+        "RetireRejected.CloseRefused.StopTimedOut",
+        "RetireRejected.CloseRefused.HerdrCloseFailed",
         "RetireRejected.Maintained",
     ] {
         let response = Potential::<Response>::from(text)

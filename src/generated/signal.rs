@@ -656,7 +656,7 @@ pub enum RetireRejection {
     UnknownFlow,
     AlreadyGone,
     StoreRefused,
-    CloseRefused,
+    CloseRefused(signal_flow::PaneCloseFailure),
     Maintained,
 }
 #[rustfmt::skip]

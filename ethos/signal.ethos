@@ -177,7 +177,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState PaneCloseFailure ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles HarnessModuleName LeftOut MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -414,11 +414,11 @@ Signal
                       Refused.RefusedFlowBinding ]
   BoundExisting.{ FlowContainer FlowBindingResult }
   BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch OwnerMismatch StoreRefused ]
-  ; CloseRefused: the retired flow's pane is still there and Herdr refused
-  ; to close it; nothing is recorded and the flow is not retired.
+  ; CloseRefused carries the exact process-identity, bounded-stop or Herdr
+  ; pane-close failure; nothing is recorded and the flow is not retired.
   ; Maintained: the flow is the one a Maintained metaflow is Awake as;
   ; nothing changes, and its declaration's continuity is changed first.
-  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained ]
+  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused.PaneCloseFailure Maintained ]
   DeliveryId.String
   CommandLine.String
   ByteOffset.Integer
