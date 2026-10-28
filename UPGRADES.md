@@ -2,6 +2,8 @@
 
 ## 48.0.0: native stop wait is configured separately
 
+This contract pins signal-flow 38.0.0, whose unit `ClaudeReady` response is the typed private launch-readiness Signal.
+
 `Timings` appends `StopWait` after `LaunchRestWait`. It is the maximum wait
 for each phase of the fixed native stop protocol: TERM, then KILL only when
 the same owned process remains. Stored timings upgrade with the prior
