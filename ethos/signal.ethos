@@ -391,7 +391,7 @@ Signal
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry ModelServedTwice.ModelName LeaveOutNotForHarness TopicRefused.Topic ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry ModelServedTwice.ModelName LeaveOutNotForHarness TopicRefused.Topic TimingOutOfRange ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
