@@ -1,5 +1,11 @@
 # Upgrades
 
+## 49.0.0: retire carries the exact pane-close failure
+
+This contract pins signal-flow 39.0.0. `RetireRejection.CloseRefused`
+carries its `PaneCloseFailure`, the same reason used by ordinary Stop and
+Refresh.
+
 ## 48.0.0: native stop wait is configured separately
 
 This contract pins signal-flow 38.0.0, whose unit `ClaudeReady` response is the typed private launch-readiness Signal.
