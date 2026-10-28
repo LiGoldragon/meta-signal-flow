@@ -404,3 +404,8 @@ ConfigureMetaflow no longer carries FlowKind. Every configured metaflow uses the
 ## 50.0.0
 
 Metaflow declarations carry `LeftOut` module names. The separate leave-out configuration family is retired; configuration rejects module names unknown to every harness and modules whose removal has no effect.
+
+## 51.0.0
+
+The ordinary contract is signal-flow 41.0.0, whose launch-status vocabulary
+returns explicit references to losslessly archived historical outcomes.
