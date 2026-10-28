@@ -432,6 +432,8 @@ pub enum DeliveryRejection {
     FlowRetired,
     FlowExited,
     PastThreshold,
+    UnknownDelivery,
+    TransportOverlimit(signal_flow::SendPayloadSize),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -538,6 +540,7 @@ pub enum QueueDeliveryStanding {
     ReceiptRecorded,
     Absent(AbsenceProof),
     Resolved(QueueResolutionRecord),
+    TransportOverlimit(signal_flow::SendPayloadSize),
 }
 #[rustfmt::skip]
 pub type QueueResolutionReason = String;
