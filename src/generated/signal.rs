@@ -502,7 +502,7 @@ pub enum ConfigurationChange {
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
-    Investigation(flow_ethos::Address),
+    Investigation(std::option::Option<flow_ethos::Address>),
     Timings(Timings),
     Limits(Limits),
     Texts(Texts),
@@ -510,37 +510,69 @@ pub enum ConfigurationChange {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ConfigurationEntry {
+    ModelEntry(ConfigureModel),
+    ThresholdEntry(ConfigureThreshold),
+    HarnessEntry(Harness),
+    SendServerEntry(ConfigureSendServer),
+    MetaflowEntry(ConfigureMetaflow),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ModelKey_Data {
+    pub layer: flow_ethos::Layer,
+    pub aspect: signal_flow::Aspect,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum EntryKey {
+    ModelKey(ModelKey_Data),
+    ThresholdKey(signal_flow::ModelName),
+    HarnessKey(HarnessName),
+    SendServerKey(CodexAppServerBinary),
+    MetaflowKey(flow_ethos::Address),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigureOutcome {
     Replaced,
     Unchanged,
+    Removed,
 }
 #[rustfmt::skip]
-pub type Nexus = ConfigureNexus;
+pub type Runtime = flow_ethos::Start;
 #[rustfmt::skip]
-pub type Harnesses = std::vec::Vec<Harness>;
+pub type ConfiguredNexus = ConfigureNexus;
 #[rustfmt::skip]
-pub type Models = std::vec::Vec<ConfigureModel>;
+pub type ConfiguredHarnesses = std::vec::Vec<Harness>;
 #[rustfmt::skip]
-pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
+pub type ConfiguredModels = std::vec::Vec<ConfigureModel>;
 #[rustfmt::skip]
-pub type SendServers = std::vec::Vec<ConfigureSendServer>;
+pub type ConfiguredThresholds = std::vec::Vec<ConfigureThreshold>;
 #[rustfmt::skip]
-pub type Metaflows = std::vec::Vec<ConfigureMetaflow>;
+pub type ConfiguredSendServers = std::vec::Vec<ConfigureSendServer>;
 #[rustfmt::skip]
-pub type Investigation = std::option::Option<flow_ethos::Address>;
+pub type ConfiguredMetaflows = std::vec::Vec<ConfigureMetaflow>;
+#[rustfmt::skip]
+pub type ConfiguredInvestigation = std::option::Option<flow_ethos::Address>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
-    pub nexus: Nexus,
-    pub harnesses: Harnesses,
-    pub models: Models,
-    pub thresholds: Thresholds,
-    pub send_servers: SendServers,
-    pub metaflows: Metaflows,
-    pub investigation: Investigation,
+    pub runtime: Runtime,
+    pub configured_nexus: ConfiguredNexus,
+    pub configured_harnesses: ConfiguredHarnesses,
+    pub configured_models: ConfiguredModels,
+    pub configured_thresholds: ConfiguredThresholds,
+    pub configured_send_servers: ConfiguredSendServers,
+    pub configured_metaflows: ConfiguredMetaflows,
+    pub configured_investigation: ConfiguredInvestigation,
     pub timings: Timings,
     pub limits: Limits,
+    pub texts: Texts,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
@@ -578,6 +610,7 @@ pub enum ConfigureRejection {
     ModelServedTwice(signal_flow::ModelName),
     UnknownHarnessModule(flow_ethos::HarnessModuleName),
     Irremovable(flow_ethos::HarnessModuleName),
+    UnknownEntry,
     TopicRefused(flow_ethos::Topic),
     TimingOutOfRange,
 }
@@ -1210,6 +1243,8 @@ pub struct Withdraw_Data {
 pub enum Query {
     Configuration,
     Configure(ConfigurationChange),
+    ConfigureEntry(ConfigurationEntry),
+    RemoveEntry(EntryKey),
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
@@ -1432,7 +1467,6 @@ pub enum WithdrawRejected_Data {
 pub enum Response {
     Configured(ConfigureOutcome),
     Configuration(ConfigurationSnapshot),
-    Unconfigured,
     ResetConsumed(ResetOutcome),
     FlowRegistered(signal_flow::FlowNode),
     ConfigureRejected(ConfigureRejection),

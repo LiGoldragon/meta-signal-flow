@@ -178,9 +178,11 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrSessionName LaunchRequestId FlowLifecycle HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt AgentState PaneCloseFailure ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles HarnessModuleName LeftOut MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
+  flow_ethos:[ Start NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles HarnessModuleName LeftOut MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
+  ConfigureEntry.ConfigurationEntry
+  RemoveEntry.EntryKey
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting.MetaBindExisting
@@ -216,7 +218,6 @@ Signal
   Withdraw.{ Address LogicalDeliveryId } ]      ; one queued delivery leaves the queue
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
-  Unconfigured
   ResetConsumed.ResetOutcome
   FlowRegistered.FlowNode
   ConfigureRejected.ConfigureRejection
@@ -397,19 +398,39 @@ Signal
                          Nexus.ConfigureNexus
                          SendServers.Vector<ConfigureSendServer>
                          Metaflows.Vector<ConfigureMetaflow>
-                         Investigation.Address
+                         Investigation.Option<Address>
                          Timings
                          Limits
                          Texts ]
-  ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Harnesses.Vector<Harness> Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> Timings Limits }
+  ConfigurationEntry.[ ModelEntry.ConfigureModel
+                       ThresholdEntry.ConfigureThreshold
+                       HarnessEntry.Harness
+                       SendServerEntry.ConfigureSendServer
+                       MetaflowEntry.ConfigureMetaflow ]
+  EntryKey.[ ModelKey.{ Layer Aspect }
+             ThresholdKey.ModelName
+             HarnessKey.HarnessName
+             SendServerKey.CodexAppServerBinary
+             MetaflowKey.Address ]
+  ConfigureOutcome.[ Replaced Unchanged Removed ]
+  ConfigurationSnapshot.{ Runtime.Start
+                          ConfiguredNexus.ConfigureNexus
+                          ConfiguredHarnesses.Vector<Harness>
+                          ConfiguredModels.Vector<ConfigureModel>
+                          ConfiguredThresholds.Vector<ConfigureThreshold>
+                          ConfiguredSendServers.Vector<ConfigureSendServer>
+                          ConfiguredMetaflows.Vector<ConfigureMetaflow>
+                          ConfiguredInvestigation.Option<Address>
+                          Timings
+                          Limits
+                          Texts }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry ModelServedTwice.ModelName UnknownHarnessModule.HarnessModuleName Irremovable.HarnessModuleName TopicRefused.Topic TimingOutOfRange ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry ModelServedTwice.ModelName UnknownHarnessModule.HarnessModuleName Irremovable.HarnessModuleName UnknownEntry TopicRefused.Topic TimingOutOfRange ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

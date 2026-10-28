@@ -4,6 +4,13 @@ Batch 8 pages event, send-outcome and flow reads and adds owner settlement of un
 
 # Upgrades
 
+## 57.0.0: configuration is complete and addressable by key
+
+Adds per-key `ConfigureEntry` and `RemoveEntry`, including typed keys and an
+explicit `Removed` outcome. `Configuration` returns the runtime `Start` and
+every configured family, including `Texts`; a fresh store is configured, so
+`Unconfigured` is retired. Whole-family `Configure` remains the deploy path.
+
 ## 56.0.0: runtime prose is configured as typed templates
 
 `Texts` owns the launch-section, prompt-part, brief, compaction-warning and
