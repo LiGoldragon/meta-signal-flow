@@ -305,6 +305,7 @@ Signal
             SendWait.Milliseconds
             PromptReplyTimeout.Milliseconds
             LaunchRestWait.Milliseconds
+            StopWait.Milliseconds
             PaneRestWait.Milliseconds
             AgentStartTimeout.Milliseconds
             EnvironmentReadyTimeout.Milliseconds

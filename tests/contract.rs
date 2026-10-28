@@ -449,7 +449,7 @@ fn configure_metaflows_has_a_concrete_datom() {
 #[test]
 fn timings_and_limits_have_concrete_datoms() {
     for text in [
-        "Configure.Timings.{ 5000 30000 10000 10000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 }",
+        "Configure.Timings.{ 5000 30000 10000 10000 30000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 }",
         "Configure.Limits.{ 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 }",
     ] {
         let query = Potential::<Query>::from(text)

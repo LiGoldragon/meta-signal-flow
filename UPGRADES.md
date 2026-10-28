@@ -1,5 +1,12 @@
 # Upgrades
 
+## 48.0.0: native stop wait is configured separately
+
+`Timings` appends `StopWait` after `LaunchRestWait`. It is the maximum wait
+for each phase of the fixed native stop protocol: TERM, then KILL only when
+the same owned process remains. Stored timings upgrade with the prior
+`LaunchRestWait` value.
+
 ## 44.0.0: timings and limits are configuration families
 
 `ConfigurationChange` and `ConfigurationSnapshot` gain the complete `Timings`
