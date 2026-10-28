@@ -1,7 +1,9 @@
 //! ReadEvents: the owner reads the harness events Flow holds for one flow.
 //! The expected texts are written out here, not computed through the codec.
 
-use meta_signal_flow::{EventsRead_Data, Query, ReadEventsRejected_Data, Response};
+use meta_signal_flow::{
+    EventsRead_Data, Page, Query, ReadEventsRejected_Data, ReadEvents_Data, Response,
+};
 use signal_flow::{Event, NativeStop};
 
 fn events_read() -> Response {
@@ -18,6 +20,7 @@ fn events_read() -> Response {
             Event::Cleared(Some("s1".into())),
             Event::Started(Some("s2".into())),
         ],
+        next_page: None,
     })
 }
 
@@ -34,7 +37,13 @@ fn read_events_round_trips_as_an_archive() {
             reply
         );
     }
-    let query = Query::ReadEvents("f1c841".into());
+    let query = Query::ReadEvents(ReadEvents_Data {
+        flow_id: "f1c841".into(),
+        page: Page {
+            after: 0,
+            count: 50,
+        },
+    });
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
         rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
@@ -59,13 +68,22 @@ mod datom {
 
     #[test]
     fn read_events_has_concrete_datoms() {
-        let query = Potential::<Query>::from("ReadEvents.f1c841")
+        let query = Potential::<Query>::from("ReadEvents.{ f1c841 { 0 50 } }")
             .actualize(&mut budget())
             .unwrap();
-        assert_eq!(query, Query::ReadEvents("f1c841".into()));
+        assert_eq!(
+            query,
+            Query::ReadEvents(ReadEvents_Data {
+                flow_id: "f1c841".into(),
+                page: Page {
+                    after: 0,
+                    count: 50
+                },
+            })
+        );
         assert_eq!(
             events_read().datomize(vec![]).protosize().compact(),
-            "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] }"
+            "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] None }"
         );
         assert_eq!(
             Response::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow)
@@ -75,7 +93,7 @@ mod datom {
             "ReadEventsRejected.UnknownFlow"
         );
         let read =
-            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] }")
+            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] None }")
                 .actualize(&mut budget())
                 .unwrap();
         assert_eq!(read, events_read());

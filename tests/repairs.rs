@@ -7,8 +7,8 @@ use flow_ethos::{
 };
 use meta_signal_flow::{
     Attempt, Binding, InspectRejected_Data, Inspected_Data, Query, QueueDelivery,
-    QueueDeliveryStanding, Rebind_Data, RebindRejected_Data, Rebinding, Response, Withdraw_Data,
-    WithdrawRejected_Data,
+    QueueDeliveryStanding, RebindRejected_Data, Rebind_Data, Rebinding, Response,
+    WithdrawRejected_Data, Withdraw_Data,
 };
 use signal_flow::{
     EndpointSelection, FlowLifecycle, FlowNode, HarnessKind, HerdrRoute, HerdrRouteSelection,
@@ -89,6 +89,7 @@ fn inspected() -> Response {
             until: 1_790_000_060,
         }],
         attempt_vector: vec![attempt()],
+        successor_option: None,
     })
 }
 
@@ -126,13 +127,14 @@ fn replies() -> Vec<Response> {
             },
             lock_vector: vec![],
             attempt_vector: vec![],
+            successor_option: None,
         }),
         Response::InspectRejected(InspectRejected_Data::UnknownAddress),
         Response::Rebound(address()),
         Response::RebindRejected(RebindRejected_Data::UnknownAddress),
         Response::RebindRejected(RebindRejected_Data::PaneAbsent),
         Response::RebindRejected(RebindRejected_Data::FlowUnknown),
-        Response::RebindRejected(RebindRejected_Data::NotAwake),
+        Response::RebindRejected(RebindRejected_Data::FlowNotLive),
         Response::RebindRejected(RebindRejected_Data::HerdrUnavailable),
         Response::RebindRejected(RebindRejected_Data::FlowTaken(address())),
         Response::Withdrawn("logical-7".into()),

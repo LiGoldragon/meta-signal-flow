@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source /srv/source/flows [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 { /usr/bin/herdr /usr/bin/flow-id /usr/bin/flow-hook } default } [ { codex Codex fixture /usr/bin/codex /home/someone/.codex Some./home/someone/.codex/control.sock [ { gpt-6.1 gpt-6.1 } ] [] [] [] [] [] [] { [ / «!» ] [ esc ] [] /compact { › LineByLine.[ ctrl+u backspace ] 12 32 } } } ] [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
+    let text = "Configuration.{ { /srv/source /srv/source/flows [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 { /usr/bin/herdr /usr/bin/flow-id /usr/bin/flow-hook } default } [ { codex Codex fixture /usr/bin/codex /home/someone/.codex Some./home/someone/.codex/control.sock [ { gpt-6.1 gpt-6.1 } ] [] [] [] [] [] [] { [ / «!» ] [ esc ] [] /compact { › LineByLine.[ ctrl+u backspace ] 12 32 } } } ] [ { Secondary Psyche claude-opus medium } { Secondary Mind gpt-6.1 medium } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] [ { Field helper Tertiary } ] } ] Some.{ Psyche compaction Tertiary } { 5000 30000 10000 10000 30000 30000 30000 15000 30000 5000 10000 3000 350 250 500 1000 60000 50 2000 600000 } { 65536 1048576 67108864 16384 67108864 4194304 1048576 1024 1048576 16 16 64 3 12 40 50 } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -98,7 +98,10 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
     assert_eq!(configuration.harnesses.len(), 1);
     assert_eq!(configuration.harnesses[0].harness_name, "codex");
     assert_eq!(configuration.harnesses[0].executable, "/usr/bin/codex");
-    assert_eq!(configuration.harnesses[0].served_models[0].model_name, "gpt-6.1");
+    assert_eq!(
+        configuration.harnesses[0].served_models[0].model_name,
+        "gpt-6.1"
+    );
     assert_eq!(
         configuration.harnesses[0].pane_profile.interrupt_keys,
         vec!["esc".to_owned()]
@@ -131,24 +134,26 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             meta_signal_flow::ConfigureModel {
                 layer: meta_signal_flow::Layer::Secondary,
                 aspect: meta_signal_flow::Aspect::Psyche,
-                native: "claude-opus".into(),
+                model_name: "claude-opus".into(),
+                effort: "medium".into(),
             },
             meta_signal_flow::ConfigureModel {
                 layer: meta_signal_flow::Layer::Secondary,
                 aspect: meta_signal_flow::Aspect::Mind,
-                native: "gpt-6.1".into(),
+                model_name: "gpt-6.1".into(),
+                effort: "medium".into(),
             },
         ]
     );
     // A model that names no aspect is no longer a declaration.
     assert!(
-        Potential::<Query>::from("Configure.Models.[ { Secondary claude-opus-5-5 } ]")
+        Potential::<Query>::from("Configure.Models.[ { Secondary claude-opus-5-5 medium } ]")
             .actualize(&mut budget())
             .is_err()
     );
     assert_eq!(configuration.thresholds.len(), 1);
     assert_eq!(configuration.thresholds[0].model_name, "claude-opus-5-5");
-    assert_eq!(configuration.thresholds[0].refresh, 200000);
+    assert_eq!(configuration.thresholds[0].refresh_tokens, 200000);
     assert_eq!(
         configuration
             .investigation
@@ -221,11 +226,9 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
 #[test]
 fn configure_missing_a_required_nexus_field_is_refused_by_the_reader() {
     let text = "Configure.Nexus.{ /srv/source { stable-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { next-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock }";
-    assert!(
-        Potential::<Query>::from(text)
-            .actualize(&mut budget())
-            .is_err()
-    );
+    assert!(Potential::<Query>::from(text)
+        .actualize(&mut budget())
+        .is_err());
 }
 
 #[test]
@@ -362,7 +365,7 @@ fn a_message_textualizes_with_its_priority_head_first() {
 #[test]
 fn configure_declares_one_whole_family() {
     for text in [
-        "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]",
+        "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 medium } { Secondary Psyche claude-opus-5-5 medium } { Secondary Mind gpt-6-sol medium } { Secondary Field gpt-6-sol medium } ]",
         "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
         "Configure.Investigation.{ Psyche compaction Tertiary }",
         "Configure.LeaveOuts.[ { { Field core Primary } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Secondary } Codex [ CodexAgentsMd ] } ]",
@@ -379,19 +382,21 @@ fn configure_declares_one_whole_family() {
         );
     }
     let Query::Configure(meta_signal_flow::Configuration::Models(models)) =
-        Potential::<Query>::from("Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } ]")
-            .actualize(&mut budget())
-            .unwrap()
+        Potential::<Query>::from(
+            "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 medium } ]",
+        )
+        .actualize(&mut budget())
+        .unwrap()
     else {
         panic!("not a Models declaration")
     };
     assert_eq!(models.len(), 1);
     // One entry is not a family: a declaration is always the whole vector.
-    assert!(
-        Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 }")
-            .actualize(&mut budget())
-            .is_err()
-    );
+    assert!(Potential::<Query>::from(
+        "Configure.Models.{ Quaternary Psyche claude-haiku-5-5 medium }"
+    )
+    .actualize(&mut budget())
+    .is_err());
     // A threshold belongs to a model, never to a layer, and has no handover.
     assert!(
         Potential::<Query>::from("Configure.Thresholds.[ { Primary 600000 700000 } ]")
@@ -399,11 +404,9 @@ fn configure_declares_one_whole_family() {
             .is_err()
     );
     // Configure.Nexus is the one way to set or replace the Nexus.
-    assert!(
-        Potential::<Query>::from("Reconfigure.{ /srv }")
-            .actualize(&mut budget())
-            .is_err()
-    );
+    assert!(Potential::<Query>::from("Reconfigure.{ /srv }")
+        .actualize(&mut budget())
+        .is_err());
     for reply in [
         "ConfigureRejected.DuplicateEntry",
         "ConfigureRejected.ModelServedTwice.gpt-6-sol",
@@ -472,13 +475,11 @@ fn timings_and_limits_have_concrete_datoms() {
 #[test]
 fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_rejection() {
     // An entry without its harness is no longer a ConfigureLeaveOut.
-    assert!(
-        Potential::<Query>::from(
-            "Configure.LeaveOuts.[ { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]"
-        )
-        .actualize(&mut budget())
-        .is_err()
-    );
+    assert!(Potential::<Query>::from(
+        "Configure.LeaveOuts.[ { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]"
+    )
+    .actualize(&mut budget())
+    .is_err());
     let text = "ConfigureRejected.LeaveOutNotForHarness";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
