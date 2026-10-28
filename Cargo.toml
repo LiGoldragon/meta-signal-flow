@@ -18,7 +18,7 @@ datom-codec = { git = "https://github.com/LiGoldragon/datom-codec", rev = "4dff1
 protos = { git = "https://github.com/LiGoldragon/protos", rev = "15b41da8f2579e73ead59bc0c2b97529b8ac32d3", optional = true }
 signal = { git = "https://github.com/LiGoldragon/signal", rev = "e0e3c05573405e793037205640e54cfd769bb1b4", default-features = false }
 signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "ddf27de013a8e14c195d69461f1284b051841963" }
-flow-ethos = { git = "https://github.com/LiGoldragon/flow", tag = "flow-ethos-typed-pane-41-final", default-features = false }
+flow-ethos = { git = "https://github.com/LiGoldragon/flow", rev = "9626b902c948b3d489dffa74449fab4797d8efff", default-features = false }
 rkyv = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 
 [build-dependencies]
