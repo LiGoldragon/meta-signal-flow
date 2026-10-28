@@ -828,9 +828,8 @@ pub enum Gate {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct DeliveryRequest {
     pub delivery_id: DeliveryId,
-    pub flow_id: signal_flow::FlowId,
-    pub message: Message,
-    pub gate: Gate,
+
+
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

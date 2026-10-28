@@ -476,8 +476,9 @@ Signal
   Message.[ HardAbrupt.Letter
             MiddleAbrupt.Letter
             Soft.Letter ]
-  Gate.[ Kept Forced ]
-  DeliveryRequest.{ DeliveryId FlowId Message Gate }
+
+  DeliveryRequest.{ DeliveryId }
+
   InterruptWitness.[ NotRequested Observed Unobserved ]
   DeliveryGrade.[ Transported Presented Uncertain NotPresented ]
   Delivery.{ DeliveryId FlowId InterruptWitness DeliveryGrade }
