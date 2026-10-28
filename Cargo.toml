@@ -17,7 +17,7 @@ datom = ["dep:datom-codec", "dep:protos", "flow-ethos/datom", "signal-flow/datom
 datom-codec = { git = "https://github.com/LiGoldragon/datom-codec", rev = "4dff16b4f7412febc3b71aac8b49680cd20988cb", optional = true }
 protos = { git = "https://github.com/LiGoldragon/protos", rev = "15b41da8f2579e73ead59bc0c2b97529b8ac32d3", optional = true }
 signal = { git = "https://github.com/LiGoldragon/signal", rev = "e0e3c05573405e793037205640e54cfd769bb1b4", default-features = false }
-signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "ddf27de013a8e14c195d69461f1284b051841963" }
+signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "11172569cb23d066d53c6eaf734cd5543d8948e4" }
 flow-ethos = { git = "https://github.com/LiGoldragon/flow", rev = "9626b902c948b3d489dffa74449fab4797d8efff", default-features = false }
 rkyv = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 
@@ -28,8 +28,3 @@ ethos-zero = { git = "https://github.com/LiGoldragon/ethos-zero", rev = "07714b0
 unsafe_code = "forbid"
 unused = { level = "warn", priority = -1 }
 dead_code = "warn"
-
-# Every transitive Flow vocabulary edge compiles the same immutable
-# flow-ethos source as this contract, rather than fetching its predecessor.
-[patch."https://github.com/LiGoldragon/flow"]
-flow-ethos = { git = "https://github.com/LiGoldragon/flow", rev = "9626b902c948b3d489dffa74449fab4797d8efff" }
