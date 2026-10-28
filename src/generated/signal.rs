@@ -200,8 +200,6 @@ pub enum Retraction {
     LineByLine(Keys),
 }
 #[rustfmt::skip]
-pub type Keys = std::vec::Vec<flow_ethos::KeyName>;
-#[rustfmt::skip]
 pub type Glyph = String;
 #[rustfmt::skip]
 pub type ComposerLines = i64;

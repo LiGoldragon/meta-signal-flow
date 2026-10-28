@@ -306,7 +306,6 @@ Signal
   Piece.[ Text.String Slot Flagged.{ String Slot } Joined.{ String Slot } ]
   Template.Vector<Piece>
   Retraction.[ Keys LineByLine.Keys ]
-  Keys.Vector<KeyName>
   Composer.{ Glyph.String Retraction ComposerLines.Integer RetractedLines.Integer }
   PaneProfile.{ Vector<CommandSigil> InterruptKeys SubmitKeys CompactLine.CommandLine Composer }
   Harness.{ HarnessName HarnessKind HarnessVersion Executable.String Home Option<ControlSocketPath> ServedModels.Vector<HarnessModel> Modules.Vector<HarnessModule> LeftOut Arguments.Template Settings.Vector<Setting> Parameters.Vector<Setting> Unset.Vector<EnvironmentName> PaneProfile }
