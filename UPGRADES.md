@@ -1,5 +1,9 @@
 # Upgrades
 
+## 42.0.0: privileged delivery references authenticated stored cohorts
+
+`Deliver` and `Vet` take only `DeliveryRequest.{ DeliveryId }`. The ID names a durable prepared queue-delivery attempt; Flow resolves its authenticated recipient and complete typed cohort from Memory. A privileged caller can no longer supply a `Message`, `Sender`, or recipient replacement.
+
 ## 41.0.0: delivered messages are complete datoms
 
 `Message` is a priority head carrying `Letter.{ Kind Sender Body }`.

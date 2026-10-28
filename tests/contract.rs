@@ -298,10 +298,10 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Order { { Mind flow Secondary } 88475f } Words.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Psyche { { Psyche core Secondary } 88475f } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
-        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Notice { { Psyche core Secondary } e167d8 } Words./compact } }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 }",
+        "Deliver.{ m-81b0e4:7d41e0:0 }",
+        "Deliver.{ m-90c1aa:7d41e0:0 }",
+        "Vet.{ m-a2d913:7d41e0:0 }",
         "Command.{ 7d41e0 Compact }",
         "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",

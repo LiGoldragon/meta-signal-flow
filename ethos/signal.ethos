@@ -331,7 +331,7 @@ Signal
   Message.[ HardAbrupt.Letter
             MiddleAbrupt.Letter
             Soft.Letter ]
-  DeliveryRequest.{ DeliveryId FlowId Message }
+  DeliveryRequest.{ DeliveryId }
   InterruptWitness.[ NotRequested Observed Unobserved ]
   DeliveryGrade.[ Transported Presented Uncertain ]
   Delivery.{ DeliveryId FlowId InterruptWitness DeliveryGrade }
