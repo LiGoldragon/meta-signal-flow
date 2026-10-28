@@ -7,7 +7,7 @@
 process; `Body` is `Words.String`, `Psyche.{ String String }`, or
 `Psyches.Vector<PsycheWords>`. The former message ID, owner marker,
 native-input content, and text content shapes are replaced rather than
-retained.
+retained. It imports signal-flow 33.0.0 (`ddf27de`); routing to a Primary remains a practice rather than a wire refusal.
 
 How to deploy each breaking change of meta-signal-flow.
 
