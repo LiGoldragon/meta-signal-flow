@@ -1,5 +1,5 @@
 pub mod generated;
-pub use generated::signal::ConfigurationChange as Configuration;
+pub use generated::signal::ConfigurationSnapshot as Configuration;
 pub use generated::signal::*;
 
 pub use flow_ethos::{

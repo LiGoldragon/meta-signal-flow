@@ -358,3 +358,10 @@ where one line is meant, rebuild and restart the Nexus and both CLIs
 together. The rkyv archive of every value is unchanged.
 
 The ordinary Send ledger names only Send outcomes (Queued, Delivered, or its typed refusal). The owner socket's former Refusal type is named StoreRefusal so it is distinct from the imported ordinary Refusal.
+# meta-signal-flow 41.0.0
+
+`Configure` now carries the complete `Configuration` value that
+`Configuration` reads: Nexus, models, thresholds, default leave-outs, send
+servers, metaflows and the optional investigation. The seven family-specific
+write variants are removed. A peer validates and commits the whole value or
+changes nothing; `Investigation.None` clears an existing investigation.

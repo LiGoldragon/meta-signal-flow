@@ -181,7 +181,7 @@ Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
-  Configure.ConfigurationChange
+  Configure.ConfigurationSnapshot
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting.MetaBindExisting
@@ -274,15 +274,10 @@ Signal
   ; composes into the system prompt and into the first user message, how
   ; it continues, its purpose and the records it rests on.
   ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
-  ; Keep the payload type distinct from the unit Query.Configuration variant.
-  ConfigurationChange.[ Models.Vector<ConfigureModel>
-                         Thresholds.Vector<ConfigureThreshold>
-                         LeaveOuts.Vector<ConfigureLeaveOut>
-                         Nexus.ConfigureNexus
-                         SendServers.Vector<ConfigureSendServer>
-                         Metaflows.Vector<ConfigureMetaflow>
-                         Investigation.Address ]
   ConfigureOutcome.[ Replaced Unchanged ]
+  ; The complete configuration is the one Configure payload and the one
+  ; Configuration response. A write names every family, including the
+  ; optional investigation, so the Nexus validates and commits one value.
   ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> }
   IdempotencyKey.String
   CreditId.String

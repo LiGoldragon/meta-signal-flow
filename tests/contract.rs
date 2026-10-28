@@ -16,7 +16,6 @@ fn budget() -> Budget {
 #[test]
 fn privileged_requests_have_concrete_datoms() {
     for text in [
-        "Configure.Nexus.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] /run/user/1001/message-nexus.sock /etc/profiles/per-user/li/bin/message-nexus /run/user/1001/curriculum/curriculum.sock 60 }",
         "Configuration",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
@@ -368,50 +367,55 @@ fn a_message_textualizes_with_its_priority_head_first() {
 }
 
 #[test]
-fn configure_declares_one_whole_family() {
-    for text in [
-        "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]",
-        "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
-        "Configure.Investigation.{ Psyche compaction Tertiary }",
-        "Configure.LeaveOuts.[ { { Field core Primary } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Secondary } Codex [ CodexAgentsMd ] } ]",
+fn configure_carries_one_whole_configuration() {
+    let text = "Configure.{ { /srv/source { codex-stable /home/stable /run/stable.sock [ gpt-stable ] } { codex-next /home/next /run/next.sock [ gpt-next ] } [ { Claude [ / ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /run/message.sock /bin/message /run/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-sol } ] [ { claude-opus 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool ] } ] [ { /bin/codex /bin/send } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained purpose [] } ] Some.{ Psyche compaction Tertiary } }";
+    let query = Potential::<Query>::from(text)
+        .actualize(&mut budget())
+        .unwrap_or_else(|_| panic!("not a Query Datom: {text}"));
+    let Query::Configure(configuration) = &query else {
+        panic!("not a complete Configuration")
+    };
+    assert_eq!(configuration.nexus.source_root, "/srv/source");
+    assert_eq!(configuration.models.len(), 2);
+    assert_eq!(configuration.thresholds.len(), 1);
+    assert_eq!(configuration.default_leave_outs.len(), 1);
+    assert_eq!(configuration.send_servers.len(), 1);
+    assert_eq!(configuration.metaflows.len(), 1);
+    assert!(configuration.investigation.is_some());
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        query
+    );
+
+    let without_investigation = text.replace("Some.{ Psyche compaction Tertiary } }", "None }");
+    let Query::Configure(without_investigation) = Potential::<Query>::from(without_investigation)
+        .actualize(&mut budget())
+        .unwrap()
+    else {
+        panic!("not a complete Configuration")
+    };
+    assert!(without_investigation.investigation.is_none());
+
+    // A family patch is no longer a Query: Configure replaces one complete
+    // configuration value or nothing.
+    for obsolete in [
+        "Configure.Models.[ { Quaternary Psyche claude-haiku } ]",
+        "Configure.Thresholds.[]",
         "Configure.LeaveOuts.[]",
+        "Configure.Nexus.{ /srv }",
+        "Configure.SendServers.[]",
+        "Configure.Metaflows.[]",
+        "Configure.Investigation.{ Psyche compaction Tertiary }",
     ] {
-        let query = Potential::<Query>::from(text)
-            .actualize(&mut budget())
-            .unwrap_or_else(|_| panic!("not a Query Datom: {text}"));
-        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
-        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
-        assert_eq!(
-            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
-            query
+        assert!(
+            Potential::<Query>::from(obsolete)
+                .actualize(&mut budget())
+                .is_err()
         );
     }
-    let Query::Configure(meta_signal_flow::Configuration::Models(models)) =
-        Potential::<Query>::from("Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } ]")
-            .actualize(&mut budget())
-            .unwrap()
-    else {
-        panic!("not a Models declaration")
-    };
-    assert_eq!(models.len(), 1);
-    // One entry is not a family: a declaration is always the whole vector.
-    assert!(
-        Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 }")
-            .actualize(&mut budget())
-            .is_err()
-    );
-    // A threshold belongs to a model, never to a layer, and has no handover.
-    assert!(
-        Potential::<Query>::from("Configure.Thresholds.[ { Primary 600000 700000 } ]")
-            .actualize(&mut budget())
-            .is_err()
-    );
-    // Configure.Nexus is the one way to set or replace the Nexus.
-    assert!(
-        Potential::<Query>::from("Reconfigure.{ /srv }")
-            .actualize(&mut budget())
-            .is_err()
-    );
+
     for reply in [
         "ConfigureRejected.DuplicateEntry",
         "ConfigureRejected.CodexModelsOverlap",
@@ -427,41 +431,6 @@ fn configure_declares_one_whole_family() {
             response
         );
     }
-}
-
-/// A send-servers declaration pairs each Codex app-server executable with
-/// the MCP send-server executable its child must run.
-#[test]
-fn configure_send_servers_has_a_concrete_datom() {
-    let text = "Configure.SendServers.[ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ]";
-    let query = Potential::<meta_signal_flow::Query>::from(text)
-        .actualize(&mut budget())
-        .unwrap();
-    assert_eq!(
-        query,
-        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::SendServers(
-            vec![meta_signal_flow::ConfigureSendServer {
-                codex_app_server_binary: "/nix/store/codex/bin/codex".into(),
-                mcp_send_server_binary: "/nix/store/send/bin/flow-send-mcp".into(),
-            }]
-        ))
-    );
-    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
-}
-
-/// A metaflow declaration names the modules a Launch of its Address composes.
-#[test]
-fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Secondary } [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
-    let query = Potential::<meta_signal_flow::Query>::from(text)
-        .actualize(&mut budget())
-        .unwrap();
-    assert!(matches!(
-        &query,
-        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::Metaflows(declared))
-            if declared.len() == 1 && declared[0].system_modules.len() == 2
-    ));
-    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
 }
 
 #[test]

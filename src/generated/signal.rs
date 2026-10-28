@@ -97,18 +97,6 @@ pub struct ConfigureMetaflow {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ConfigurationChange {
-    Models(std::vec::Vec<ConfigureModel>),
-    Thresholds(std::vec::Vec<ConfigureThreshold>),
-    LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
-    Nexus(ConfigureNexus),
-    SendServers(std::vec::Vec<ConfigureSendServer>),
-    Metaflows(std::vec::Vec<ConfigureMetaflow>),
-    Investigation(flow_ethos::Address),
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigureOutcome {
     Replaced,
     Unchanged,
@@ -680,7 +668,7 @@ pub struct Withdraw_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
     Configuration,
-    Configure(ConfigurationChange),
+    Configure(ConfigurationSnapshot),
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
