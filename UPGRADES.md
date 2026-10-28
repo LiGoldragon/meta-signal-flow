@@ -1,3 +1,7 @@
+# 43.0.0: Primary route refusal vocabulary
+
+Repins signal-flow 35.0.0, whose ordinary Refusal adds the typed PrimaryRouteRefused payload. Rebuild the Nexus and both clients together.
+
 # Upgrades
 
 ## 42.0.0: delivered messages are complete datoms
