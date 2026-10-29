@@ -517,10 +517,32 @@ pub type ConfigurationRequestId = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum FullConfiguration {
+    Harnesses(std::vec::Vec<Harness>),
+    Models(std::vec::Vec<ConfigureModel>),
+    Thresholds(std::vec::Vec<ConfigureThreshold>),
+    Nexus(ConfigureNexus),
+    SendServers(std::vec::Vec<ConfigureSendServer>),
+    Metaflows(std::vec::Vec<ConfigureMetaflow>),
+    Investigation(std::option::Option<flow_ethos::Address>),
+    Timings(Timings),
+    Limits(Limits),
+    Texts(Texts),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct StoredConfiguration {
+    pub configuration_revision: ConfigurationRevision,
+    pub full_configuration: FullConfiguration,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct FullConfigurationRequest {
     pub configuration_request_id: ConfigurationRequestId,
     pub configuration_revision: ConfigurationRevision,
-    pub configuration_change: ConfigurationChange,
+    pub full_configuration: FullConfiguration,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

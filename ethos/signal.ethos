@@ -411,7 +411,18 @@ Signal
                          Texts ]
   ConfigurationRevision.Integer
   ConfigurationRequestId.String
-  FullConfigurationRequest.{ ConfigurationRequestId ConfigurationRevision ConfigurationChange }
+  FullConfiguration.[ Harnesses.Vector<Harness>
+                      Models.Vector<ConfigureModel>
+                      Thresholds.Vector<ConfigureThreshold>
+                      Nexus.ConfigureNexus
+                      SendServers.Vector<ConfigureSendServer>
+                      Metaflows.Vector<ConfigureMetaflow>
+                      Investigation.Option<Address>
+                      Timings
+                      Limits
+                      Texts ]
+  StoredConfiguration.{ ConfigurationRevision FullConfiguration }
+  FullConfigurationRequest.{ ConfigurationRequestId ConfigurationRevision FullConfiguration }
   Historical.[ New Replay ]
   FullConfigurationDisposition.[ Replaced
                                   Unchanged
