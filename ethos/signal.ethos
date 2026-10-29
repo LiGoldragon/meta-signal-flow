@@ -531,6 +531,7 @@ Signal
                       FlowExited
                       PastThreshold
                       UnknownDelivery
+                      CallerNotAuthorized
                       TransportOverlimit.SendPayloadSize ]
   Keys.Vector<KeyName>
   HarnessCommand.[ Compact Interrupt

@@ -983,6 +983,7 @@ pub enum DeliveryRejection {
     FlowExited,
     PastThreshold,
     UnknownDelivery,
+    CallerNotAuthorized,
     TransportOverlimit(signal_flow::SendPayloadSize),
 }
 #[rustfmt::skip]
