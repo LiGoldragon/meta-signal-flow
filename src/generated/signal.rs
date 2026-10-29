@@ -1335,6 +1335,7 @@ pub enum Query {
     Retire(Retire_Data),
     Deliver(DeliveryRequest),
     Vet(DeliveryRequest),
+    ReplayDelivery(DeliveryRequest),
     Command(CommandRequest),
     ReadPane(signal_flow::FlowId),
     ResolvePeer(ProcessIdentity),
@@ -1358,6 +1359,16 @@ pub enum Query {
     ReadContext(signal_flow::FlowId),
     ReadQuarantine,
     Withdraw(Withdraw_Data),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReplayDeliveryRejected_Data {
+    UnknownDelivery,
+    NotTerminal,
+    Unsafe,
+    CallerNotAuthorized,
+    PersistenceRefused,
 }
 #[rustfmt::skip]
 pub type Screen = String;
@@ -1563,6 +1574,8 @@ pub enum Response {
     RetireRejected(RetireRejection),
     Delivered(Delivery),
     DeliveryRejected(DeliveryRejection),
+    DeliveryReplayed(DeliveryId),
+    ReplayDeliveryRejected(ReplayDeliveryRejected_Data),
     Vetted(signal_flow::FlowId),
     Commanded(CommandOutcome),
     CommandRejected(CommandRejection),

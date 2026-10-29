@@ -194,6 +194,7 @@ Signal
   Retire.{ FlowId Gate }
   Deliver.DeliveryRequest
   Vet.DeliveryRequest
+  ReplayDelivery.DeliveryRequest
   Command.CommandRequest
   ReadPane.FlowId
   ResolvePeer.ProcessIdentity
@@ -235,6 +236,8 @@ Signal
   RetireRejected.RetireRejection
   Delivered.Delivery
   DeliveryRejected.DeliveryRejection
+  DeliveryReplayed.DeliveryId
+  ReplayDeliveryRejected.[ UnknownDelivery NotTerminal Unsafe CallerNotAuthorized PersistenceRefused ]
   Vetted.FlowId
   Commanded.CommandOutcome
   CommandRejected.CommandRejection
