@@ -515,19 +515,33 @@ pub type ConfigurationRevision = i64;
 #[rustfmt::skip]
 pub type ConfigurationRequestId = String;
 #[rustfmt::skip]
+pub type Harnesses = std::vec::Vec<Harness>;
+#[rustfmt::skip]
+pub type Models = std::vec::Vec<ConfigureModel>;
+#[rustfmt::skip]
+pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
+#[rustfmt::skip]
+pub type Nexus = ConfigureNexus;
+#[rustfmt::skip]
+pub type SendServers = std::vec::Vec<ConfigureSendServer>;
+#[rustfmt::skip]
+pub type Metaflows = std::vec::Vec<ConfigureMetaflow>;
+#[rustfmt::skip]
+pub type Investigation = std::option::Option<flow_ethos::Address>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum FullConfiguration {
-    Harnesses(std::vec::Vec<Harness>),
-    Models(std::vec::Vec<ConfigureModel>),
-    Thresholds(std::vec::Vec<ConfigureThreshold>),
-    Nexus(ConfigureNexus),
-    SendServers(std::vec::Vec<ConfigureSendServer>),
-    Metaflows(std::vec::Vec<ConfigureMetaflow>),
-    Investigation(std::option::Option<flow_ethos::Address>),
-    Timings(Timings),
-    Limits(Limits),
-    Texts(Texts),
+pub struct FullConfiguration {
+    pub harnesses: Harnesses,
+    pub models: Models,
+    pub thresholds: Thresholds,
+    pub nexus: Nexus,
+    pub send_servers: SendServers,
+    pub metaflows: Metaflows,
+    pub investigation: Investigation,
+    pub timings: Timings,
+    pub limits: Limits,
+    pub texts: Texts,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

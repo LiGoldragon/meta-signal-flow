@@ -411,7 +411,7 @@ Signal
                          Texts ]
   ConfigurationRevision.Integer
   ConfigurationRequestId.String
-  FullConfiguration.[ Harnesses.Vector<Harness>
+  FullConfiguration.{ Harnesses.Vector<Harness>
                       Models.Vector<ConfigureModel>
                       Thresholds.Vector<ConfigureThreshold>
                       Nexus.ConfigureNexus
@@ -420,7 +420,7 @@ Signal
                       Investigation.Option<Address>
                       Timings
                       Limits
-                      Texts ]
+                      Texts }
   StoredConfiguration.{ ConfigurationRevision FullConfiguration }
   FullConfigurationRequest.{ ConfigurationRequestId ConfigurationRevision FullConfiguration }
   Historical.[ New Replay ]
