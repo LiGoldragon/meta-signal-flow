@@ -185,6 +185,7 @@ Signal
   flow_ethos:[ Start NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles HarnessModuleName LeftOut MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
 [ Configuration
   Configure.ConfigurationChange
+  FullConfigure.FullConfigurationRequest
   ConfigureEntry.ConfigurationEntry
   RemoveEntry.EntryKey
   ConsumeReset.ResetRequest
@@ -221,6 +222,7 @@ Signal
   ReadQuarantine
   Withdraw.{ Address LogicalDeliveryId } ]      ; one queued delivery leaves the queue
 [ Configured.ConfigureOutcome
+  FullConfigured.FullConfigurationReceipt
   Configuration.ConfigurationSnapshot
   ResetConsumed.ResetOutcome
   FlowRegistered.FlowNode
@@ -359,6 +361,7 @@ Signal
   Bytes.Integer
   Count.Integer
   Limits.{ SendBody.Bytes
+           Cohort.Bytes
            Frame.Bytes
            CurriculumAnswer.Bytes
            AppServerHeader.Bytes
@@ -406,6 +409,19 @@ Signal
                          Timings
                          Limits
                          Texts ]
+  ConfigurationRevision.Integer
+  ConfigurationRequestId.String
+  FullConfigurationRequest.{ ConfigurationRequestId ConfigurationRevision ConfigurationChange }
+  Historical.[ New Replay ]
+  FullConfigurationDisposition.[ Replaced
+                                  Unchanged
+                                  Stale.ConfigurationRevision
+                                  IdentifierConflict ]
+  FullConfigurationReceipt.{ FullConfigurationRequest
+                              ObservedRevision.ConfigurationRevision
+                              ResultingRevision.ConfigurationRevision
+                              FullConfigurationDisposition
+                              Historical }
   ConfigurationEntry.[ ModelEntry.ConfigureModel
                        ThresholdEntry.ConfigureThreshold
                        HarnessEntry.Harness

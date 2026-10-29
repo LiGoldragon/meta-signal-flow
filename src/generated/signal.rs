@@ -366,6 +366,8 @@ pub type Count = i64;
 #[rustfmt::skip]
 pub type SendBody = Bytes;
 #[rustfmt::skip]
+pub type Cohort = Bytes;
+#[rustfmt::skip]
 pub type Frame = Bytes;
 #[rustfmt::skip]
 pub type CurriculumAnswer = Bytes;
@@ -400,6 +402,7 @@ pub type OutputLines = Count;
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Limits {
     pub send_body: SendBody,
+    pub cohort: Cohort,
     pub frame: Frame,
     pub curriculum_answer: CurriculumAnswer,
     pub app_server_header: AppServerHeader,
@@ -506,6 +509,48 @@ pub enum ConfigurationChange {
     Timings(Timings),
     Limits(Limits),
     Texts(Texts),
+}
+#[rustfmt::skip]
+pub type ConfigurationRevision = i64;
+#[rustfmt::skip]
+pub type ConfigurationRequestId = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct FullConfigurationRequest {
+    pub configuration_request_id: ConfigurationRequestId,
+    pub configuration_revision: ConfigurationRevision,
+    pub configuration_change: ConfigurationChange,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Historical {
+    New,
+    Replay,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum FullConfigurationDisposition {
+    Replaced,
+    Unchanged,
+    Stale(ConfigurationRevision),
+    IdentifierConflict,
+}
+#[rustfmt::skip]
+pub type ObservedRevision = ConfigurationRevision;
+#[rustfmt::skip]
+pub type ResultingRevision = ConfigurationRevision;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct FullConfigurationReceipt {
+    pub full_configuration_request: FullConfigurationRequest,
+    pub observed_revision: ObservedRevision,
+    pub resulting_revision: ResultingRevision,
+    pub full_configuration_disposition: FullConfigurationDisposition,
+    pub historical: Historical,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1244,6 +1289,7 @@ pub struct Withdraw_Data {
 pub enum Query {
     Configuration,
     Configure(ConfigurationChange),
+    FullConfigure(FullConfigurationRequest),
     ConfigureEntry(ConfigurationEntry),
     RemoveEntry(EntryKey),
     ConsumeReset(ResetRequest),
@@ -1467,6 +1513,7 @@ pub enum WithdrawRejected_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Response {
     Configured(ConfigureOutcome),
+    FullConfigured(FullConfigurationReceipt),
     Configuration(ConfigurationSnapshot),
     ResetConsumed(ResetOutcome),
     FlowRegistered(signal_flow::FlowNode),
