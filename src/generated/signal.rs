@@ -773,13 +773,10 @@ pub enum Kind {
     Notice,
     Question,
     Psyche,
-
-
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-
 pub struct Sender {
     pub address: flow_ethos::Address,
     pub flow_id: signal_flow::FlowId,
@@ -798,7 +795,6 @@ pub enum Body {
     Words(String),
     Psyche(PsycheWords),
     Psyches(std::vec::Vec<PsycheWords>),
-
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -828,8 +824,6 @@ pub enum Gate {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct DeliveryRequest {
     pub delivery_id: DeliveryId,
-
-
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

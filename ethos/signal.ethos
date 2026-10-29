@@ -478,6 +478,7 @@ Signal
             MiddleAbrupt.Letter
             Soft.Letter ]
 
+  Gate.[ Kept Forced ]
   DeliveryRequest.{ DeliveryId }
 
   InterruptWitness.[ NotRequested Observed Unobserved ]
