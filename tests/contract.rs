@@ -506,3 +506,63 @@ fn configure_topic_refusal_round_trips() {
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
 }
+
+/// The default Minutes is a configuration family of its own: one whole
+/// number of minutes, declared whole over Configure and read back as the
+/// snapshot's last field. A declaration the Minutes rule refuses answers
+/// ConfigureRejected.MinutesRefused and changes nothing.
+#[test]
+fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
+    let text = "Configure.DefaultMinutes.45";
+    let query = Potential::<Query>::from(text)
+        .actualize(&mut budget())
+        .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        query
+    );
+    for reply in [
+        "ConfigureRejected.MinutesRefused.Zero",
+        "ConfigureRejected.MinutesRefused.Negative",
+        "ConfigureRejected.MinutesRefused.Unreachable",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [] [] [] [] [] None 45 }",
+    ] {
+        let response = Potential::<Response>::from(reply)
+            .actualize(&mut budget())
+            .unwrap_or_else(|error| panic!("{reply}: {error:?}"));
+        assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            response
+        );
+    }
+}
+
+/// What one hand-over types is a Waking: every queued input under its own
+/// logical id, its own sender and its own priority, one top-level vector,
+/// oldest first. A Task, the reminder Flow raised for it and a Done each
+/// name who sent them; none is folded into another's Notice.
+#[test]
+fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
+    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ logical-delivery-00000000000000000001 Owner Waking.[ { logical-delivery-00000000000000000001 Sender.{ Psyche flow Primary } MiddleAbrupt.Task.{ 30 «Draft the proposal.» } } { logical-delivery-00000000000000000002 Flow Soft.Notice.«Reminder 1 of 4: task logical-delivery-00000000000000000001 has no Done.» } { logical-delivery-00000000000000000003 Sender.{ Mind flow Secondary } Soft.Done.{ logical-delivery-00000000000000000000 «Proposal drafted.» } } ] } }";
+    let query = Potential::<Query>::from(text)
+        .actualize(&mut budget())
+        .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        query
+    );
+    // One input alone is a Waking of one; the single-input form is gone.
+    assert!(
+        Potential::<Query>::from(
+            "Deliver.{ attempt-8 7d41e0 Soft.{ logical-delivery-00000000000000000004 Owner NativeInput.{ logical-delivery-00000000000000000004 Flow Soft.Notice.«One alone.» } } }"
+        )
+        .actualize(&mut budget())
+        .is_err()
+    );
+}
