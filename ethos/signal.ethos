@@ -267,7 +267,7 @@ Signal
   ; The process sockets are separately supplied by Library.Start; this
   ; record is not a Configure wire payload.
   ; A Nexus that does not own a Message Nexus executable carries None.
-  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath Option<MessageNexusBinary> Lease }
+  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> Lease }
   ; The model a seat of one layer and aspect runs; a Start naming another
   ; model for that seat is refused.
   ConfigureModel.{ Layer Aspect Native.String }
@@ -277,7 +277,7 @@ Signal
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
   ; A Nexus that does not own a Message Nexus executable carries None.
-  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath Option<MessageNexusBinary> CurriculumNexusPath Lease }
+  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> CurriculumNexusPath Lease }
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }

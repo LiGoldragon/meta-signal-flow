@@ -10,7 +10,7 @@ pub struct NexusRuntimeSettings {
     pub next_codex: flow_ethos::NextCodex,
     pub harness_profile_vector: std::vec::Vec<flow_ethos::HarnessProfile>,
     pub meta_aspects: flow_ethos::MetaAspects,
-    pub message_nexus_path: flow_ethos::MessageNexusPath,
+    pub message_nexus_path_option: std::option::Option<flow_ethos::MessageNexusPath>,
     pub message_nexus_binary_option: std::option::Option<flow_ethos::MessageNexusBinary>,
     pub lease: flow_ethos::Lease,
 }
@@ -52,7 +52,7 @@ pub struct ConfigureNexus {
     pub next_codex: flow_ethos::NextCodex,
     pub harness_profiles: flow_ethos::HarnessProfiles,
     pub meta_aspects: flow_ethos::MetaAspects,
-    pub message_nexus_path: flow_ethos::MessageNexusPath,
+    pub message_nexus_path_option: std::option::Option<flow_ethos::MessageNexusPath>,
     pub message_nexus_binary_option: std::option::Option<flow_ethos::MessageNexusBinary>,
     pub curriculum_nexus_path: CurriculumNexusPath,
     pub lease: flow_ethos::Lease,

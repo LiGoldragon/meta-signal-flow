@@ -136,7 +136,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         &[signal_flow::Aspect::Psyche, signal_flow::Aspect::Mind]
     );
     assert_eq!(
-        configuration.nexus.message_nexus_path,
+        configuration.nexus.message_nexus_path_option,
         "/srv/message-nexus.sock"
     );
     assert_eq!(
