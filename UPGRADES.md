@@ -2,6 +2,15 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 48.0.0: Message Nexus executable identity is optional
+
+- `ConfigureNexus.message_nexus_binary` and
+  `NexusRuntimeSettings.message_nexus_binary` carry
+  `Option<MessageNexusBinary>`. `None` declares that the Flow Nexus does not
+  own a Message Nexus executable.
+- Major: both record archives change. Update their producers and consumers
+  together.
+
 ## 47.0.0: lifecycle replies retain their run identities
 
 - Meta lifecycle replies again carry their useful Flow ids. Version 46

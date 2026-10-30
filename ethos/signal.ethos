@@ -266,7 +266,8 @@ Signal
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
   ; record is not a Configure wire payload.
-  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath MessageNexusBinary Lease }
+  ; A Nexus that does not own a Message Nexus executable carries None.
+  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects MessageNexusPath Option<MessageNexusBinary> Lease }
   ; The model a seat of one layer and aspect runs; a Start naming another
   ; model for that seat is refused.
   ConfigureModel.{ Layer Aspect Native.String }
@@ -275,7 +276,8 @@ Signal
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
-  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary CurriculumNexusPath Lease }
+  ; A Nexus that does not own a Message Nexus executable carries None.
+  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects MessageNexusPath Option<MessageNexusBinary> CurriculumNexusPath Lease }
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
