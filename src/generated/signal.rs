@@ -11,7 +11,7 @@ pub struct NexusRuntimeSettings {
     pub harness_profile_vector: std::vec::Vec<flow_ethos::HarnessProfile>,
     pub meta_aspects: flow_ethos::MetaAspects,
     pub message_nexus_path: flow_ethos::MessageNexusPath,
-    pub message_nexus_binary: std::option::Option<flow_ethos::MessageNexusBinary>,
+    pub message_nexus_binary_option: std::option::Option<flow_ethos::MessageNexusBinary>,
     pub lease: flow_ethos::Lease,
 }
 #[rustfmt::skip]
@@ -53,7 +53,7 @@ pub struct ConfigureNexus {
     pub harness_profiles: flow_ethos::HarnessProfiles,
     pub meta_aspects: flow_ethos::MetaAspects,
     pub message_nexus_path: flow_ethos::MessageNexusPath,
-    pub message_nexus_binary: std::option::Option<flow_ethos::MessageNexusBinary>,
+    pub message_nexus_binary_option: std::option::Option<flow_ethos::MessageNexusBinary>,
     pub curriculum_nexus_path: CurriculumNexusPath,
     pub lease: flow_ethos::Lease,
 }
