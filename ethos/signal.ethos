@@ -407,6 +407,7 @@ Signal
   QueueDeliveryResolution.{ QueueAttemptId QueueResolutionOutcome QueueResolutionReason }
   ResolverIdentity.{ ProcessIdentity Option<FlowId> }
   QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
+  ResolveQueueDeliveryRejection.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered.NativeReceipt ]
   QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueueEvidence QueueDeliveryStanding }
   QueueRequestId.String
   LegacyArchiveEntry.{ QueueRequestId Address QueueEvidence Vector<QueueAttemptId> }

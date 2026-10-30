@@ -598,6 +598,20 @@ pub struct QueueResolutionRecord {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ResolveQueueDeliveryRejection {
+    UnknownAttempt,
+    NotUncertain,
+    NotOldest,
+    EmptyReason,
+    StoreRefused,
+    NativeReceiptRequired,
+    LegacyUncorrelated,
+    AlreadyResolved(QueueResolutionRecord),
+    AlreadyDelivered(signal_flow::NativeReceipt),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct QueueDelivery {
     pub queue_attempt_id: QueueAttemptId,
     pub flow_id: signal_flow::FlowId,
