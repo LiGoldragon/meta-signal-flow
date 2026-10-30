@@ -2,6 +2,19 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 43.0.0: signal-flow 35.0.0; a refused Unidentified carries its seat evidence
+
+- Pins signal-flow 09ad7a (35.0.0), where `Refusal.Unidentified` carries
+  `SeatEvidence` instead of `Process`. meta-signal-flow declares no type of
+  its own for it, but `OrdinarySendOutcome.Refused.Refusal` and
+  `Failed.SendFailure` hold a `Refusal`, so `SendOutcomesRead` and every
+  record `SendOutcomeRecord` shapes change in datom and rkyv archive:
+  `Refused.Unidentified.{ Some.{ herdr-1 w1-2 } Some.«Claude research» None
+  1761800000 { 4242 987654 } }`. Re-exports follow signal-flow.
+- Major: a consumer built against 42.0.0 cannot read these records.
+  Consumers pin meta-signal-flow 43.0.0 together with signal-flow 35.0.0; no
+  compatibility path.
+
 ## 42.0.0: Configure.Counters; the snapshot ends with the counters
 
 - `ConfigurationChange` appends `Counters.ConfigureCounters`, its own
