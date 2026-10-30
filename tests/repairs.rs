@@ -2,16 +2,15 @@
 //! where its flow lives, and takes one queued request out of its queue. The
 //! expected texts are written out here, not computed through the codec.
 
-use flow_ethos::{Address, Aspect, Layer, Lock};
+use flow_ethos::{Address, Aspect, Layer, Lock, State};
 use meta_signal_flow::{
-    InspectRejected_Data, Inspected_Data, Query, Rebind_Data, RebindRejected_Data, Rebinding,
-    Response, VisibleAttempt, VisibleBinding, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
-    VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
+    Binding, InspectRejected_Data, Inspected_Data, Query, Rebind_Data, RebindRejected_Data,
+    Rebinding, Response, VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery,
+    VisibleQueueDeliveryStanding, VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
 };
 use signal_flow::{
-    EndpointSelection, FlowLifecycle, HarnessKind, HerdrRoute, HerdrRouteSelection, Process,
-    VisibleFlowNode, VisibleMessage, VisibleMetaflow, VisibleNativeInput, VisibleOrigin,
-    VisibleRequest, VisibleSender, VisibleState,
+    EndpointSelection, FlowLifecycle, FlowNode, HarnessKind, HerdrRoute, HerdrRouteSelection,
+    Origin, Process, VisibleMessage, VisibleNativeInput, VisibleRequest, VisibleSender,
 };
 
 fn address() -> Address {
@@ -30,8 +29,9 @@ fn sender() -> Address {
     }
 }
 
-fn node() -> VisibleFlowNode {
-    VisibleFlowNode {
+fn node() -> FlowNode {
+    FlowNode {
+        flow_id: "f1c841".into(),
         session_id: "s1".into(),
         harness_kind: HarnessKind::Claude,
         endpoint_selection: EndpointSelection::Unavailable,
@@ -41,7 +41,7 @@ fn node() -> VisibleFlowNode {
             herdr_pane_id: "w7B".into(),
             herdr_terminal_id: "t1".into(),
         }),
-        visible_origin: VisibleOrigin::Unbound,
+        origin: Origin::Unbound,
         flow_lifecycle: FlowLifecycle::Active,
     }
 }
@@ -49,7 +49,6 @@ fn node() -> VisibleFlowNode {
 fn visible_entry() -> VisibleNativeInput {
     VisibleNativeInput {
         visible_sender: VisibleSender::Sender(sender()),
-        address: address(),
         visible_message: VisibleMessage::Soft(VisibleRequest::Order("go".into())),
     }
 }
@@ -67,12 +66,12 @@ fn inspected() -> Response {
     Response::Inspected(Inspected_Data {
         visible_metaflow: VisibleMetaflow {
             address: address(),
-            visible_state: VisibleState::Awake,
-            integer: 1,
+            state: State::Awake("f1c841".into()),
+            flow_id_vector: vec!["9a83ec".into()],
             visible_native_input_vector: vec![visible_entry()],
         },
-        visible_binding: VisibleBinding {
-            visible_flow_node_option: Some(node()),
+        binding: Binding {
+            flow_node_option: Some(node()),
             process_option: Some(Process {
                 pid: 4242,
                 started: 17,
@@ -111,12 +110,12 @@ fn replies() -> Vec<Response> {
         Response::Inspected(Inspected_Data {
             visible_metaflow: VisibleMetaflow {
                 address: address(),
-                visible_state: VisibleState::Asleep,
-                integer: 0,
+                state: State::Asleep,
+                flow_id_vector: vec![],
                 visible_native_input_vector: vec![],
             },
-            visible_binding: VisibleBinding {
-                visible_flow_node_option: None,
+            binding: Binding {
+                flow_node_option: None,
                 process_option: None,
             },
             lock_vector: vec![],
@@ -191,8 +190,8 @@ mod datom {
     #[test]
     fn repair_replies_have_concrete_datoms() {
         let texts = [
-            "Inspected.{ { { Mind flow Secondary } Awake 1 [ { Sender.{ Psyche core Secondary } { Mind flow Secondary } Soft.Order.go } ] } { Some.{ s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Secondary } { Mind flow Secondary } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Secondary } { Mind flow Secondary } Soft.Order.go } Prepared } ] }",
-            "Inspected.{ { { Mind flow Secondary } Asleep 0 [] } { None None } [] [] }",
+            "Inspected.{ { { Mind flow Secondary } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Secondary } Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Secondary } { Mind flow Secondary } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Secondary } Soft.Order.go } Prepared } ] }",
+            "Inspected.{ { { Mind flow Secondary } Asleep [] [] } { None None } [] [] }",
             "InspectRejected.UnknownAddress",
             "Rebound.{ Mind flow Secondary }",
             "RebindRejected.UnknownAddress",

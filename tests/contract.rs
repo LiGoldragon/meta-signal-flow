@@ -39,7 +39,7 @@ fn privileged_requests_have_concrete_datoms() {
 
 #[test]
 fn bind_existing_result_preserves_each_explicit_outcome() {
-    let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } } Bound.RegisteredUnconfirmed }";
+    let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } Bound.{ psyche-flow RegisteredUnconfirmed } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -286,7 +286,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
     assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
-        "FlowRetired.{ claude-session Claude Unavailable Unavailable Flow.field-session Retired }",
+        "FlowRetired.{ d8df70 claude-session Claude Unavailable Unavailable Flow.{ 88475f field-session } Retired }",
         "RetireRejected.UnknownFlow",
         "RetireRejected.AlreadyGone",
         "RetireRejected.StoreRefused",
@@ -308,10 +308,10 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } { Mind flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Nexus { Mind flow Secondary } Text.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Sender.{ Field core Primary } { Mind flow Secondary } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
-        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } { Mind flow Secondary } Text./compact } }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» } }",
+        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Nexus Text.«Stop the ouranos build now.» } }",
+        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Sender.{ Field core Primary } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
+        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } Text./compact } }",
         "Command.{ 7d41e0 Compact }",
         "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",
@@ -340,16 +340,16 @@ fn delivery_replies_have_concrete_datoms() {
         "DeliveryRejected.BodyRefused.HarnessCommand./compact",
         "DeliveryRejected.BodyRefused.ControlCharacter.14",
         "Vetted",
-        "Commanded.{ Compact Transported }",
+        "Commanded.{ 7d41e0 Compact Transported }",
         "CommandRejected.UnsupportedForHarness",
         "CommandRejected.FlowRetired",
         "CommandRejected.FlowExited",
         "CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }",
         "CommandRejected.CompactionRefused.Unmeasured",
         "CommandRejected.CompactionRefused.NoThreshold",
-        "PeerResolved.{ Psyche High claude-opus-5-5 }",
+        "PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
-        "MetaRefused.PeerNotAuthorized.{ Field Medium gpt-5.5 }",
+        "MetaRefused.PeerNotAuthorized.{ da88cf Field Medium gpt-5.5 }",
         "MetaRefused.PeerUnknown",
     ] {
         let response = Potential::<Response>::from(text)
@@ -372,16 +372,11 @@ fn a_message_textualizes_with_its_priority_head_first() {
             topic: "flow".into(),
             layer: signal_flow::Layer::Secondary,
         }),
-        address: signal_flow::Address {
-            aspect: signal_flow::Aspect::Mind,
-            topic: "flow".into(),
-            layer: signal_flow::Layer::Secondary,
-        },
         content: meta_signal_flow::Content::Text("Stage 1 is deployed; run the tier tests.".into()),
     });
     assert_eq!(
         message.datomize(vec![]).protosize().compact(),
-        "Soft.{ Sender.{ Psyche flow Secondary } { Mind flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» }"
+        "Soft.{ Sender.{ Psyche flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» }"
     );
 }
 
@@ -559,12 +554,12 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
     }
 }
 
-/// What one hand-over types is a Waking: every queued input names its sender,
-/// recipient and priority, one top-level vector, oldest first. Private ledger
+/// What one hand-over types is a Waking: every queued input names its sender
+/// and priority, one top-level vector, oldest first. Private ledger
 /// keys never enter the prompt.
 #[test]
 fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
-    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ Nexus { Mind flow Secondary } Waking.[ { Sender.{ Psyche flow Primary } { Mind flow Secondary } MiddleAbrupt.Task.{ 30 «Draft the proposal.» } } { Nexus { Mind flow Secondary } Soft.Notice.«Reminder 1 of 4: task has no Done.» } { Sender.{ Mind flow Secondary } { Psyche flow Primary } Soft.Done.Answered.{ Task.{ 30 «Draft the proposal.» } «Proposal drafted.» } } ] } }";
+    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ Nexus Waking.[ { Sender.{ Psyche flow Primary } MiddleAbrupt.Task.{ 30 «Draft the proposal.» } } { Nexus Soft.Notice.«Reminder 1 of 4: task has no Done.» } { Sender.{ Mind flow Secondary } Soft.Done.Answered.{ Task.{ 30 «Draft the proposal.» } «Proposal drafted.» } } ] } }";
     let query = Potential::<Query>::from(text)
         .actualize(&mut budget())
         .unwrap_or_else(|error| panic!("{text}: {error:?}"));
@@ -577,7 +572,7 @@ fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
     // One input alone is a Waking of one; the single-input form is gone.
     assert!(
         Potential::<Query>::from(
-            "Deliver.{ attempt-8 7d41e0 Soft.{ Nexus { Mind flow Secondary } NativeInput.{ Nexus { Mind flow Secondary } Soft.Notice.«One alone.» } } }"
+            "Deliver.{ attempt-8 7d41e0 Soft.{ Nexus NativeInput.{ Nexus Soft.Notice.«One alone.» } } }"
         )
         .actualize(&mut budget())
         .is_err()

@@ -2,19 +2,19 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
-## 46.0.0: lifecycle replies project private run identities away
+## 47.0.0: lifecycle replies retain their run identities
 
-- Registration, adoption, retirement, peer resolution, event reading,
-  command and inspection replies use dedicated visible lifecycle values.
-  They preserve the operational state without exposing a `FlowId` through
-  an ordinary meta operation. `Debug.Address` remains the sole explicit
-  interface that returns run and logical-delivery ids.
-- The complete private flow node, binding, launch attempt and event types
-  stay unchanged for Flow's routing and Memory. This is a wire projection
-  only and changes no stored row or schema hash.
-- Major: meta `Response` archives change. Consumers pin meta-signal-flow
-  46.0.0 with signal-flow 37.0.0 and update every producer and consumer
-  together.
+- Meta lifecycle replies again carry their useful Flow ids. Version 46
+  removed them too broadly while projecting delivery-ledger ids away.
+- A recipient-visible `Letter` carries its sender and content. Its recipient
+  is routing state inside the Nexus, not envelope data repeated to that
+  recipient.
+- Pins signal-flow 38.0.0.
+
+## 46.0.0: lifecycle replies projected run identities away
+
+- This release removed Flow ids from lifecycle replies. Version 47 restores
+  them while retaining the operational delivery projections from version 45.
 
 ## 45.0.0: Inspect projects queued delivery attempts
 
