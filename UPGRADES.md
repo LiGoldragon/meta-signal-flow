@@ -2,6 +2,27 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 42.0.0: Configure.Counters; the snapshot ends with the counters
+
+- `ConfigurationChange` appends `Counters.ConfigureCounters`, its own
+  family: `Configure.Counters.{ 120 45 300 }` names the next logical
+  delivery, the next queue attempt and the next send outcome a Nexus
+  allocates. A store that has allocated nothing reads `{ 1 3 1 }`.
+- `ConfigurationSnapshot` appends `Counters.ConfigureCounters`, so a
+  snapshot ends with it: `Configuration.{ … None 45 { 120 45 300 } }`.
+  An operator reads an old store's counters there before carrying them to
+  a new one.
+- `ConfigureRejection` appends `CountersRefused.CountersRefusal`:
+  `NotEmpty` (the store has recorded a logical delivery, a queue attempt
+  or a send outcome), `Lowered.ConfigureCounters` (a value is below its
+  family's counter; it carries the counters as they stand), `NotRunning`
+  (a Nexus opened for configuration only holds no counters).
+- Major, not minor: the appended snapshot field changes the shape of
+  every `Configuration` answer, positional in its datom and in its rkyv
+  archive, so a consumer built against 41.0.0 cannot read a 42.0.0
+  snapshot. The appended variants alone would be additive. Consumers pin
+  42.0.0; no compatibility path.
+
 ## 41.0.0: variants removed; signal-flow 34.0.0
 
 - Pins signal-flow fb13fa (34.0.0), the release that marks the removal of

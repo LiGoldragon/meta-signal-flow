@@ -44,7 +44,7 @@
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
-; LeaveOuts, Nexus, SendServers, Metaflows, Investigation or DefaultMinutes. The declared value replaces that family's committed
+; LeaveOuts, Nexus, SendServers, Metaflows, Investigation, DefaultMinutes or Counters. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
@@ -62,10 +62,23 @@
 ; endpoints, LeaveOutNotForHarness when an entry names a leave-out of
 ; another harness than its own, MinutesRefused when a DefaultMinutes is
 ; refused by the rule a Task's Minutes meets at admission (Zero, Negative,
-; Unreachable). Configuration reads the committed Nexus, the committed
+; Unreachable), CountersRefused when a Counters is refused (below).
+; Configuration reads the committed Nexus, the committed
 ; model, threshold, leave-out, send-server and metaflow vectors, the
-; Investigation seat and the default Minutes; it answers Unconfigured while
-; no Nexus has been declared.
+; Investigation seat, the default Minutes and the counters; it answers
+; Unconfigured while no Nexus has been declared.
+;
+; Counters names the next id each family allocates: the next logical
+; delivery, the next queue attempt, the next send outcome. A store that
+; has allocated nothing reads { 1 3 1 }: a queue attempt's number is also
+; its Codex app-server request id, whose first two a connection reserves.
+; A Counters is taken only on an empty store, one that has recorded no
+; logical delivery, no queue attempt and no send outcome, so a new store
+; continues the ids of the store it replaces; it is refused NotEmpty
+; otherwise, Lowered (carrying the counters as they stand) when any value
+; is below its family's counter now, and NotRunning by a Nexus opened for
+; configuration only, which holds no counters. A refused Counters changes
+; nothing.
 ;
 ; DefaultMinutes is the Minutes Flow gives a request that carries none of
 ; its own: the Minutes a migrated Order takes. A new Memory holds the
@@ -284,6 +297,9 @@ Signal
   ; composes into the system prompt and into the first user message, how
   ; it continues, its purpose and the records it rests on.
   ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
+  ; The next id each family allocates.
+  ConfigureCounters.{ LogicalDelivery.Integer QueueAttempt.Integer SendOutcome.Integer }
+  CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
@@ -292,16 +308,17 @@ Signal
                          SendServers.Vector<ConfigureSendServer>
                          Metaflows.Vector<ConfigureMetaflow>
                          Investigation.Address
-                         DefaultMinutes.Minutes ]
+                         DefaultMinutes.Minutes
+                         Counters.ConfigureCounters ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> DefaultMinutes.Minutes }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> DefaultMinutes.Minutes Counters.ConfigureCounters }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

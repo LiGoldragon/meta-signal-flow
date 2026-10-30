@@ -95,6 +95,28 @@ pub struct ConfigureMetaflow {
     pub records: Records,
 }
 #[rustfmt::skip]
+pub type LogicalDelivery = i64;
+#[rustfmt::skip]
+pub type QueueAttempt = i64;
+#[rustfmt::skip]
+pub type SendOutcome = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureCounters {
+    pub logical_delivery: LogicalDelivery,
+    pub queue_attempt: QueueAttempt,
+    pub send_outcome: SendOutcome,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum CountersRefusal {
+    NotEmpty,
+    Lowered(ConfigureCounters),
+    NotRunning,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
@@ -106,6 +128,7 @@ pub enum ConfigurationChange {
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
     Investigation(flow_ethos::Address),
     DefaultMinutes(flow_ethos::Minutes),
+    Counters(ConfigureCounters),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -131,6 +154,8 @@ pub type Investigation = std::option::Option<flow_ethos::Address>;
 #[rustfmt::skip]
 pub type DefaultMinutes = flow_ethos::Minutes;
 #[rustfmt::skip]
+pub type Counters = ConfigureCounters;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -142,6 +167,7 @@ pub struct ConfigurationSnapshot {
     pub metaflows: Metaflows,
     pub investigation: Investigation,
     pub default_minutes: DefaultMinutes,
+    pub counters: Counters,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
@@ -180,6 +206,7 @@ pub enum ConfigureRejection {
     LeaveOutNotForHarness,
     TopicRefused(flow_ethos::Topic),
     MinutesRefused(signal_flow::MinutesRefusal),
+    CountersRefused(CountersRefusal),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
