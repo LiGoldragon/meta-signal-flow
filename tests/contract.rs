@@ -308,10 +308,10 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ m-81b0e4 Owner Text.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ m-90c1aa Flow.88475f Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
-        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ m-a2d913 Flow.e167d8 Text./compact } }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } { Mind flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» } }",
+        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Nexus { Mind flow Secondary } Text.«Stop the ouranos build now.» } }",
+        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Sender.{ Field core Primary } { Mind flow Secondary } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
+        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } { Mind flow Secondary } Text./compact } }",
         "Command.{ 7d41e0 Compact }",
         "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",
@@ -326,9 +326,9 @@ fn delivery_requests_have_concrete_datoms() {
 #[test]
 fn delivery_replies_have_concrete_datoms() {
     for text in [
-        "Delivered.{ m-7f3a2c:7d41e0:0 7d41e0 NotRequested Presented }",
-        "Delivered.{ m-81b0e4:7d41e0:0 7d41e0 Observed Transported }",
-        "Delivered.{ m-81b0e5:7d41e0:1 7d41e0 Unobserved Uncertain }",
+        "Delivered.{ NotRequested Presented }",
+        "Delivered.{ Observed Transported }",
+        "Delivered.{ Unobserved Uncertain }",
         "DeliveryRejected.RecipientBlocked",
         "DeliveryRejected.RecipientWorking",
         "DeliveryRejected.ComposerOccupied",
@@ -339,7 +339,7 @@ fn delivery_replies_have_concrete_datoms() {
         "DeliveryRejected.BodyRefused.EmptyBody",
         "DeliveryRejected.BodyRefused.HarnessCommand./compact",
         "DeliveryRejected.BodyRefused.ControlCharacter.14",
-        "Vetted.7d41e0",
+        "Vetted",
         "Commanded.{ 7d41e0 Compact Transported }",
         "CommandRejected.UnsupportedForHarness",
         "CommandRejected.FlowRetired",
@@ -367,13 +367,21 @@ fn delivery_replies_have_concrete_datoms() {
 #[test]
 fn a_message_textualizes_with_its_priority_head_first() {
     let message = meta_signal_flow::Message::Soft(meta_signal_flow::Letter {
-        message_id: "m-7f3a2c".into(),
-        sender: meta_signal_flow::Sender::Flow("e167d8".into()),
+        visible_sender: signal_flow::VisibleSender::Sender(signal_flow::Address {
+            aspect: signal_flow::Aspect::Psyche,
+            topic: "flow".into(),
+            layer: signal_flow::Layer::Secondary,
+        }),
+        address: signal_flow::Address {
+            aspect: signal_flow::Aspect::Mind,
+            topic: "flow".into(),
+            layer: signal_flow::Layer::Secondary,
+        },
         content: meta_signal_flow::Content::Text("Stage 1 is deployed; run the tier tests.".into()),
     });
     assert_eq!(
         message.datomize(vec![]).protosize().compact(),
-        "Soft.{ m-7f3a2c Flow.e167d8 Text.«Stage 1 is deployed; run the tier tests.» }"
+        "Soft.{ Sender.{ Psyche flow Secondary } { Mind flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» }"
     );
 }
 
@@ -551,13 +559,12 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
     }
 }
 
-/// What one hand-over types is a Waking: every queued input under its own
-/// logical id, its own sender and its own priority, one top-level vector,
-/// oldest first. A Task, the reminder Flow raised for it and a Done each
-/// name who sent them; none is folded into another's Notice.
+/// What one hand-over types is a Waking: every queued input names its sender,
+/// recipient and priority, one top-level vector, oldest first. Private ledger
+/// keys never enter the prompt.
 #[test]
 fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
-    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ logical-delivery-00000000000000000001 Owner Waking.[ { logical-delivery-00000000000000000001 Sender.{ Psyche flow Primary } MiddleAbrupt.Task.{ 30 «Draft the proposal.» } } { logical-delivery-00000000000000000002 Flow Soft.Notice.«Reminder 1 of 4: task logical-delivery-00000000000000000001 has no Done.» } { logical-delivery-00000000000000000003 Sender.{ Mind flow Secondary } Soft.Done.{ logical-delivery-00000000000000000000 «Proposal drafted.» } } ] } }";
+    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ Nexus { Mind flow Secondary } Waking.[ { Sender.{ Psyche flow Primary } { Mind flow Secondary } MiddleAbrupt.Task.{ 30 «Draft the proposal.» } } { Nexus { Mind flow Secondary } Soft.Notice.«Reminder 1 of 4: task has no Done.» } { Sender.{ Mind flow Secondary } { Psyche flow Primary } Soft.Done.Answered.{ Task.{ 30 «Draft the proposal.» } «Proposal drafted.» } } ] } }";
     let query = Potential::<Query>::from(text)
         .actualize(&mut budget())
         .unwrap_or_else(|error| panic!("{text}: {error:?}"));
@@ -570,7 +577,7 @@ fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
     // One input alone is a Waking of one; the single-input form is gone.
     assert!(
         Potential::<Query>::from(
-            "Deliver.{ attempt-8 7d41e0 Soft.{ logical-delivery-00000000000000000004 Owner NativeInput.{ logical-delivery-00000000000000000004 Flow Soft.Notice.«One alone.» } } }"
+            "Deliver.{ attempt-8 7d41e0 Soft.{ Nexus { Mind flow Secondary } NativeInput.{ Nexus { Mind flow Secondary } Soft.Notice.«One alone.» } } }"
         )
         .actualize(&mut budget())
         .is_err()
@@ -620,7 +627,7 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
 /// datom.
 #[test]
 fn a_send_outcome_refused_unidentified_carries_its_seat_evidence() {
-    let text = "SendOutcomesRead.[ { outcome-1 Some.{ 4242 987654 } None None digest-1 Refused.Unidentified.{ Some.{ herdr-1 w1-2 } Some.«Claude research» Some.01a0fdcc-c1a1 1761800000 { 4242 987654 } } } ]";
+    let text = "SendOutcomesRead.[ { Some.{ 4242 987654 } None None digest-1 Refused.Unidentified.{ Some.{ herdr-1 w1-2 } Some.«Claude research» Some.01a0fdcc-c1a1 1761800000 { 4242 987654 } } } ]";
     let value = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();

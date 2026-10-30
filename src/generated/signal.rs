@@ -358,18 +358,9 @@ pub enum RetireRejection {
 #[rustfmt::skip]
 pub type DeliveryId = String;
 #[rustfmt::skip]
-pub type MessageId = String;
-#[rustfmt::skip]
 pub type CommandLine = String;
 #[rustfmt::skip]
 pub type ByteOffset = i64;
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Sender {
-    Flow(signal_flow::FlowId),
-    Owner,
-}
 #[rustfmt::skip]
 pub type PsycheContext = String;
 #[rustfmt::skip]
@@ -385,7 +376,7 @@ pub struct Psyche_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Content {
-    Waking(std::vec::Vec<flow_ethos::NativeInput>),
+    Waking(std::vec::Vec<signal_flow::VisibleNativeInput>),
     Text(String),
     Psyche(Psyche_Data),
 }
@@ -393,8 +384,8 @@ pub enum Content {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Letter {
-    pub message_id: MessageId,
-    pub sender: Sender,
+    pub visible_sender: signal_flow::VisibleSender,
+    pub address: flow_ethos::Address,
     pub content: Content,
 }
 #[rustfmt::skip]
@@ -633,7 +624,7 @@ pub type RequestDigest = String;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct Legacy_Data {
+pub struct QueueEvidence_Legacy_Data {
     pub sent_by: signal_flow::SentBy,
     pub request: signal_flow::Request,
 }
@@ -642,7 +633,7 @@ pub struct Legacy_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum QueueEvidence {
     Logical(flow_ethos::QueueEntry),
-    Legacy(Legacy_Data),
+    Legacy(QueueEvidence_Legacy_Data),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -689,6 +680,113 @@ pub enum Attempt {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleDelivery {
+    pub interrupt_witness: InterruptWitness,
+    pub delivery_grade: DeliveryGrade,
+}
+#[rustfmt::skip]
+pub type VisibleResolverIdentity = ProcessIdentity;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleQueueResolutionRecord {
+    pub queue_resolution_outcome: QueueResolutionOutcome,
+    pub visible_resolver_identity: VisibleResolverIdentity,
+    pub queue_resolution_reason: QueueResolutionReason,
+    pub unix_seconds: UnixSeconds,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleQueueDeliveryStanding {
+    Prepared,
+    Uncertain(std::option::Option<Undecided>),
+    ReceiptRecorded,
+    Absent(AbsenceProof),
+    Resolved(VisibleQueueResolutionRecord),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleQueueEvidence_Legacy_Data {
+    pub visible_sender: signal_flow::VisibleSender,
+    pub visible_request: signal_flow::VisibleRequest,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleQueueEvidence {
+    Logical(signal_flow::VisibleNativeInput),
+    Legacy(VisibleQueueEvidence_Legacy_Data),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleQueueDelivery {
+    pub native_session_id: signal_flow::NativeSessionId,
+    pub harness_kind: signal_flow::HarnessKind,
+    pub visible_queue_evidence: VisibleQueueEvidence,
+    pub visible_queue_delivery_standing: VisibleQueueDeliveryStanding,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleQueueDeliveryResolution {
+    pub queue_resolution_outcome: QueueResolutionOutcome,
+    pub queue_resolution_reason: QueueResolutionReason,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleResolveQueueDeliveryRejected {
+    UnknownAttempt,
+    NotUncertain,
+    NotOldest,
+    EmptyReason,
+    StoreRefused,
+    NativeReceiptRequired,
+    LegacyUncorrelated,
+    AlreadyResolved(VisibleQueueResolutionRecord),
+    AlreadyDelivered(signal_flow::NativeReceipt),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleOrdinarySendOutcome {
+    Accepted(signal_flow::VisibleSendAcceptance),
+    Refused(signal_flow::VisibleRefusal),
+    PriorAdmission(PriorSendOutcome),
+    Sent(signal_flow::VisibleSendReceipt),
+    Failed(signal_flow::VisibleSendFailure),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleSendOutcomeRecord {
+    pub process_option: std::option::Option<signal_flow::Process>,
+    pub first_address_option: std::option::Option<flow_ethos::Address>,
+    pub second_address_option: std::option::Option<flow_ethos::Address>,
+    pub request_digest: RequestDigest,
+    pub visible_ordinary_send_outcome: VisibleOrdinarySendOutcome,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleLegacyArchiveEntry {
+    pub address: flow_ethos::Address,
+    pub visible_queue_evidence: VisibleQueueEvidence,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DebugSnapshot {
+    pub address: flow_ethos::Address,
+    pub flow_id_vector: std::vec::Vec<signal_flow::FlowId>,
+    pub logical_delivery_id_vector: std::vec::Vec<flow_ethos::LogicalDeliveryId>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Rebinding {
     Pane(signal_flow::HerdrPaneId),
     Flow(signal_flow::FlowId),
@@ -725,6 +823,7 @@ pub enum Query {
     ReadQueueDeliveries(flow_ethos::Address),
     ReadSendOutcomes,
     ObserveLegacyArchive,
+    Debug(flow_ethos::Address),
     ResolveQueueDelivery(QueueDeliveryResolution),
     Inspect(flow_ethos::Address),
     Rebind(Rebind_Data),
@@ -749,7 +848,7 @@ pub enum ReadEventsRejected_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct QueueDeliveriesRead_Data {
     pub address: flow_ethos::Address,
-    pub queue_delivery_vector: std::vec::Vec<QueueDelivery>,
+    pub visible_queue_delivery_vector: std::vec::Vec<VisibleQueueDelivery>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -769,21 +868,7 @@ pub enum ReadSendOutcomesRejected_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct QueueDeliveryResolved_Data {
     pub address: flow_ethos::Address,
-    pub queue_delivery_resolution: QueueDeliveryResolution,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ResolveQueueDeliveryRejected_Data {
-    UnknownAttempt,
-    NotUncertain,
-    NotOldest,
-    EmptyReason,
-    StoreRefused,
-    NativeReceiptRequired,
-    LegacyUncorrelated,
-    AlreadyResolved(QueueResolutionRecord),
-    AlreadyDelivered(signal_flow::NativeReceipt),
+    pub visible_queue_delivery_resolution: VisibleQueueDeliveryResolution,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -834,9 +919,9 @@ pub enum Response {
     BindExistingRejected(BindExistingRejection),
     FlowRetired(signal_flow::FlowNode),
     RetireRejected(RetireRejection),
-    Delivered(Delivery),
+    Delivered(VisibleDelivery),
     DeliveryRejected(DeliveryRejection),
-    Vetted(signal_flow::FlowId),
+    Vetted,
     Commanded(CommandOutcome),
     CommandRejected(CommandRejection),
     PeerResolved(signal_flow::Caller),
@@ -847,16 +932,17 @@ pub enum Response {
     ReadEventsRejected(ReadEventsRejected_Data),
     QueueDeliveriesRead(QueueDeliveriesRead_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
-    SendOutcomesRead(std::vec::Vec<SendOutcomeRecord>),
+    SendOutcomesRead(std::vec::Vec<VisibleSendOutcomeRecord>),
     ReadSendOutcomesRejected(ReadSendOutcomesRejected_Data),
-    LegacyArchiveObserved(std::vec::Vec<LegacyArchiveEntry>),
+    LegacyArchiveObserved(std::vec::Vec<VisibleLegacyArchiveEntry>),
     ObserveLegacyArchiveRejected(StoreRefusal),
     QueueDeliveryResolved(QueueDeliveryResolved_Data),
-    ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data),
+    ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected),
     Inspected(Inspected_Data),
     InspectRejected(InspectRejected_Data),
     Rebound(flow_ethos::Address),
     RebindRejected(RebindRejected_Data),
-    Withdrawn(flow_ethos::LogicalDeliveryId),
+    Withdrawn,
+    Debugged(DebugSnapshot),
     WithdrawRejected(WithdrawRejected_Data),
 }

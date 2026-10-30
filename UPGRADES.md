@@ -2,6 +2,20 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 44.0.0: operational replies hide private run and delivery ids
+
+- The pane `Letter` carries a typed sender metaflow, recipient metaflow and
+  content. Its `MessageId` and `Sender.Flow.FlowId` positions leave; waking
+  content is a vector of public native inputs without logical delivery ids.
+- Delivery, queue, send-outcome and archive replies use public projections
+  without `FlowId` or `LogicalDeliveryId`. The private types used by the
+  Nexus's existing stored families remain unchanged.
+- `Debug.Address` is the one explicit meta query that answers the Address's
+  run ids and logical delivery ids. No operational response exposes them.
+- Major: Query, Response and Letter archives change shape. Consumers pin
+  meta-signal-flow 44.0.0 with signal-flow 36.0.0 and update every producer
+  and consumer together.
+
 ## 43.0.0: signal-flow 35.0.0; a refused Unidentified carries its seat evidence
 
 - Pins signal-flow 09ad7a (35.0.0), where `Refusal.Unidentified` carries

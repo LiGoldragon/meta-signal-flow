@@ -201,7 +201,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest VisibleMessage VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -217,6 +217,7 @@ Signal
   ReadQueueDeliveries.Address
   ReadSendOutcomes
   ObserveLegacyArchive
+  Debug.Address
   ResolveQueueDelivery.QueueDeliveryResolution
   Inspect.Address                               ; the metaflow whole: state, binding, queue, locks, attempts
   Rebind.{ Address
@@ -235,9 +236,9 @@ Signal
   BindExistingRejected.BindExistingRejection
   FlowRetired.FlowNode
   RetireRejected.RetireRejection
-  Delivered.Delivery
+  Delivered.VisibleDelivery
   DeliveryRejected.DeliveryRejection
-  Vetted.FlowId
+  Vetted
   Commanded.CommandOutcome
   CommandRejected.CommandRejection
   PeerResolved.Caller
@@ -246,19 +247,20 @@ Signal
   Refused.StoreRefusal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
-  QueueDeliveriesRead.{ Address Vector<QueueDelivery> }
+  QueueDeliveriesRead.{ Address Vector<VisibleQueueDelivery> }
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
-  SendOutcomesRead.Vector<SendOutcomeRecord>
+  SendOutcomesRead.Vector<VisibleSendOutcomeRecord>
   ReadSendOutcomesRejected.[ StoreRefused ]
-  LegacyArchiveObserved.Vector<LegacyArchiveEntry>
+  LegacyArchiveObserved.Vector<VisibleLegacyArchiveEntry>
   ObserveLegacyArchiveRejected.StoreRefusal
-  QueueDeliveryResolved.{ Address QueueDeliveryResolution }
-  ResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered.NativeReceipt ]
+  QueueDeliveryResolved.{ Address VisibleQueueDeliveryResolution }
+  ResolveQueueDeliveryRejected.VisibleResolveQueueDeliveryRejected
   Inspected.{ Metaflow Binding Vector<Lock> Vector<Attempt> }
   InspectRejected.[ UnknownAddress ]
   Rebound.Address
   RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
-  Withdrawn.LogicalDeliveryId
+  Withdrawn
+  Debugged.DebugSnapshot
   WithdrawRejected.[ UnknownAddress NotQueued ] ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
@@ -347,19 +349,16 @@ Signal
   ; nothing changes, and its declaration's continuity is changed first.
   RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained ]
   DeliveryId.String
-  MessageId.String
   CommandLine.String
   ByteOffset.Integer
-  Sender.[ Flow.FlowId
-           Owner ]
   PsycheContext.String
   PsycheVerbatim.String
   ; A Waking is what one hand-over types: every queued input under its
-  ; own logical id, sender and priority, one top-level vector, oldest first.
-  Content.[ Waking.Vector<NativeInput>
+  ; sender, recipient and priority, one top-level vector, oldest first.
+  Content.[ Waking.Vector<VisibleNativeInput>
             Text.String
             Psyche.{ PsycheContext PsycheVerbatim } ]
-  Letter.{ MessageId Sender Content }
+  Letter.{ VisibleSender Address Content }
   Message.[ HardAbrupt.Letter
             MiddleAbrupt.Letter
             Soft.Letter ]
@@ -424,4 +423,27 @@ Signal
   ; One attempt Flow holds outstanding for a metaflow.
   Attempt.[ Queued.QueueDelivery                ; a queued request handed to a seat and not settled
             Launch.LaunchAttempt ]              ; a launch at the metaflow's Address not settled
+  ; Operational meta replies project private routing and ledger keys away.
+  ; Debug is the one explicit interface that exposes them.
+  VisibleDelivery.{ InterruptWitness DeliveryGrade }
+  VisibleResolverIdentity.ProcessIdentity
+  VisibleQueueResolutionRecord.{ QueueResolutionOutcome VisibleResolverIdentity QueueResolutionReason UnixSeconds }
+  VisibleQueueDeliveryStanding.[ Prepared
+                                 Uncertain.Option<Undecided>
+                                 ReceiptRecorded
+                                 Absent.AbsenceProof
+                                 Resolved.VisibleQueueResolutionRecord ]
+  VisibleQueueEvidence.[ Logical.VisibleNativeInput
+                         Legacy.{ VisibleSender VisibleRequest } ]
+  VisibleQueueDelivery.{ NativeSessionId HarnessKind VisibleQueueEvidence VisibleQueueDeliveryStanding }
+  VisibleQueueDeliveryResolution.{ QueueResolutionOutcome QueueResolutionReason }
+  VisibleResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.VisibleQueueResolutionRecord AlreadyDelivered.NativeReceipt ]
+  VisibleOrdinarySendOutcome.[ Accepted.VisibleSendAcceptance
+                               Refused.VisibleRefusal
+                               PriorAdmission.PriorSendOutcome
+                               Sent.VisibleSendReceipt
+                               Failed.VisibleSendFailure ]
+  VisibleSendOutcomeRecord.{ Option<Process> Option<Address> Option<Address> RequestDigest VisibleOrdinarySendOutcome }
+  VisibleLegacyArchiveEntry.{ Address VisibleQueueEvidence }
+  DebugSnapshot.{ Address Vector<FlowId> Vector<LogicalDeliveryId> }
   ]

@@ -135,7 +135,7 @@ fn replies() -> Vec<Response> {
         Response::RebindRejected(RebindRejected_Data::NotAwake),
         Response::RebindRejected(RebindRejected_Data::HerdrUnavailable),
         Response::RebindRejected(RebindRejected_Data::FlowTaken(address())),
-        Response::Withdrawn("logical-7".into()),
+        Response::Withdrawn,
         Response::WithdrawRejected(WithdrawRejected_Data::UnknownAddress),
         Response::WithdrawRejected(WithdrawRejected_Data::NotQueued),
     ]
@@ -206,7 +206,7 @@ mod datom {
             "RebindRejected.NotAwake",
             "RebindRejected.HerdrUnavailable",
             "RebindRejected.FlowTaken.{ Mind flow Secondary }",
-            "Withdrawn.logical-7",
+            "Withdrawn",
             "WithdrawRejected.UnknownAddress",
             "WithdrawRejected.NotQueued",
         ];

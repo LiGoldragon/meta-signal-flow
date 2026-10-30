@@ -2,14 +2,15 @@
 //! metaflow's queue. The expected texts are written out here, not computed
 //! through the codec.
 
-use flow_ethos::{Address, Aspect, Layer, Request, SentBy};
+use flow_ethos::{Address, Aspect, Layer};
 use meta_signal_flow::{
-    AbsenceProof, ProcessIdentity, Query, QueueDeliveriesRead_Data, QueueDelivery,
-    QueueDeliveryResolution, QueueDeliveryResolved_Data, QueueDeliveryStanding,
-    QueueResolutionOutcome, QueueResolutionRecord, ReadQueueDeliveriesRejected_Data,
-    ResolveQueueDeliveryRejected_Data, ResolverIdentity, Response, Undecided,
+    AbsenceProof, ProcessIdentity, Query, QueueDeliveriesRead_Data, QueueDeliveryResolution,
+    QueueDeliveryResolved_Data, QueueResolutionOutcome, ReadQueueDeliveriesRejected_Data,
+    Response, Undecided, VisibleQueueDelivery, VisibleQueueDeliveryResolution,
+    VisibleQueueDeliveryStanding, VisibleQueueEvidence, VisibleQueueEvidence_Legacy_Data,
+    VisibleQueueResolutionRecord, VisibleResolveQueueDeliveryRejected,
 };
-use signal_flow::HarnessKind;
+use signal_flow::{HarnessKind, VisibleRequest, VisibleSender};
 
 fn address() -> Address {
     Address {
@@ -19,35 +20,33 @@ fn address() -> Address {
     }
 }
 
-fn delivery(standing: QueueDeliveryStanding) -> QueueDelivery {
-    QueueDelivery {
-        queue_attempt_id: "queue-attempt-3".into(),
-        flow_id: "f1c841".into(),
+fn delivery(standing: VisibleQueueDeliveryStanding) -> VisibleQueueDelivery {
+    VisibleQueueDelivery {
         native_session_id: "s1".into(),
         harness_kind: HarnessKind::Claude,
-        queue_evidence: meta_signal_flow::QueueEvidence::Legacy(meta_signal_flow::Legacy_Data {
-            sent_by: SentBy::Sender(Address {
+        visible_queue_evidence: VisibleQueueEvidence::Legacy(VisibleQueueEvidence_Legacy_Data {
+            visible_sender: VisibleSender::Sender(Address {
                 aspect: Aspect::Psyche,
                 topic: "core".into(),
                 layer: Layer::Secondary,
             }),
-            request: Request::Order("go".into()),
+            visible_request: VisibleRequest::Order("go".into()),
         }),
-        queue_delivery_standing: standing,
+        visible_queue_delivery_standing: standing,
     }
 }
 
 fn read() -> Response {
     Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
         address: address(),
-        queue_delivery_vector: vec![
-            delivery(QueueDeliveryStanding::Prepared),
-            delivery(QueueDeliveryStanding::Uncertain(None)),
-            delivery(QueueDeliveryStanding::Uncertain(Some(
+        visible_queue_delivery_vector: vec![
+            delivery(VisibleQueueDeliveryStanding::Prepared),
+            delivery(VisibleQueueDeliveryStanding::Uncertain(None)),
+            delivery(VisibleQueueDeliveryStanding::Uncertain(Some(
                 Undecided::AbsenceUnprovable,
             ))),
-            delivery(QueueDeliveryStanding::ReceiptRecorded),
-            delivery(QueueDeliveryStanding::Absent(AbsenceProof::HistoryAbsent)),
+            delivery(VisibleQueueDeliveryStanding::ReceiptRecorded),
+            delivery(VisibleQueueDeliveryStanding::Absent(AbsenceProof::HistoryAbsent)),
         ],
     })
 }
@@ -81,16 +80,13 @@ fn resolution(outcome: QueueResolutionOutcome) -> QueueDeliveryResolution {
     }
 }
 
-fn record() -> QueueResolutionRecord {
-    QueueResolutionRecord {
+fn record() -> VisibleQueueResolutionRecord {
+    VisibleQueueResolutionRecord {
         queue_resolution_outcome: QueueResolutionOutcome::Absent,
-        resolver_identity: ResolverIdentity {
-            process_identity: ProcessIdentity {
+        visible_resolver_identity: ProcessIdentity {
                 process_id: 7,
                 process_user_id: 1001,
                 process_start_token: "99".into(),
-            },
-            flow_id_option: Some("aa034f".into()),
         },
         queue_resolution_reason: "seen in the pane".into(),
         unix_seconds: 1_790_000_000,
@@ -113,16 +109,19 @@ fn resolve_queue_delivery_round_trips_as_an_archive() {
     let replies = [
         Response::QueueDeliveryResolved(QueueDeliveryResolved_Data {
             address: address(),
-            queue_delivery_resolution: resolution(QueueResolutionOutcome::Absent),
+            visible_queue_delivery_resolution: VisibleQueueDeliveryResolution {
+                queue_resolution_outcome: QueueResolutionOutcome::Absent,
+                queue_resolution_reason: "seen in the pane".into(),
+            },
         }),
-        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::UnknownAttempt),
-        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::NotUncertain),
-        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::NotOldest),
-        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::EmptyReason),
-        Response::ResolveQueueDeliveryRejected(ResolveQueueDeliveryRejected_Data::StoreRefused),
+        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::UnknownAttempt),
+        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::NotUncertain),
+        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::NotOldest),
+        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::EmptyReason),
+        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::StoreRefused),
         Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
             address: address(),
-            queue_delivery_vector: vec![delivery(QueueDeliveryStanding::Resolved(record()))],
+            visible_queue_delivery_vector: vec![delivery(VisibleQueueDeliveryStanding::Resolved(record()))],
         }),
     ];
     for reply in replies {
@@ -159,11 +158,11 @@ mod datom {
         );
         let one = Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
             address: address(),
-            queue_delivery_vector: vec![delivery(QueueDeliveryStanding::Uncertain(Some(
+            visible_queue_delivery_vector: vec![delivery(VisibleQueueDeliveryStanding::Uncertain(Some(
                 Undecided::PendingInHarness,
             )))],
         });
-        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { queue-attempt-3 f1c841 s1 Claude Legacy.{ Sender.{ Psyche core Secondary } Order.go } Uncertain.Some.PendingInHarness } ] }";
+        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { s1 Claude Legacy.{ Sender.{ Psyche core Secondary } Order.go } Uncertain.Some.PendingInHarness } ] }";
         assert_eq!(one.datomize(vec![]).protosize().compact(), text);
         assert_eq!(
             Potential::<Response>::from(text)
@@ -193,9 +192,9 @@ mod datom {
         );
         let one = Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
             address: address(),
-            queue_delivery_vector: vec![delivery(QueueDeliveryStanding::Resolved(record()))],
+            visible_queue_delivery_vector: vec![delivery(VisibleQueueDeliveryStanding::Resolved(record()))],
         });
-        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { queue-attempt-3 f1c841 s1 Claude Legacy.{ Sender.{ Psyche core Secondary } Order.go } Resolved.{ Absent { { 7 1001 99 } Some.aa034f } «seen in the pane» 1790000000 } } ] }";
+        let text = "QueueDeliveriesRead.{ { Mind flow Secondary } [ { s1 Claude Legacy.{ Sender.{ Psyche core Secondary } Order.go } Resolved.{ Absent { 7 1001 99 } «seen in the pane» 1790000000 } } ] }";
         assert_eq!(one.datomize(vec![]).protosize().compact(), text);
         assert_eq!(
             Potential::<Response>::from(text)
