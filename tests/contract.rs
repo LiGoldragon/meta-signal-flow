@@ -137,7 +137,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
     );
     assert_eq!(
         configuration.nexus.message_nexus_path_option,
-        "/srv/message-nexus.sock"
+        Some("/srv/message-nexus.sock".to_owned())
     );
     assert_eq!(
         configuration.nexus.message_nexus_binary_option,
