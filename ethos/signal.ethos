@@ -202,7 +202,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest VisibleMessage VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock Minutes ] ]
+  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -255,7 +255,7 @@ Signal
   ObserveLegacyArchiveRejected.StoreRefusal
   QueueDeliveryResolved.{ Address VisibleQueueDeliveryResolution }
   ResolveQueueDeliveryRejected.VisibleResolveQueueDeliveryRejected
-  Inspected.{ Metaflow Binding Vector<Lock> Vector<Attempt> }
+  Inspected.{ VisibleMetaflow Binding Vector<Lock> Vector<VisibleAttempt> }
   InspectRejected.[ UnknownAddress ]
   Rebound.Address
   RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
@@ -424,6 +424,12 @@ Signal
   ; One attempt Flow holds outstanding for a metaflow.
   Attempt.[ Queued.QueueDelivery                ; a queued request handed to a seat and not settled
             Launch.LaunchAttempt ]              ; a launch at the metaflow's Address not settled
+  ; Inspect keeps launch lifecycle detail for the next lifecycle projection,
+  ; while its queued-delivery branch exposes no private attempt, run or
+  ; logical-delivery key.
+  VisibleAttempt.[ Queued.VisibleQueueDelivery
+                   Launch.LaunchAttempt ]
+  VisibleMetaflow.{ Address State Vector<FlowId> Vector<VisibleNativeInput> }
   ; Operational meta replies project private routing and ledger keys away.
   ; Debug is the one explicit interface that exposes them.
   VisibleDelivery.{ InterruptWitness DeliveryGrade }

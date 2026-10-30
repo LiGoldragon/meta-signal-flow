@@ -694,6 +694,22 @@ pub enum Attempt {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleAttempt {
+    Queued(VisibleQueueDelivery),
+    Launch(signal_flow::LaunchAttempt),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleMetaflow {
+    pub address: flow_ethos::Address,
+    pub state: flow_ethos::State,
+    pub flow_id_vector: std::vec::Vec<signal_flow::FlowId>,
+    pub visible_native_input_vector: std::vec::Vec<signal_flow::VisibleNativeInput>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct VisibleDelivery {
     pub interrupt_witness: InterruptWitness,
     pub delivery_grade: DeliveryGrade,
@@ -888,10 +904,10 @@ pub struct QueueDeliveryResolved_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Inspected_Data {
-    pub metaflow: flow_ethos::Metaflow,
+    pub visible_metaflow: VisibleMetaflow,
     pub binding: Binding,
     pub lock_vector: std::vec::Vec<flow_ethos::Lock>,
-    pub attempt_vector: std::vec::Vec<Attempt>,
+    pub visible_attempt_vector: std::vec::Vec<VisibleAttempt>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

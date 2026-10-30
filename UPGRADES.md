@@ -2,6 +2,16 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 45.0.0: Inspect projects queued delivery attempts
+
+- `Inspected` carries `VisibleMetaflow` and `VisibleAttempt`: the metaflow's
+  queue and the queued-delivery attempt omit private delivery keys while
+  preserving sender, recipient, priority, request, native session, harness
+  and standing. Its lifecycle Flow ids and launch branch remain for the
+  separately versioned lifecycle projection.
+- Major: the `Inspected` response archive changes. Consumers pin
+  meta-signal-flow 45.0.0 with signal-flow 36.0.0.
+
 ## 44.0.0: operational replies hide private run and delivery ids
 
 - The pane `Letter` carries a typed sender metaflow, recipient metaflow and

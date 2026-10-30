@@ -2,17 +2,15 @@
 //! where its flow lives, and takes one queued request out of its queue. The
 //! expected texts are written out here, not computed through the codec.
 
-use flow_ethos::{
-    Address, Aspect, Delivery, Layer, Lock, Message, Metaflow, QueueEntry, Request, SentBy, State,
-};
+use flow_ethos::{Address, Aspect, Layer, Lock, State};
 use meta_signal_flow::{
-    Attempt, Binding, InspectRejected_Data, Inspected_Data, Query, QueueDelivery,
-    QueueDeliveryStanding, Rebind_Data, RebindRejected_Data, Rebinding, Response,
-    WithdrawRejected_Data, Withdraw_Data,
+    Binding, InspectRejected_Data, Inspected_Data, Query, Rebind_Data, RebindRejected_Data,
+    Rebinding, Response, VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery,
+    VisibleQueueDeliveryStanding, VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
 };
 use signal_flow::{
     EndpointSelection, FlowLifecycle, FlowNode, HarnessKind, HerdrRoute, HerdrRouteSelection,
-    Origin, Process,
+    Origin, Process, VisibleMessage, VisibleNativeInput, VisibleRequest, VisibleSender,
 };
 
 fn address() -> Address {
@@ -28,15 +26,6 @@ fn sender() -> Address {
         aspect: Aspect::Psyche,
         topic: "core".into(),
         layer: Layer::Secondary,
-    }
-}
-
-fn entry() -> QueueEntry {
-    QueueEntry {
-        logical_delivery_id: "logical-7".into(),
-        sent_by: SentBy::Sender(sender()),
-        delivery: Delivery::Queue,
-        message: Message::Soft(Request::Order("go".into())),
     }
 }
 
@@ -57,24 +46,30 @@ fn node() -> FlowNode {
     }
 }
 
-fn attempt() -> Attempt {
-    Attempt::Queued(QueueDelivery {
-        queue_attempt_id: "queue-attempt-3".into(),
-        flow_id: "f1c841".into(),
+fn visible_entry() -> VisibleNativeInput {
+    VisibleNativeInput {
+        visible_sender: VisibleSender::Sender(sender()),
+        address: address(),
+        visible_message: VisibleMessage::Soft(VisibleRequest::Order("go".into())),
+    }
+}
+
+fn attempt() -> VisibleAttempt {
+    VisibleAttempt::Queued(VisibleQueueDelivery {
         native_session_id: "s1".into(),
         harness_kind: HarnessKind::Claude,
-        queue_evidence: meta_signal_flow::QueueEvidence::Logical(entry()),
-        queue_delivery_standing: QueueDeliveryStanding::Prepared,
+        visible_queue_evidence: VisibleQueueEvidence::Logical(visible_entry()),
+        visible_queue_delivery_standing: VisibleQueueDeliveryStanding::Prepared,
     })
 }
 
 fn inspected() -> Response {
     Response::Inspected(Inspected_Data {
-        metaflow: Metaflow {
+        visible_metaflow: VisibleMetaflow {
             address: address(),
             state: State::Awake("f1c841".into()),
-            past: vec!["9a83ec".into()],
-            queue: vec![entry()],
+            flow_id_vector: vec!["9a83ec".into()],
+            visible_native_input_vector: vec![visible_entry()],
         },
         binding: Binding {
             flow_node_option: Some(node()),
@@ -88,7 +83,7 @@ fn inspected() -> Response {
             address: address(),
             until: 1_790_000_060,
         }],
-        attempt_vector: vec![attempt()],
+        visible_attempt_vector: vec![attempt()],
     })
 }
 
@@ -114,18 +109,18 @@ fn replies() -> Vec<Response> {
     vec![
         inspected(),
         Response::Inspected(Inspected_Data {
-            metaflow: Metaflow {
+            visible_metaflow: VisibleMetaflow {
                 address: address(),
                 state: State::Asleep,
-                past: vec![],
-                queue: vec![],
+                flow_id_vector: vec![],
+                visible_native_input_vector: vec![],
             },
             binding: Binding {
                 flow_node_option: None,
                 process_option: None,
             },
             lock_vector: vec![],
-            attempt_vector: vec![],
+            visible_attempt_vector: vec![],
         }),
         Response::InspectRejected(InspectRejected_Data::UnknownAddress),
         Response::Rebound(address()),
@@ -196,7 +191,7 @@ mod datom {
     #[test]
     fn repair_replies_have_concrete_datoms() {
         let texts = [
-            "Inspected.{ { { Mind flow Secondary } Awake.f1c841 [ 9a83ec ] [ { logical-7 Sender.{ Psyche core Secondary } Queue Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Secondary } { Mind flow Secondary } 1790000060 } ] [ Queued.{ queue-attempt-3 f1c841 s1 Claude Logical.{ logical-7 Sender.{ Psyche core Secondary } Queue Soft.Order.go } Prepared } ] }",
+            "Inspected.{ { { Mind flow Secondary } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Secondary } { Mind flow Secondary } Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Secondary } { Mind flow Secondary } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Secondary } { Mind flow Secondary } Soft.Order.go } Prepared } ] }",
             "Inspected.{ { { Mind flow Secondary } Asleep [] [] } { None None } [] [] }",
             "InspectRejected.UnknownAddress",
             "Rebound.{ Mind flow Secondary }",
