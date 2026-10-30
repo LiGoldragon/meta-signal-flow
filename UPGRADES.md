@@ -2,6 +2,12 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 41.0.0: variants removed; signal-flow 34.0.0
+
+- Pins signal-flow fb13fa (34.0.0), the release that marks the removal of
+  variants. Consumers pin meta-signal-flow 41.0.0 together with
+  signal-flow 34.0.0; no compatibility path.
+
 ## 40.1.0: Configure.DefaultMinutes; a Letter carries a Waking; signal-flow 33.3.0
 
 - `ConfigurationChange` appends `DefaultMinutes.Minutes`, its own family:
