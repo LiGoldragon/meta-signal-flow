@@ -614,3 +614,18 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         );
     }
 }
+
+/// A stored send outcome refused for an unidentified sender holds the raw
+/// evidence signal-flow 35 carries; the record round-trips datom → rkyv →
+/// datom.
+#[test]
+fn a_send_outcome_refused_unidentified_carries_its_seat_evidence() {
+    let text = "SendOutcomesRead.[ { outcome-1 Some.{ 4242 987654 } None None digest-1 Refused.Unidentified.{ Some.{ herdr-1 w1-2 } Some.«Claude research» Some.01a0fdcc-c1a1 1761800000 { 4242 987654 } } } ]";
+    let value = Potential::<Response>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&value).unwrap();
+    let read = rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap();
+    assert_eq!(read, value);
+    assert_eq!(read.datomize(vec![]).protosize().compact(), text);
+}
