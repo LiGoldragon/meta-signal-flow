@@ -2,6 +2,22 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 40.1.0: Configure.DefaultMinutes; a Letter carries a Waking; signal-flow 33.3.0
+
+- `ConfigurationChange` appends `DefaultMinutes.Minutes`, its own family:
+  `Configure.DefaultMinutes.45`. `ConfigurationSnapshot` appends
+  `DefaultMinutes.Minutes`, so a snapshot ends with it:
+  `Configuration.{ … None 45 }`. `ConfigureRejection` appends
+  `MinutesRefused.MinutesRefusal` (signal-flow), answered when the declared
+  Minutes is zero, negative, or gives a deadline the clock cannot hold.
+- `Content.NativeInput.NativeInput` is replaced by
+  `Content.Waking.Vector<NativeInput>`: what one hand-over types, every
+  queued input under its own id, sender and priority, oldest first. A
+  single input is a Waking of one. Consumers building a Letter build the
+  vector; no compatibility path.
+- Pins signal-flow c73ac8 (33.3.0): `Remind`, `Reminded` and
+  `InstantUnreadable` are gone.
+
 ## 40.0.0: a metaflow declares its continuity, purpose and records; Inspect, Rebind and Withdraw repair one
 
 - `ConfigureMetaflow` appends `Continuity.[ OnDemand Maintained ]`,

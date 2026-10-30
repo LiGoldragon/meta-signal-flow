@@ -5,9 +5,13 @@
 ; per-pane lease: an exclusive hold over the whole key sequence, never
 ; handed out on the wire.
 ;
-; Deliver carries a typed Message addressed by FlowId; Flow renders it,
-; so the pane text always begins with its Priority head (HardAbrupt.,
-; MiddleAbrupt. or Soft.). A Letter names its MessageId first: the id the
+; Deliver carries a typed Message addressed by FlowId; Flow renders it.
+; A Letter whose Content is a Waking is typed as that Waking alone: one
+; top-level vector of its inputs, oldest first, each naming its logical
+; id, its sender and its own priority, so the recipient can tell each
+; message and who sent it. Any other Letter is typed with its Priority
+; head first (HardAbrupt., MiddleAbrupt. or Soft.). A Letter names its
+; MessageId first: the id the
 ; sender's Message Nexus minted, carried through untouched so the
 ; recipient reading the pane can Acknowledge it. Flow never interprets it. The Content may hold no control character but
 ; LF and TAB (ControlCharacter carries the byte offset in the rendered
@@ -40,7 +44,7 @@
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
-; LeaveOuts, Nexus, SendServers, Metaflows or Investigation. The declared value replaces that family's committed
+; LeaveOuts, Nexus, SendServers, Metaflows, Investigation or DefaultMinutes. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
@@ -56,10 +60,16 @@
 ; uncapitalized camelCase identifier,
 ; CodexModelsOverlap when a Nexus names one model under both Codex
 ; endpoints, LeaveOutNotForHarness when an entry names a leave-out of
-; another harness than its own. Configuration reads the committed Nexus,
-; the committed model, threshold, leave-out, send-server and metaflow
-; vectors and the Investigation seat; it never returns defaults, and
-; answers Unconfigured while no Nexus has been declared.
+; another harness than its own, MinutesRefused when a DefaultMinutes is
+; refused by the rule a Task's Minutes meets at admission (Zero, Negative,
+; Unreachable). Configuration reads the committed Nexus, the committed
+; model, threshold, leave-out, send-server and metaflow vectors, the
+; Investigation seat and the default Minutes; it answers Unconfigured while
+; no Nexus has been declared.
+;
+; DefaultMinutes is the Minutes Flow gives a request that carries none of
+; its own: the Minutes a migrated Order takes. A new Memory holds the
+; constant Flow seeds it with until a DefaultMinutes is declared.
 ;
 ; A model's refresh threshold is the context, in tokens, past which a flow
 ; running that model is refreshed: it is given no new message, Flow keeps
@@ -178,8 +188,8 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock ] ]
+[ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal ]
+  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -281,16 +291,17 @@ Signal
                          Nexus.ConfigureNexus
                          SendServers.Vector<ConfigureSendServer>
                          Metaflows.Vector<ConfigureMetaflow>
-                         Investigation.Address ]
+                         Investigation.Address
+                         DefaultMinutes.Minutes ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> DefaultMinutes.Minutes }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
@@ -326,7 +337,9 @@ Signal
            Owner ]
   PsycheContext.String
   PsycheVerbatim.String
-  Content.[ NativeInput.NativeInput
+  ; A Waking is what one hand-over types: every queued input under its
+  ; own logical id, sender and priority, one top-level vector, oldest first.
+  Content.[ Waking.Vector<NativeInput>
             Text.String
             Psyche.{ PsycheContext PsycheVerbatim } ]
   Letter.{ MessageId Sender Content }

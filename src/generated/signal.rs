@@ -105,6 +105,7 @@ pub enum ConfigurationChange {
     SendServers(std::vec::Vec<ConfigureSendServer>),
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
     Investigation(flow_ethos::Address),
+    DefaultMinutes(flow_ethos::Minutes),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -128,6 +129,8 @@ pub type Metaflows = std::vec::Vec<ConfigureMetaflow>;
 #[rustfmt::skip]
 pub type Investigation = std::option::Option<flow_ethos::Address>;
 #[rustfmt::skip]
+pub type DefaultMinutes = flow_ethos::Minutes;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -138,6 +141,7 @@ pub struct ConfigurationSnapshot {
     pub send_servers: SendServers,
     pub metaflows: Metaflows,
     pub investigation: Investigation,
+    pub default_minutes: DefaultMinutes,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
@@ -175,6 +179,7 @@ pub enum ConfigureRejection {
     CodexModelsOverlap,
     LeaveOutNotForHarness,
     TopicRefused(flow_ethos::Topic),
+    MinutesRefused(signal_flow::MinutesRefusal),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -353,7 +358,7 @@ pub struct Psyche_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Content {
-    NativeInput(flow_ethos::NativeInput),
+    Waking(std::vec::Vec<flow_ethos::NativeInput>),
     Text(String),
     Psyche(Psyche_Data),
 }
