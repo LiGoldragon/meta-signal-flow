@@ -1,24 +1,21 @@
 //! ReadEvents: the owner reads the harness events Flow holds for one flow.
 //! The expected texts are written out here, not computed through the codec.
 
-use meta_signal_flow::{EventsRead_Data, Query, ReadEventsRejected_Data, Response};
+use meta_signal_flow::{Query, ReadEventsRejected_Data, Response};
 use signal_flow::{Event, NativeStop};
 
 fn events_read() -> Response {
-    Response::EventsRead(EventsRead_Data {
-        flow_id: "f1c841".into(),
-        event_vector: vec![
-            Event::Started(Some("s1".into())),
-            Event::ToolUsed("Bash".into()),
-            Event::Stopped(NativeStop {
-                native_session_id_option: Some("s1".into()),
-                transcript_path_option: None,
-                last_assistant_message_option: None,
-            }),
-            Event::Cleared(Some("s1".into())),
-            Event::Started(Some("s2".into())),
-        ],
-    })
+    Response::EventsRead(vec![
+        Event::Started(Some("s1".into())),
+        Event::ToolUsed("Bash".into()),
+        Event::Stopped(NativeStop {
+            native_session_id_option: Some("s1".into()),
+            transcript_path_option: None,
+            last_assistant_message_option: None,
+        }),
+        Event::Cleared(Some("s1".into())),
+        Event::Started(Some("s2".into())),
+    ])
 }
 
 #[test]
@@ -65,7 +62,7 @@ mod datom {
         assert_eq!(query, Query::ReadEvents("f1c841".into()));
         assert_eq!(
             events_read().datomize(vec![]).protosize().compact(),
-            "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] }"
+            "EventsRead.[ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ]"
         );
         assert_eq!(
             Response::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow)
@@ -75,7 +72,7 @@ mod datom {
             "ReadEventsRejected.UnknownFlow"
         );
         let read =
-            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] }")
+            Potential::<Response>::from("EventsRead.[ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ]")
                 .actualize(&mut budget())
                 .unwrap();
         assert_eq!(read, events_read());

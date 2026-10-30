@@ -2,6 +2,20 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 46.0.0: lifecycle replies project private run identities away
+
+- Registration, adoption, retirement, peer resolution, event reading,
+  command and inspection replies use dedicated visible lifecycle values.
+  They preserve the operational state without exposing a `FlowId` through
+  an ordinary meta operation. `Debug.Address` remains the sole explicit
+  interface that returns run and logical-delivery ids.
+- The complete private flow node, binding, launch attempt and event types
+  stay unchanged for Flow's routing and Memory. This is a wire projection
+  only and changes no stored row or schema hash.
+- Major: meta `Response` archives change. Consumers pin meta-signal-flow
+  46.0.0 with signal-flow 37.0.0 and update every producer and consumer
+  together.
+
 ## 45.0.0: Inspect projects queued delivery attempts
 
 - `Inspected` carries `VisibleMetaflow` and `VisibleAttempt`: the metaflow's

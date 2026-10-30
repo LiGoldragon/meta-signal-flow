@@ -39,7 +39,7 @@ fn privileged_requests_have_concrete_datoms() {
 
 #[test]
 fn bind_existing_result_preserves_each_explicit_outcome() {
-    let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } Bound.{ psyche-flow RegisteredUnconfirmed } }";
+    let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } } Bound.RegisteredUnconfirmed }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -286,7 +286,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
     assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
-        "FlowRetired.{ d8df70 claude-session Claude Unavailable Unavailable Flow.{ 88475f field-session } Retired }",
+        "FlowRetired.{ claude-session Claude Unavailable Unavailable Flow.field-session Retired }",
         "RetireRejected.UnknownFlow",
         "RetireRejected.AlreadyGone",
         "RetireRejected.StoreRefused",
@@ -340,16 +340,16 @@ fn delivery_replies_have_concrete_datoms() {
         "DeliveryRejected.BodyRefused.HarnessCommand./compact",
         "DeliveryRejected.BodyRefused.ControlCharacter.14",
         "Vetted",
-        "Commanded.{ 7d41e0 Compact Transported }",
+        "Commanded.{ Compact Transported }",
         "CommandRejected.UnsupportedForHarness",
         "CommandRejected.FlowRetired",
         "CommandRejected.FlowExited",
         "CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }",
         "CommandRejected.CompactionRefused.Unmeasured",
         "CommandRejected.CompactionRefused.NoThreshold",
-        "PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }",
+        "PeerResolved.{ Psyche High claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
-        "MetaRefused.PeerNotAuthorized.{ da88cf Field Medium gpt-5.5 }",
+        "MetaRefused.PeerNotAuthorized.{ Field Medium gpt-5.5 }",
         "MetaRefused.PeerUnknown",
     ] {
         let response = Potential::<Response>::from(text)

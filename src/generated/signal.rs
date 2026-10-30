@@ -339,6 +339,49 @@ pub struct BoundExisting {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleFlowContainer {
+    pub herdr_session_name: signal_flow::HerdrSessionName,
+    pub herdr_server_socket_path: HerdrServerSocketPath,
+    pub herdr_server_process_identity: HerdrServerProcessIdentity,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleFlowBinding {
+    pub aspect: signal_flow::Aspect,
+    pub power_level: signal_flow::PowerLevel,
+    pub model_name: signal_flow::ModelName,
+    pub harness_kind: signal_flow::HarnessKind,
+    pub native_session_id: signal_flow::NativeSessionId,
+    pub herdr_workspace_id: signal_flow::HerdrWorkspaceId,
+    pub herdr_pane_id: signal_flow::HerdrPaneId,
+    pub herdr_tab_id: HerdrTabId,
+    pub herdr_terminal_id: signal_flow::HerdrTerminalId,
+    pub herdr_agent_name: signal_flow::HerdrAgentName,
+    pub process_identity: ProcessIdentity,
+    pub working_directory: WorkingDirectory,
+}
+#[rustfmt::skip]
+pub type VisibleBoundFlowBinding = FlowLifecycle;
+#[rustfmt::skip]
+pub type VisibleRefusedFlowBinding = FlowBindingRefusalReason;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleFlowBindingResult {
+    Bound(VisibleBoundFlowBinding),
+    Refused(VisibleRefusedFlowBinding),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleBoundExisting {
+    pub visible_flow_container: VisibleFlowContainer,
+    pub visible_flow_binding_result: VisibleFlowBindingResult,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum BindExistingRejection {
     ContainerUnavailable,
     ContainerIdentityMismatch,
@@ -485,6 +528,13 @@ pub struct CommandOutcome {
     pub command_grade: CommandGrade,
 }
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleCommandOutcome {
+    pub harness_command: HarnessCommand,
+    pub command_grade: CommandGrade,
+}
+#[rustfmt::skip]
 pub type ContextTokens = i64;
 #[rustfmt::skip]
 pub type RefreshTokens = i64;
@@ -523,6 +573,13 @@ pub enum CommandRejection {
 pub enum MetaRefusal {
     PeerUnknown,
     PeerNotAuthorized(signal_flow::Caller),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleMetaRefusal {
+    PeerUnknown,
+    PeerNotAuthorized(signal_flow::VisibleCaller),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -687,6 +744,13 @@ pub struct Binding {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleBinding {
+    pub visible_flow_node_option: std::option::Option<signal_flow::VisibleFlowNode>,
+    pub process_option: std::option::Option<signal_flow::Process>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Attempt {
     Queued(QueueDelivery),
     Launch(signal_flow::LaunchAttempt),
@@ -696,16 +760,7 @@ pub enum Attempt {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum VisibleAttempt {
     Queued(VisibleQueueDelivery),
-    Launch(signal_flow::LaunchAttempt),
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct VisibleMetaflow {
-    pub address: flow_ethos::Address,
-    pub state: flow_ethos::State,
-    pub flow_id_vector: std::vec::Vec<signal_flow::FlowId>,
-    pub visible_native_input_vector: std::vec::Vec<signal_flow::VisibleNativeInput>,
+    Launch(signal_flow::VisibleLaunchAttempt),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -862,13 +917,6 @@ pub enum Query {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct EventsRead_Data {
-    pub flow_id: signal_flow::FlowId,
-    pub event_vector: std::vec::Vec<signal_flow::Event>,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ReadEventsRejected_Data {
     UnknownFlow,
     StoreRefused,
@@ -904,8 +952,8 @@ pub struct QueueDeliveryResolved_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Inspected_Data {
-    pub visible_metaflow: VisibleMetaflow,
-    pub binding: Binding,
+    pub visible_metaflow: signal_flow::VisibleMetaflow,
+    pub visible_binding: VisibleBinding,
     pub lock_vector: std::vec::Vec<flow_ethos::Lock>,
     pub visible_attempt_vector: std::vec::Vec<VisibleAttempt>,
 }
@@ -941,24 +989,24 @@ pub enum Response {
     Configuration(ConfigurationSnapshot),
     Unconfigured,
     ResetConsumed(ResetOutcome),
-    FlowRegistered(signal_flow::FlowNode),
+    FlowRegistered(signal_flow::VisibleFlowNode),
     ConfigureRejected(ConfigureRejection),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
-    BoundExisting(BoundExisting),
+    BoundExisting(VisibleBoundExisting),
     BindExistingRejected(BindExistingRejection),
-    FlowRetired(signal_flow::FlowNode),
+    FlowRetired(signal_flow::VisibleFlowNode),
     RetireRejected(RetireRejection),
     Delivered(VisibleDelivery),
     DeliveryRejected(DeliveryRejection),
     Vetted,
-    Commanded(CommandOutcome),
+    Commanded(VisibleCommandOutcome),
     CommandRejected(CommandRejection),
-    PeerResolved(signal_flow::Caller),
-    PeerResolutionRejected(signal_flow::CallerResolutionRejection),
-    MetaRefused(MetaRefusal),
+    PeerResolved(signal_flow::VisibleCaller),
+    PeerResolutionRejected(signal_flow::VisibleCallerResolutionRejection),
+    MetaRefused(VisibleMetaRefusal),
     Refused(StoreRefusal),
-    EventsRead(EventsRead_Data),
+    EventsRead(std::vec::Vec<signal_flow::Event>),
     ReadEventsRejected(ReadEventsRejected_Data),
     QueueDeliveriesRead(QueueDeliveriesRead_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
