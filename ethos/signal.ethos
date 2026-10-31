@@ -301,6 +301,9 @@ Signal
   ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
   ; The next id each family allocates.
   ConfigureCounters.{ LogicalDelivery.Integer QueueAttempt.Integer SendOutcome.Integer }
+  HeartbeatPeriodSeconds.Integer
+  HeartbeatRecipients.Vector<Address>
+  HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
   CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
@@ -311,9 +314,10 @@ Signal
                          Metaflows.Vector<ConfigureMetaflow>
                          Investigation.Address
                          DefaultMinutes.Minutes
+                         Heartbeat.Option<HeartbeatConfig>
                          Counters.ConfigureCounters ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> DefaultMinutes.Minutes Counters.ConfigureCounters }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> Counters.ConfigureCounters }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
