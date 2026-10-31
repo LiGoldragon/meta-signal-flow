@@ -2,6 +2,15 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 49.0.0: typed sampling-heartbeat configuration
+
+- `ConfigurationChange` gains `Heartbeat(Some(config))` to enable or replace
+  the positive sampling period and explicit recipient addresses, and
+  `Heartbeat(None)` to disable it.
+- `ConfigurationSnapshot` carries the same optional configuration. Producers
+  and consumers update together; Flow 0.44.0 is the matching client.
+- Pins signal-flow 38.0.0.
+
 ## 47.0.0: lifecycle replies retain their run identities
 
 - Meta lifecycle replies again carry their useful Flow ids. Version 46
