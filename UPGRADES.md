@@ -461,3 +461,13 @@ where one line is meant, rebuild and restart the Nexus and both CLIs
 together. The rkyv archive of every value is unchanged.
 
 The ordinary Send ledger names only Send outcomes (Queued, Delivered, or its typed refusal). The owner socket's former Refusal type is named StoreRefusal so it is distinct from the imported ordinary Refusal.
+# 50.0.0: per-metaflow harness flags
+
+- `HarnessFlags.String` and `ConfigureHarnessFlags.{ Address HarnessFlags }`
+  add one typed native-argument string per metaflow.
+- `ConfigurationChange.HarnessFlags` replaces that family whole and
+  `ConfigurationSnapshot.ConfiguredHarnessFlags` reads it. An older Flow store has an
+  empty family.
+- The ordinary contract is signal-flow 39.0.0, which adds Rehearse.
+
+Flow and both clients must move with this contract.

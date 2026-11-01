@@ -95,6 +95,15 @@ pub struct ConfigureMetaflow {
     pub records: Records,
 }
 #[rustfmt::skip]
+pub type HarnessFlags = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureHarnessFlags {
+    pub address: flow_ethos::Address,
+    pub harness_flags: HarnessFlags,
+}
+#[rustfmt::skip]
 pub type LogicalDelivery = i64;
 #[rustfmt::skip]
 pub type QueueAttempt = i64;
@@ -137,6 +146,7 @@ pub enum ConfigurationChange {
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
+    HarnessFlags(std::vec::Vec<ConfigureHarnessFlags>),
     Investigation(flow_ethos::Address),
     DefaultMinutes(flow_ethos::Minutes),
     Heartbeat(std::option::Option<HeartbeatConfig>),
@@ -162,6 +172,8 @@ pub type SendServers = std::vec::Vec<ConfigureSendServer>;
 #[rustfmt::skip]
 pub type Metaflows = std::vec::Vec<ConfigureMetaflow>;
 #[rustfmt::skip]
+pub type ConfiguredHarnessFlags = std::vec::Vec<ConfigureHarnessFlags>;
+#[rustfmt::skip]
 pub type Investigation = std::option::Option<flow_ethos::Address>;
 #[rustfmt::skip]
 pub type DefaultMinutes = flow_ethos::Minutes;
@@ -179,6 +191,7 @@ pub struct ConfigurationSnapshot {
     pub default_leave_outs: DefaultLeaveOuts,
     pub send_servers: SendServers,
     pub metaflows: Metaflows,
+    pub configured_harness_flags: ConfiguredHarnessFlags,
     pub investigation: Investigation,
     pub default_minutes: DefaultMinutes,
     pub heartbeat: Heartbeat,

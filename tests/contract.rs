@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] Some.{ Psyche compaction Tertiary } 30 None { 1 3 1 } }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Secondary } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Tertiary } 30 None { 1 3 1 } }";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -224,6 +224,17 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             continuity: meta_signal_flow::Continuity::Maintained,
             purpose: "Keeps Flow running.".into(),
             records: vec!["flows/a68420/vision/flow.md".into()],
+        }]
+    );
+    assert_eq!(
+        configuration.configured_harness_flags,
+        vec![meta_signal_flow::ConfigureHarnessFlags {
+            address: signal_flow::Address {
+                aspect: meta_signal_flow::Aspect::Mind,
+                topic: "core".into(),
+                layer: meta_signal_flow::Layer::Secondary,
+            },
+            harness_flags: "--disallowedTools 'Artifact*'".into(),
         }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
@@ -478,6 +489,20 @@ fn configure_metaflows_has_a_concrete_datom() {
 }
 
 #[test]
+fn configure_harness_flags_has_a_concrete_datom() {
+    let text = "Configure.HarnessFlags.[ { { Psyche core Primary } «--disallowedTools 'Artifact*'» } ]";
+    let query = Potential::<meta_signal_flow::Query>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert!(matches!(
+        &query,
+        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::HarnessFlags(flags))
+            if flags.len() == 1 && flags[0].harness_flags == "--disallowedTools 'Artifact*'"
+    ));
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+}
+
+#[test]
 fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_rejection() {
     // An entry without its harness is no longer a ConfigureLeaveOut.
     assert!(
@@ -540,7 +565,7 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
         "ConfigureRejected.MinutesRefused.Zero",
         "ConfigureRejected.MinutesRefused.Negative",
         "ConfigureRejected.MinutesRefused.Unreachable",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [] [] [] [] [] None 45 None { 1 3 1 } }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [] [] [] [] [] [] None 45 None { 1 3 1 } }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -603,7 +628,7 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         "ConfigureRejected.CountersRefused.NotEmpty",
         "ConfigureRejected.CountersRefused.Lowered.{ 121 46 301 }",
         "ConfigureRejected.CountersRefused.NotRunning",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [] [] [] [] [] None 45 None { 120 45 300 } }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] /srv/message-nexus.sock /usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 } [] [] [] [] [] [] None 45 None { 120 45 300 } }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
