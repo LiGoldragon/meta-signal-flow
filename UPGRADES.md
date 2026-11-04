@@ -2,6 +2,13 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 53.0.0: the running Nexus reports readiness
+
+- `Readiness` answers `Readiness.NexusReadiness`, whose value is
+  `ConfigServing` or `Ready`.
+- Major: the Signal query and response enums change. Update every producer
+  and consumer together.
+
 ## 52.0.0: workspaces, harness flags and heartbeat compose
 
 - `ConfigureMetaflow` carries its optional `Root`.

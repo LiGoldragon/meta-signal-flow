@@ -163,6 +163,13 @@ pub enum ConfigureOutcome {
     Unchanged,
 }
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum NexusReadiness {
+    ConfigServing,
+    Ready,
+}
+#[rustfmt::skip]
 pub type Nexus = ConfigureNexus;
 #[rustfmt::skip]
 pub type Models = std::vec::Vec<ConfigureModel>;
@@ -870,6 +877,7 @@ pub struct Withdraw_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
     Configuration,
+    Readiness,
     Configure(ConfigurationChange),
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
@@ -968,6 +976,7 @@ pub enum WithdrawRejected_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Response {
     Configured(ConfigureOutcome),
+    Readiness(NexusReadiness),
     Configuration(ConfigurationSnapshot),
     Unconfigured,
     ResetConsumed(ResetOutcome),

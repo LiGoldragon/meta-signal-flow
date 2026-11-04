@@ -18,6 +18,7 @@ fn privileged_requests_have_concrete_datoms() {
     for text in [
         "Configure.Nexus.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } { Codex [ / «!» ] [ esc ] [] } ] [ Psyche ] Some./run/user/1001/message-nexus.sock None /run/user/1001/curriculum/curriculum.sock 60 }",
         "Configuration",
+        "Readiness",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable Unbound Pending }",
@@ -33,6 +34,31 @@ fn privileged_requests_have_concrete_datoms() {
             query.datomize(vec![]).protosize().compact(),
             text,
             "Query Datom did not round-trip: {text}"
+        );
+    }
+}
+
+#[test]
+fn readiness_round_trips_over_signal_and_datom() {
+    for (text, expected) in [
+        (
+            "Readiness.ConfigServing",
+            Response::Readiness(meta_signal_flow::NexusReadiness::ConfigServing),
+        ),
+        (
+            "Readiness.Ready",
+            Response::Readiness(meta_signal_flow::NexusReadiness::Ready),
+        ),
+    ] {
+        let response = Potential::<Response>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(response, expected);
+        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            response
         );
     }
 }
