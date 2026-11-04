@@ -2,6 +2,15 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 50.0.0: each metaflow declaration carries its workspace
+
+- `ConfigureMetaflow` carries `Option<Root>` immediately after its `Address`.
+  `Some.Root` names the workspace for that metaflow's flows; `None` takes the
+  Nexus source root when a flow launches.
+- Major: every `Configure.Metaflows` declaration and every `Configuration`
+  snapshot changes positional datom and rkyv archive shape. Consumers update
+  together; no compatibility path is part of this contract.
+
 ## 47.0.0: lifecycle replies retain their run identities
 
 - Meta lifecycle replies again carry their useful Flow ids. Version 46

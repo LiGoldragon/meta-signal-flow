@@ -291,6 +291,8 @@ Signal
   Continuity.[ OnDemand Maintained ]
   ; What the metaflow is for, composed with the brief into the first prompt.
   Purpose.String
+  ; The workspace a metaflow's flows run in. None takes the Nexus source root.
+  Root.String
   ; A record of the living the metaflow rests on, as a path under the
   ; records root.
   RecordPath.String
@@ -298,7 +300,7 @@ Signal
   ; A metaflow's declaration: the context modules a Launch of its Address
   ; composes into the system prompt and into the first user message, how
   ; it continues, its purpose and the records it rests on.
-  ConfigureMetaflow.{ Address SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
+  ConfigureMetaflow.{ Address Option<Root> SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
   ; The next id each family allocates.
   ConfigureCounters.{ LogicalDelivery.Integer QueueAttempt.Integer SendOutcome.Integer }
   HeartbeatPeriodSeconds.Integer

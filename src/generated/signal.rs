@@ -78,6 +78,8 @@ pub enum Continuity {
 #[rustfmt::skip]
 pub type Purpose = String;
 #[rustfmt::skip]
+pub type Root = String;
+#[rustfmt::skip]
 pub type RecordPath = String;
 #[rustfmt::skip]
 pub type Records = std::vec::Vec<RecordPath>;
@@ -86,6 +88,7 @@ pub type Records = std::vec::Vec<RecordPath>;
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
+    pub root_option: std::option::Option<Root>,
     pub system_modules: signal_flow::SystemModules,
     pub user_modules: signal_flow::UserModules,
     pub flow_kind: signal_flow::FlowKind,
