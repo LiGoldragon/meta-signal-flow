@@ -2,6 +2,14 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 53.0.0: a Nexus declaration carries its presentation prompt
+
+- `ConfigureNexus` appends `Option<PresentationPrompt>` after `Lease`. The
+  prompt is preserved exactly, including leading and trailing whitespace and
+  line breaks. `None` carries declarations upgraded from the prior archive.
+- Major: configuration Datom and rkyv archive shapes change. Update every
+  producer and consumer together.
+
 ## 52.0.0: workspaces, harness flags and heartbeat compose
 
 - `ConfigureMetaflow` carries its optional `Root`.

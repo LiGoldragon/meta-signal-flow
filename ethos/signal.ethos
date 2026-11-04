@@ -276,8 +276,11 @@ Signal
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
+  ; Optional presentation guidance preserved exactly as configured, including
+  ; its whitespace and line breaks.
+  PresentationPrompt.String
   ; A Nexus that does not own a Message Nexus executable carries None.
-  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> CurriculumNexusPath Lease }
+  ConfigureNexus.{ SourceRoot StableCodex NextCodex HarnessProfiles MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> CurriculumNexusPath Lease Option<PresentationPrompt> }
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }

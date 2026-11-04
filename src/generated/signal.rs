@@ -44,6 +44,8 @@ pub struct ConfigureLeaveOut {
 #[rustfmt::skip]
 pub type CurriculumNexusPath = String;
 #[rustfmt::skip]
+pub type PresentationPrompt = String;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureNexus {
@@ -56,6 +58,7 @@ pub struct ConfigureNexus {
     pub message_nexus_binary_option: std::option::Option<flow_ethos::MessageNexusBinary>,
     pub curriculum_nexus_path: CurriculumNexusPath,
     pub lease: flow_ethos::Lease,
+    pub presentation_prompt_option: std::option::Option<PresentationPrompt>,
 }
 #[rustfmt::skip]
 pub type CodexAppServerBinary = String;
