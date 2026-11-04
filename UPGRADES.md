@@ -2,6 +2,22 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 52.0.0: workspaces, harness flags and heartbeat compose
+
+- `ConfigureMetaflow` carries its optional `Root`.
+- `ConfigureHarnessFlags` configures native arguments per metaflow.
+- `ConfigurationSnapshot` carries both configured harness flags and heartbeat.
+- Major: configuration datom and rkyv archive shapes change. Update every producer and consumer together.
+
+## 50.0.0: each metaflow declaration carries its workspace
+
+- `ConfigureMetaflow` carries `Option<Root>` immediately after its `Address`.
+  `Some.Root` names the workspace for that metaflow's flows; `None` takes the
+  Nexus source root when a flow launches.
+- Major: every `Configure.Metaflows` declaration and every `Configuration`
+  snapshot changes positional datom and rkyv archive shape. Consumers update
+  together; no compatibility path is part of this contract.
+
 ## 48.0.0: Message Nexus executable identity is optional
 
 - `ConfigureNexus.message_nexus_binary` and

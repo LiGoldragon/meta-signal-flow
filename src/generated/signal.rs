@@ -78,6 +78,8 @@ pub enum Continuity {
 #[rustfmt::skip]
 pub type Purpose = String;
 #[rustfmt::skip]
+pub type Root = String;
+#[rustfmt::skip]
 pub type RecordPath = String;
 #[rustfmt::skip]
 pub type Records = std::vec::Vec<RecordPath>;
@@ -86,6 +88,7 @@ pub type Records = std::vec::Vec<RecordPath>;
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
+    pub root_option: std::option::Option<Root>,
     pub system_modules: signal_flow::SystemModules,
     pub user_modules: signal_flow::UserModules,
     pub flow_kind: signal_flow::FlowKind,
@@ -118,6 +121,17 @@ pub struct ConfigureCounters {
     pub send_outcome: SendOutcome,
 }
 #[rustfmt::skip]
+pub type HeartbeatPeriodSeconds = i64;
+#[rustfmt::skip]
+pub type HeartbeatRecipients = std::vec::Vec<flow_ethos::Address>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HeartbeatConfig {
+    pub heartbeat_period_seconds: HeartbeatPeriodSeconds,
+    pub heartbeat_recipients: HeartbeatRecipients,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum CountersRefusal {
@@ -138,6 +152,7 @@ pub enum ConfigurationChange {
     HarnessFlags(std::vec::Vec<ConfigureHarnessFlags>),
     Investigation(flow_ethos::Address),
     DefaultMinutes(flow_ethos::Minutes),
+    Heartbeat(std::option::Option<HeartbeatConfig>),
     Counters(ConfigureCounters),
 }
 #[rustfmt::skip]
@@ -166,6 +181,8 @@ pub type Investigation = std::option::Option<flow_ethos::Address>;
 #[rustfmt::skip]
 pub type DefaultMinutes = flow_ethos::Minutes;
 #[rustfmt::skip]
+pub type Heartbeat = std::option::Option<HeartbeatConfig>;
+#[rustfmt::skip]
 pub type Counters = ConfigureCounters;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -180,6 +197,7 @@ pub struct ConfigurationSnapshot {
     pub configured_harness_flags: ConfiguredHarnessFlags,
     pub investigation: Investigation,
     pub default_minutes: DefaultMinutes,
+    pub heartbeat: Heartbeat,
     pub counters: Counters,
 }
 #[rustfmt::skip]
