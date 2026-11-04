@@ -63,6 +63,9 @@
 ; another harness than its own, MinutesRefused when a DefaultMinutes is
 ; refused by the rule a Task's Minutes meets at admission (Zero, Negative,
 ; Unreachable), CountersRefused when a Counters is refused (below).
+; Readiness answers whether the running Nexus is serving configuration or
+; is ready to admit starts. ConfigServing means Start is refused until a
+; Nexus configuration is committed and startup recovery has completed.
 ; Configuration reads the committed Nexus, the committed
 ; model, threshold, leave-out, send-server and metaflow vectors, the
 ; Investigation seat, the default Minutes and the counters; it answers
@@ -204,6 +207,7 @@ Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest VisibleMessage VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow State Lock Minutes ] ]
 [ Configuration
+  Readiness
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
@@ -225,6 +229,7 @@ Signal
                        Flow.FlowId ] }          ; the metaflow's current flow is now this flow
   Withdraw.{ Address LogicalDeliveryId } ]      ; one queued delivery leaves the queue
 [ Configured.ConfigureOutcome
+  Readiness.NexusReadiness
   Configuration.ConfigurationSnapshot
   Unconfigured
   ResetConsumed.ResetOutcome
@@ -329,6 +334,7 @@ Signal
                          Heartbeat.Option<HeartbeatConfig>
                          Counters.ConfigureCounters ]
   ConfigureOutcome.[ Replaced Unchanged ]
+  NexusReadiness.[ ConfigServing Ready ]
   ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> Counters.ConfigureCounters }
   IdempotencyKey.String
   CreditId.String
