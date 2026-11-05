@@ -2,6 +2,12 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 54.0.0: share the ordinary running-seat adoption contract
+
+- The `signal-flow` dependency moves to 42.0.0 so the Nexus has one ordinary
+  Query and Response type containing `Adopt` and `Adopted`.
+- The meta signal itself is unchanged.
+
 ## 53.0.0: a Nexus declaration carries its presentation prompt
 
 - `ConfigureNexus` appends `Option<PresentationPrompt>` after `Lease`. The
