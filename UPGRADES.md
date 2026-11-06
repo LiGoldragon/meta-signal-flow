@@ -2,6 +2,14 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 64.0.0: a composer's rejection carries its text
+
+Built on 63.0.0.
+
+- `signal-flow` moves to 51.0.0 (9f159d9): `ContextRefusal.ComposerRejected`
+  carries the text Curriculum answered `Rejected` with.
+- Every producer and consumer moves to 64.0.0 together.
+
 ## 63.0.0: protos 0.33, datom-codec 0.33, signal 10.3
 
 Built on 62.0.0. The contract is unchanged; its stack moves.
