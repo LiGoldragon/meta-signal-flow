@@ -721,3 +721,14 @@ fn a_send_outcome_refused_unidentified_carries_its_seat_evidence() {
     assert_eq!(read, value);
     assert_eq!(read.datomize(vec![]).protosize().compact(), text);
 }
+
+/// A restart owed names the count of the flow's harness events recorded
+/// when it was written, as concrete text.
+#[test]
+fn an_owed_restart_phase_names_its_report_position() {
+    let phase = Potential::<meta_signal_flow::RestartPhase>::from("Owed.3")
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(phase, meta_signal_flow::RestartPhase::Owed(3));
+    assert_eq!(phase.datomize(vec![]).protosize().compact(), "Owed.3");
+}

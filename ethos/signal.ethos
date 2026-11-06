@@ -187,15 +187,20 @@
 ; names an Address Flow holds no metaflow for.
 ;
 ; A RestartRecord is the durable lock a flow's restart holds on its
-; Address, written before each effect it names: Closing before the old
-; harness is closed, Closed once its pane is gone and its process proven
-; exited, Opening before the new pane is created, Spawning with that pane
-; before the harness is resumed in it. The record is removed in the write
-; that binds the resumed seat. Failed keeps the session, the queue and the
-; Address held, for a retry or the owner's Stop (Stopped). Interrupted is a
-; spawn whose outcome is unproven, with the new pane when one was recorded;
-; it is never retried and only a Stop that proves the spawn quiesced clears
-; it. OldSeat is the route the flow ran in and, when Herdr showed it, the
+; Address, written before each effect it names. Owed is a restart a
+; working seat, or a flow asking for its own, waits on: it runs at the
+; first real Stop the bound seat reports after Owed is written, and no
+; other Stop runs it; ReportPosition is the count of the flow's harness
+; events recorded when Owed was written, so a Stop recorded before it is
+; told from one after. Closing before the old harness is closed, Closed
+; once its pane is gone and its process proven exited, Opening before the
+; new pane is created, Spawning with that pane before the harness is
+; resumed in it. The record is removed in the write that binds the resumed
+; seat. Failed keeps the session, the queue and the Address held, for a
+; retry or the owner's Stop (Stopped). Interrupted is a spawn whose
+; outcome is unproven, with the new pane when one was recorded; it is
+; never retried and only a Stop that proves the spawn quiesced clears it.
+; OldSeat is the route the flow ran in and, when Herdr showed it, the
 ; birth of its harness process. Attempts counts the runs of the restart.
 ; Retire is refused RestartUnresolved while the record is not Failed.
 
@@ -389,7 +394,9 @@ Signal
   RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained RestartUnresolved ]
   OldSeat.{ HerdrRoute Option<Process> }
   RestartFailure.[ CloseRefused CloseUnproven ResumeRefused.String BindMismatch Stopped ]
-  RestartPhase.[ Closing
+  ReportPosition.Integer
+  RestartPhase.[ Owed.ReportPosition
+                 Closing
                  Closed
                  Opening
                  Spawning.HerdrPaneBinding
