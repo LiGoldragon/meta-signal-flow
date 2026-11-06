@@ -33,6 +33,46 @@ pub struct ConfigureThreshold {
     pub refresh: Refresh,
 }
 #[rustfmt::skip]
+pub type WarningShareLeft = i64;
+#[rustfmt::skip]
+pub type ReminderText = String;
+#[rustfmt::skip]
+pub type EveryMinutes = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HandoverPolicy {
+    pub model_name: signal_flow::ModelName,
+    pub warning_share_left: WarningShareLeft,
+    pub reminder_text: ReminderText,
+    pub every_minutes: EveryMinutes,
+}
+#[rustfmt::skip]
+pub type Repository = String;
+#[rustfmt::skip]
+pub type Path = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HandoverPoliciesConfiguration {
+    Configured(std::vec::Vec<HandoverPolicy>),
+    Unconfigured,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HandoverArchiveConfiguration {
+    Configured(Path),
+    Unconfigured,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HandoverCountConfiguration {
+    Configured(i64),
+    Unconfigured,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureLeaveOut {
@@ -147,6 +187,9 @@ pub enum CountersRefusal {
 pub enum ConfigurationChange {
     Models(std::vec::Vec<ConfigureModel>),
     Thresholds(std::vec::Vec<ConfigureThreshold>),
+    HandoverPolicies(std::vec::Vec<HandoverPolicy>),
+    HandoverArchive(Path),
+    HandoverCount(i64),
     LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
@@ -172,6 +215,12 @@ pub type Models = std::vec::Vec<ConfigureModel>;
 #[rustfmt::skip]
 pub type Thresholds = std::vec::Vec<ConfigureThreshold>;
 #[rustfmt::skip]
+pub type HandoverPolicies = HandoverPoliciesConfiguration;
+#[rustfmt::skip]
+pub type HandoverArchive = HandoverArchiveConfiguration;
+#[rustfmt::skip]
+pub type HandoverCount = HandoverCountConfiguration;
+#[rustfmt::skip]
 pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
 #[rustfmt::skip]
 pub type SendServers = std::vec::Vec<ConfigureSendServer>;
@@ -196,6 +245,9 @@ pub struct ConfigurationSnapshot {
     pub nexus: Nexus,
     pub models: Models,
     pub thresholds: Thresholds,
+    pub handover_policies: HandoverPolicies,
+    pub handover_archive: HandoverArchive,
+    pub handover_count: HandoverCount,
     pub default_leave_outs: DefaultLeaveOuts,
     pub send_servers: SendServers,
     pub metaflows: Metaflows,
@@ -236,7 +288,20 @@ pub enum ResetOutcome {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HandoverConfigurationRefusal {
+    InvalidWarningShareLeft,
+    InvalidEveryMinutes,
+    InvalidHandoverCount,
+    NegativeHandoverCount,
+    DuplicatePolicy,
+    DuplicateArchive,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigureRejection {
+    HandoverConfigurationRefused(HandoverConfigurationRefusal),
     StoreRefused,
     DuplicateEntry,
     CodexModelsOverlap,
