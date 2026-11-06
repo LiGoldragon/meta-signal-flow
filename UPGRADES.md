@@ -2,6 +2,21 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 62.0.0: a protected Address
+
+Built on 58.0.0; 59.0.0 to 61.0.0 are other lines.
+
+- `signal-flow` moves to 49.0.0 (3030a8c): the `Protected` refusals.
+- `ConfigurationChange` gains `ProtectedAddresses.Vector<Address>`, one
+  entry per Address; `ConfigurationSnapshot` gains the same field, before
+  `Counters`. A snapshot text gains one vector there, `[]` when none is
+  protected.
+- `Query` gains `Restart.FlowId` and `Refresh.Address`; `Response` gains
+  `Restarted.FlowId`, `RestartRefused.RestartRefusal`,
+  `Refreshed.Refreshed` and `RefreshRejected.RefreshRejection`.
+- `RetireRejection` gains `Protected`.
+- Every producer and consumer moves to 62.0.0 together.
+
 ## 58.0.0: Inspect shows a restart under way
 
 - `signal-flow` moves to 46.0.0: `Restart.FlowId` and its answers.

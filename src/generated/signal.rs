@@ -155,6 +155,7 @@ pub enum ConfigurationChange {
     Investigation(flow_ethos::Address),
     DefaultMinutes(flow_ethos::Minutes),
     Heartbeat(std::option::Option<HeartbeatConfig>),
+    ProtectedAddresses(std::vec::Vec<flow_ethos::Address>),
     Counters(ConfigureCounters),
 }
 #[rustfmt::skip]
@@ -185,6 +186,8 @@ pub type DefaultMinutes = flow_ethos::Minutes;
 #[rustfmt::skip]
 pub type Heartbeat = std::option::Option<HeartbeatConfig>;
 #[rustfmt::skip]
+pub type ProtectedAddresses = std::vec::Vec<flow_ethos::Address>;
+#[rustfmt::skip]
 pub type Counters = ConfigureCounters;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -200,6 +203,7 @@ pub struct ConfigurationSnapshot {
     pub investigation: Investigation,
     pub default_minutes: DefaultMinutes,
     pub heartbeat: Heartbeat,
+    pub protected_addresses: ProtectedAddresses,
     pub counters: Counters,
 }
 #[rustfmt::skip]
@@ -387,6 +391,7 @@ pub enum RetireRejection {
     CloseRefused,
     Maintained,
     RestartUnresolved,
+    Protected,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -918,6 +923,8 @@ pub enum Query {
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
     Retire(signal_flow::FlowId),
+    Restart(signal_flow::FlowId),
+    Refresh(flow_ethos::Address),
     Deliver(DeliveryRequest),
     Vet(DeliveryRequest),
     Command(CommandRequest),
@@ -1023,6 +1030,10 @@ pub enum Response {
     BindExistingRejected(BindExistingRejection),
     FlowRetired(signal_flow::FlowNode),
     RetireRejected(RetireRejection),
+    Restarted(signal_flow::FlowId),
+    RestartRefused(signal_flow::RestartRefusal),
+    Refreshed(signal_flow::Refreshed),
+    RefreshRejected(signal_flow::RefreshRejection),
     Delivered(VisibleDelivery),
     DeliveryRejected(DeliveryRejection),
     Vetted,

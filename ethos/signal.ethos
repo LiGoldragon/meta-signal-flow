@@ -44,7 +44,8 @@
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
-; LeaveOuts, Nexus, SendServers, Metaflows, Investigation, DefaultMinutes or Counters. The declared value replaces that family's committed
+; LeaveOuts, Nexus, SendServers, Metaflows, Investigation, DefaultMinutes,
+; ProtectedAddresses or Counters. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
@@ -192,6 +193,16 @@
 ; birth of its harness process. Attempts counts the runs of the restart.
 ; Retire is refused RestartUnresolved while the record is not Failed.
 
+; ProtectedAddresses names the Addresses whose flows Flow keeps: one entry
+; per Address, none by default. A protected Address's flow is never
+; refreshed for its model's threshold; it is handed its messages past it,
+; and a Compact of it is refused as below the threshold. Restart and
+; Refresh here take a flow or an Address as the ordinary ones do, with
+; their answers, from any peer this socket admits; on the ordinary socket a
+; protected Address answers only its own seat (signal-flow Protected).
+; Retire of a protected Address's flow is refused Protected when the peer
+; is a flow other than it; the owner, or the flow itself, retires it.
+
 ; Rebind repairs where a metaflow's flow lives, with no harness action.
 ; Rebinding.Pane: the flow the metaflow is Awake as now lives in this pane
 ; of the Herdr session its route names; Flow reads the pane's terminal and
@@ -216,7 +227,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest VisibleMessage VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest VisibleMessage VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshRejection ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -224,6 +235,8 @@ Signal
   RegisterFlow.FlowNode
   MetaBindExisting.MetaBindExisting
   Retire.FlowId
+  Restart.FlowId                                ; as the ordinary Restart, a protected Address's included
+  Refresh.Address                               ; as the ordinary Refresh, a protected Address's included
   Deliver.DeliveryRequest
   Vet.DeliveryRequest
   Command.CommandRequest
@@ -251,6 +264,10 @@ Signal
   BindExistingRejected.BindExistingRejection
   FlowRetired.FlowNode
   RetireRejected.RetireRejection
+  Restarted.FlowId
+  RestartRefused.RestartRefusal
+  Refreshed.Refreshed
+  RefreshRejected.RefreshRejection
   Delivered.VisibleDelivery
   DeliveryRejected.DeliveryRejection
   Vetted
@@ -342,9 +359,10 @@ Signal
                          Investigation.Address
                          DefaultMinutes.Minutes
                          Heartbeat.Option<HeartbeatConfig>
+                         ProtectedAddresses.Vector<Address>
                          Counters.ConfigureCounters ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> Counters.ConfigureCounters }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
@@ -378,7 +396,8 @@ Signal
   ; to close it; nothing is recorded and the flow is not retired.
   ; Maintained: the flow is the one a Maintained metaflow is Awake as;
   ; nothing changes, and its declaration's continuity is changed first.
-  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained RestartUnresolved ]
+  ; Protected: the flow's Address is protected and the peer is another flow.
+  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained RestartUnresolved Protected ]
   OldSeat.{ HerdrRoute Option<Process> }
   RestartFailure.[ CloseRefused CloseUnproven ResumeRefused.String BindMismatch Stopped ]
   RestartPhase.[ Closing
