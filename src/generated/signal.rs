@@ -26,11 +26,14 @@ pub struct ConfigureModel {
 #[rustfmt::skip]
 pub type Refresh = i64;
 #[rustfmt::skip]
+pub type Warning = i64;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureThreshold {
     pub model_name: signal_flow::ModelName,
     pub refresh: Refresh,
+    pub warning: Warning,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -240,6 +243,7 @@ pub enum ConfigureRejection {
     TopicRefused(flow_ethos::Topic),
     MinutesRefused(signal_flow::MinutesRefusal),
     CountersRefused(CountersRefusal),
+    WarningRefused(ConfigureThreshold),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

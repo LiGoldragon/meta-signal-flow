@@ -87,9 +87,16 @@
 ; A model's refresh threshold is the context, in tokens, past which a flow
 ; running that model is refreshed: it is given no new message, Flow keeps
 ; the metaflow's next messages for its next flow, and the flow is replaced
-; as it goes idle and reaped in the same event. It is told nothing and
-; writes no handover. A model with no threshold configured is never
-; refreshed.
+; as it goes idle and reaped in the same event. It is told nothing more
+; then. A model with no threshold configured is never refreshed.
+;
+; Warning is the share of the threshold left when a flow running that
+; model is warned, as a percentage: a flow whose context reaches Refresh
+; less Warning percent of it, and is still below Refresh, is sent
+; HardAbrupt.Notice.«Write your handover at flows/<id>/handover.md», <id>
+; its FlowId, once. Every threshold declares its Warning; a Warning below 0
+; or above 100 is refused WarningRefused, naming that threshold, and the
+; declaration changes nothing. A Warning of 0 warns no flow.
 ;
 ; Investigation is the Address of the seat Flow gives the investigation of
 ; a flow that compacted while it kept working without being given more
@@ -286,8 +293,9 @@ Signal
   ; The native model a seat of one Model runs, in every aspect; a Start
   ; naming another native model for that seat is refused.
   ConfigureModel.{ Model Native.String }
-  ; The refresh threshold of the flows that run one model, in tokens.
-  ConfigureThreshold.{ ModelName Refresh.Integer }
+  ; The refresh threshold of the flows that run one model, in tokens, and
+  ; the share of it left, in percent, when such a flow is warned.
+  ConfigureThreshold.{ ModelName Refresh.Integer Warning.Integer }
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
@@ -351,7 +359,7 @@ Signal
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal ]
+  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal WarningRefused.ConfigureThreshold ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

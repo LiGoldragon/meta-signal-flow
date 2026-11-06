@@ -2,6 +2,18 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 59.0.0: a threshold declares its Warning
+
+- `ConfigureThreshold` is `{ ModelName Refresh.Integer Warning.Integer }`:
+  Warning is the share of Refresh left, in percent, when a flow running the
+  model is warned to write its handover. Every threshold declares it; there
+  is no default. `Configure.Thresholds.[ { claude-opus-5-5 200000 20 } ]`
+  warns at 160000 and refreshes at 200000, as before.
+- `ConfigureRejection` appends `WarningRefused.ConfigureThreshold`: a Warning
+  below 0 or above 100, the declaration changing nothing.
+- `signal-flow` moves to 47.0.0: `Event` appends `Warned` and `Threshold`.
+- Every producer and consumer moves to 59.0.0 together.
+
 ## 58.0.0: Inspect shows a restart under way
 
 - `signal-flow` moves to 46.0.0: `Restart.FlowId` and its answers.
