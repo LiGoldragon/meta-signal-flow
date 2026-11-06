@@ -480,9 +480,10 @@ fn configure_declares_one_whole_family() {
             .actualize(&mut budget())
             .is_err()
     );
-    // A threshold belongs to a native model, never to a Model.
+    // A threshold carries its model, its Refresh and its Warning, and no
+    // handover.
     assert!(
-        Potential::<Query>::from("Configure.Thresholds.[ { Fable 600000 20 } ]")
+        Potential::<Query>::from("Configure.Thresholds.[ { claude-opus-5-5 600000 700000 20 } ]")
             .actualize(&mut budget())
             .is_err()
     );
