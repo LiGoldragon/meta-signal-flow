@@ -307,6 +307,13 @@ Signal
   ConfigureModel.{ Model Native.String }
   ; The refresh threshold of the flows that run one model, in tokens.
   ConfigureThreshold.{ ModelName Refresh.Integer }
+  ; The model policy governing handover warning and reminder behavior.
+  HandoverPolicy.{ ModelName WarningShareLeft.Integer ReminderText.String EveryMinutes.Integer }
+  Repository.String
+  Path.String
+  ConfigureHandoverArchive.{ Repository Path HandoverCount.Integer }
+  HandoverPoliciesConfiguration.[ Configured.Vector<HandoverPolicy> Unconfigured ]
+  HandoverArchiveConfiguration.[ Configured.ConfigureHandoverArchive Unconfigured ]
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
@@ -353,6 +360,8 @@ Signal
   ; Keep the payload type distinct from the unit Query.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
+                         HandoverPolicies.Vector<HandoverPolicy>
+                         HandoverArchive.ConfigureHandoverArchive
                          LeaveOuts.Vector<ConfigureLeaveOut>
                          Nexus.ConfigureNexus
                          SendServers.Vector<ConfigureSendServer>
@@ -364,14 +373,15 @@ Signal
                          ProtectedAddresses.Vector<Address>
                          Counters.ConfigureCounters ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> HandoverPolicies.HandoverPoliciesConfiguration HandoverArchive.HandoverArchiveConfiguration DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
                     Specific.CreditId ]
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
-  ConfigureRejection.[ StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal ]
+  HandoverConfigurationRefusal.[ InvalidWarningShareLeft InvalidEveryMinutes InvalidHandoverCount DuplicatePolicy DuplicateArchive StoreRefused ]
+  ConfigureRejection.[ HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
