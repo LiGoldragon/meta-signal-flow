@@ -198,7 +198,8 @@
 ; refreshed for its model's threshold; it is handed its messages past it,
 ; and a Compact of it is refused as below the threshold. Restart and
 ; Refresh here take a flow or an Address as the ordinary ones do, with
-; their answers, from any peer this socket admits; on the ordinary socket a
+; their answers, from any peer this socket admits; what the ordinary one
+; answers Refused is OrdinaryRefused here. On the ordinary socket a
 ; protected Address answers only its own seat (signal-flow Protected).
 ; Retire of a protected Address's flow is refused Protected when the peer
 ; is a flow other than it; the owner, or the flow itself, retires it.
@@ -268,6 +269,7 @@ Signal
   RestartRefused.RestartRefusal
   Refreshed.Refreshed
   RefreshRejected.RefreshRejection
+  OrdinaryRefused.Refusal
   Delivered.VisibleDelivery
   DeliveryRejected.DeliveryRejection
   Vetted

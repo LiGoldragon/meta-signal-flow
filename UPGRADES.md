@@ -13,7 +13,8 @@ Built on 58.0.0; 59.0.0 to 61.0.0 are other lines.
   protected.
 - `Query` gains `Restart.FlowId` and `Refresh.Address`; `Response` gains
   `Restarted.FlowId`, `RestartRefused.RestartRefusal`,
-  `Refreshed.Refreshed` and `RefreshRejected.RefreshRejection`.
+  `Refreshed.Refreshed`, `RefreshRejected.RefreshRejection` and
+  `OrdinaryRefused.Refusal`, a Refused answer of either.
 - `RetireRejection` gains `Protected`.
 - Every producer and consumer moves to 62.0.0 together.
 

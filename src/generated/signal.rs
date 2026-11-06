@@ -1034,6 +1034,7 @@ pub enum Response {
     RestartRefused(signal_flow::RestartRefusal),
     Refreshed(signal_flow::Refreshed),
     RefreshRejected(signal_flow::RefreshRejection),
+    OrdinaryRefused(signal_flow::Refusal),
     Delivered(VisibleDelivery),
     DeliveryRejected(DeliveryRejection),
     Vetted,

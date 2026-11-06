@@ -743,6 +743,7 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "Refreshed.{ { Psyche core Fable } c1a0de }",
         "RefreshRejected.Protected",
         "RetireRejected.Protected",
+        "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] [] [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } }",
     ] {
         let response = Potential::<Response>::from(reply)
