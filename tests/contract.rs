@@ -21,7 +21,7 @@ fn privileged_requests_have_concrete_datoms() {
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable Unbound Pending }",
-        "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Astra } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }",
+        "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Astra } { mind-flow Mind gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
@@ -35,6 +35,25 @@ fn privileged_requests_have_concrete_datoms() {
             "Query Datom did not round-trip: {text}"
         );
     }
+}
+
+/// A binding names its flow's aspect and model and no power: a model
+/// ranks above no other.
+#[test]
+fn a_flow_binding_carries_no_power() {
+    let powered = "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Astra } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }";
+    assert!(
+        Potential::<Query>::from(powered)
+            .actualize(&mut budget())
+            .is_err(),
+        "a binding carrying a power is refused"
+    );
+    assert!(
+        Potential::<Response>::from("PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }")
+            .actualize(&mut budget())
+            .is_err(),
+        "a resolved peer carries no power"
+    );
 }
 
 #[test]
@@ -394,9 +413,9 @@ fn delivery_replies_have_concrete_datoms() {
         "CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }",
         "CommandRejected.CompactionRefused.Unmeasured",
         "CommandRejected.CompactionRefused.NoThreshold",
-        "PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }",
+        "PeerResolved.{ e167d8 Psyche claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
-        "MetaRefused.PeerNotAuthorized.{ da88cf Field Medium gpt-5.5 }",
+        "MetaRefused.PeerNotAuthorized.{ da88cf Field gpt-5.5 }",
         "MetaRefused.PeerUnknown",
     ] {
         let response = Potential::<Response>::from(text)

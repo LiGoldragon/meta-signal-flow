@@ -2,6 +2,16 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 57.0.0: a binding carries no power
+
+- `signal-flow` moves to 45.0.0: a `Recipient` is an `Address`, `Up` and
+  `PowerLevel` leave, and `Caller` is `{ FlowId Aspect ModelName }`.
+- `FlowBinding` is `{ FlowId Aspect ModelName HarnessKind … }`: its power
+  leaves. A binding is refused `RoleMismatch` when its aspect is not its
+  Address's or its model is not the one configured for its Address's Model.
+- Pins flow-ethos 9644e01. Every producer and consumer moves to 57.0.0
+  together.
+
 ## 56.0.0: a model is configured per Model
 
 - `signal-flow` moves to 44.0.0: an `Address` is `{ Aspect Topic Model }`.
