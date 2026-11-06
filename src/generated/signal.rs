@@ -410,9 +410,12 @@ pub enum RestartFailure {
     Stopped,
 }
 #[rustfmt::skip]
+pub type ReportPosition = i64;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum RestartPhase {
+    Owed(ReportPosition),
     Closing,
     Closed,
     Opening,

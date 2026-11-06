@@ -2,6 +2,16 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 61.0.0: a restart a working or asking seat is owed
+
+- `RestartPhase` gains `Owed.ReportPosition`, first: a restart a working
+  seat, or a flow asking for its own, waits on until the bound seat's first
+  real Stop after it is written. `ReportPosition` is the count of the flow's
+  harness events recorded when Owed was written.
+- Pins signal-flow 48.0.0, which carries both `Warned` and `Threshold`
+  (47.0.0) and `RestartOwed.FlowId`.
+- Every producer and consumer moves to 61.0.0 together.
+
 ## 59.0.0: a threshold declares its Warning
 
 - `ConfigureThreshold` is `{ ModelName Refresh.Integer Warning.Integer }`:
