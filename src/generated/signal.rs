@@ -386,6 +386,48 @@ pub enum RetireRejection {
     StoreRefused,
     CloseRefused,
     Maintained,
+    RestartUnresolved,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct OldSeat {
+    pub herdr_route: signal_flow::HerdrRoute,
+    pub process_option: std::option::Option<signal_flow::Process>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum RestartFailure {
+    CloseRefused,
+    CloseUnproven,
+    ResumeRefused(String),
+    BindMismatch,
+    Stopped,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum RestartPhase {
+    Closing,
+    Closed,
+    Opening,
+    Spawning(signal_flow::HerdrPaneBinding),
+    Failed(RestartFailure),
+    Interrupted(std::option::Option<signal_flow::HerdrPaneBinding>),
+}
+#[rustfmt::skip]
+pub type Attempts = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct RestartRecord {
+    pub flow_id: signal_flow::FlowId,
+    pub native_session_id: signal_flow::NativeSessionId,
+    pub address: flow_ethos::Address,
+    pub old_seat: OldSeat,
+    pub restart_phase: RestartPhase,
+    pub attempts: Attempts,
 }
 #[rustfmt::skip]
 pub type DeliveryId = String;
@@ -939,6 +981,7 @@ pub struct Inspected_Data {
     pub binding: Binding,
     pub lock_vector: std::vec::Vec<flow_ethos::Lock>,
     pub visible_attempt_vector: std::vec::Vec<VisibleAttempt>,
+    pub restart_record_option: std::option::Option<RestartRecord>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

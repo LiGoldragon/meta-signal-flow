@@ -4,9 +4,10 @@
 
 use flow_ethos::{Address, Aspect, Lock, Model, State};
 use meta_signal_flow::{
-    Binding, InspectRejected_Data, Inspected_Data, Query, Rebind_Data, RebindRejected_Data,
-    Rebinding, Response, VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery,
-    VisibleQueueDeliveryStanding, VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
+    Binding, InspectRejected_Data, Inspected_Data, OldSeat, Query, Rebind_Data,
+    RebindRejected_Data, Rebinding, Response, RestartFailure, RestartPhase, RestartRecord,
+    VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
+    VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
 };
 use signal_flow::{
     EndpointSelection, FlowLifecycle, FlowNode, HarnessKind, HerdrRoute, HerdrRouteSelection,
@@ -83,7 +84,32 @@ fn inspected() -> Response {
             until: 1_790_000_060,
         }],
         visible_attempt_vector: vec![attempt()],
+        restart_record_option: Some(restart_record()),
     })
+}
+
+/// A restart that failed at its bind, on its second run: the record keeps
+/// the session, the old route and the birth of the old harness.
+fn restart_record() -> RestartRecord {
+    RestartRecord {
+        flow_id: "f1c841".into(),
+        native_session_id: "s1".into(),
+        address: address(),
+        old_seat: OldSeat {
+            herdr_route: HerdrRoute {
+                herdr_session_name: "default".into(),
+                herdr_agent_name: "mind-flow".into(),
+                herdr_pane_id: "w7B".into(),
+                herdr_terminal_id: "t1".into(),
+            },
+            process_option: Some(Process {
+                pid: 4242,
+                started: 17,
+            }),
+        },
+        restart_phase: RestartPhase::Failed(RestartFailure::BindMismatch),
+        attempts: 2,
+    }
 }
 
 fn queries() -> Vec<Query> {
@@ -120,6 +146,7 @@ fn replies() -> Vec<Response> {
             },
             lock_vector: vec![],
             visible_attempt_vector: vec![],
+            restart_record_option: None,
         }),
         Response::InspectRejected(InspectRejected_Data::UnknownAddress),
         Response::Rebound(address()),
@@ -190,8 +217,8 @@ mod datom {
     #[test]
     fn repair_replies_have_concrete_datoms() {
         let texts = [
-            "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.go } Prepared } ] }",
-            "Inspected.{ { { Mind flow Sol } Asleep [] [] } { None None } [] [] }",
+            "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.go } Prepared } ] Some.{ f1c841 s1 { Mind flow Sol } { { default mind-flow w7B t1 } Some.{ 4242 17 } } Failed.BindMismatch 2 } }",
+            "Inspected.{ { { Mind flow Sol } Asleep [] [] } { None None } [] [] None }",
             "InspectRejected.UnknownAddress",
             "Rebound.{ Mind flow Sol }",
             "RebindRejected.UnknownAddress",

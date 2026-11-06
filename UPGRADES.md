@@ -2,6 +2,18 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 58.0.0: Inspect shows a restart under way
+
+- `signal-flow` moves to 46.0.0: `Restart.FlowId` and its answers.
+- `Inspected` gains `Option<RestartRecord>`: the restart of the flow the
+  metaflow is Awake as, while one is recorded, with its phase (`Closing`,
+  `Closed`, `Opening`, `Spawning.HerdrPaneBinding`,
+  `Failed.RestartFailure`, `Interrupted.Option<HerdrPaneBinding>`), the old
+  seat's route and harness birth, and the count of its runs.
+- `RetireRejection` gains `RestartUnresolved`: a flow whose restart record
+  is not Failed is not retired.
+- Every producer and consumer moves to 58.0.0 together.
+
 ## 57.0.0: a binding carries no power
 
 - `signal-flow` moves to 45.0.0: a `Recipient` is an `Address`, `Up` and
