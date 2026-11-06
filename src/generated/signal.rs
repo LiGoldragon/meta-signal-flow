@@ -20,8 +20,7 @@ pub type Native = String;
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureModel {
-    pub layer: flow_ethos::Layer,
-    pub aspect: signal_flow::Aspect,
+    pub model: flow_ethos::Model,
     pub native: Native,
 }
 #[rustfmt::skip]

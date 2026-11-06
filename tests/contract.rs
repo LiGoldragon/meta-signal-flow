@@ -21,7 +21,7 @@ fn privileged_requests_have_concrete_datoms() {
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable Unbound Pending }",
-        "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Primary } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }",
+        "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Astra } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Secondary } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Tertiary } 30 None { 1 3 1 } }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Terra } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None { 1 3 1 } }";
 
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
@@ -150,25 +150,23 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
     );
     assert_eq!(configuration.nexus.lease, 60);
     assert_eq!(configuration.nexus.presentation_prompt_option, None);
-    // One layer holds a model per aspect.
+    // Each model holds its one native model.
     assert_eq!(
         configuration.models,
         vec![
             meta_signal_flow::ConfigureModel {
-                layer: meta_signal_flow::Layer::Secondary,
-                aspect: meta_signal_flow::Aspect::Psyche,
+                model: meta_signal_flow::Model::Opus,
                 native: "claude-opus".into(),
             },
             meta_signal_flow::ConfigureModel {
-                layer: meta_signal_flow::Layer::Secondary,
-                aspect: meta_signal_flow::Aspect::Mind,
+                model: meta_signal_flow::Model::Sol,
                 native: "gpt-6.1".into(),
             },
         ]
     );
-    // A model that names no aspect is no longer a declaration.
+    // A layer and an aspect no longer name a model.
     assert!(
-        Potential::<Query>::from("Configure.Models.[ { Secondary claude-opus-5-5 } ]")
+        Potential::<Query>::from("Configure.Models.[ { Secondary Psyche claude-opus-5-5 } ]")
             .actualize(&mut budget())
             .is_err()
     );
@@ -217,7 +215,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             address: signal_flow::Address {
                 aspect: meta_signal_flow::Aspect::Mind,
                 topic: "core".into(),
-                layer: meta_signal_flow::Layer::Secondary,
+                model: meta_signal_flow::Model::Sol,
             },
             root_option: Some("/srv/core".into()),
             system_modules: vec!["spirit:core".into()],
@@ -235,7 +233,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             address: signal_flow::Address {
                 aspect: meta_signal_flow::Aspect::Mind,
                 topic: "core".into(),
-                layer: meta_signal_flow::Layer::Secondary,
+                model: meta_signal_flow::Model::Sol,
             },
             harness_flags: "--disallowedTools 'Artifact*'".into(),
         }]
@@ -357,10 +355,10 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Nexus Text.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Sender.{ Field core Primary } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
-        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Secondary } Text./compact } }",
+        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Opus } Text.«Stage 1 is deployed; run the tier tests.» } }",
+        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Notification Text.«Stop the ouranos build now.» } }",
+        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Sender.{ Field core Astra } Psyche.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
+        "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Opus } Text./compact } }",
         "Command.{ 7d41e0 Compact }",
         "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",
@@ -419,23 +417,23 @@ fn a_message_textualizes_with_its_priority_head_first() {
         visible_sender: signal_flow::VisibleSender::Sender(signal_flow::Address {
             aspect: signal_flow::Aspect::Psyche,
             topic: "flow".into(),
-            layer: signal_flow::Layer::Secondary,
+            model: signal_flow::Model::Opus,
         }),
         content: meta_signal_flow::Content::Text("Stage 1 is deployed; run the tier tests.".into()),
     });
     assert_eq!(
         message.datomize(vec![]).protosize().compact(),
-        "Soft.{ Sender.{ Psyche flow Secondary } Text.«Stage 1 is deployed; run the tier tests.» }"
+        "Soft.{ Sender.{ Psyche flow Opus } Text.«Stage 1 is deployed; run the tier tests.» }"
     );
 }
 
 #[test]
 fn configure_declares_one_whole_family() {
     for text in [
-        "Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } { Secondary Psyche claude-opus-5-5 } { Secondary Mind gpt-6-sol } { Secondary Field gpt-6-sol } ]",
+        "Configure.Models.[ { Haiku claude-haiku-5-5 } { Opus claude-opus-5-5 } { Sol gpt-6-sol } { Luna gpt-6-luna } ]",
         "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
-        "Configure.Investigation.{ Psyche compaction Tertiary }",
-        "Configure.LeaveOuts.[ { { Field core Primary } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Secondary } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Secondary } Codex [ CodexAgentsMd ] } ]",
+        "Configure.Investigation.{ Psyche compaction Sonnet }",
+        "Configure.LeaveOuts.[ { { Field core Astra } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Opus } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Opus } Codex [ CodexAgentsMd ] } ]",
         "Configure.LeaveOuts.[]",
     ] {
         let query = Potential::<Query>::from(text)
@@ -449,7 +447,7 @@ fn configure_declares_one_whole_family() {
         );
     }
     let Query::Configure(meta_signal_flow::Configuration::Models(models)) =
-        Potential::<Query>::from("Configure.Models.[ { Quaternary Psyche claude-haiku-5-5 } ]")
+        Potential::<Query>::from("Configure.Models.[ { Haiku claude-haiku-5-5 } ]")
             .actualize(&mut budget())
             .unwrap()
     else {
@@ -458,13 +456,13 @@ fn configure_declares_one_whole_family() {
     assert_eq!(models.len(), 1);
     // One entry is not a family: a declaration is always the whole vector.
     assert!(
-        Potential::<Query>::from("Configure.Models.{ Quaternary Psyche claude-haiku-5-5 }")
+        Potential::<Query>::from("Configure.Models.{ Haiku claude-haiku-5-5 }")
             .actualize(&mut budget())
             .is_err()
     );
-    // A threshold belongs to a model, never to a layer, and has no handover.
+    // A threshold belongs to a native model, never to a Model, and has no handover.
     assert!(
-        Potential::<Query>::from("Configure.Thresholds.[ { Primary 600000 700000 } ]")
+        Potential::<Query>::from("Configure.Thresholds.[ { Fable 600000 700000 } ]")
             .actualize(&mut budget())
             .is_err()
     );
@@ -514,7 +512,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Secondary } None [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -529,7 +527,7 @@ fn configure_metaflows_has_a_concrete_datom() {
 #[test]
 fn configure_harness_flags_has_a_concrete_datom() {
     let text =
-        "Configure.HarnessFlags.[ { { Psyche core Primary } «--disallowedTools 'Artifact*'» } ]";
+        "Configure.HarnessFlags.[ { { Psyche core Fable } «--disallowedTools 'Artifact*'» } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -546,7 +544,7 @@ fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_reje
     // An entry without its harness is no longer a ConfigureLeaveOut.
     assert!(
         Potential::<Query>::from(
-            "Configure.LeaveOuts.[ { { Psyche flow Secondary } [ SkillTool ClaudeMd ] } ]"
+            "Configure.LeaveOuts.[ { { Psyche flow Opus } [ SkillTool ClaudeMd ] } ]"
         )
         .actualize(&mut budget())
         .is_err()
@@ -623,7 +621,7 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
 /// keys never enter the prompt.
 #[test]
 fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
-    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ Nexus Waking.[ { Sender.{ Psyche flow Primary } MiddleAbrupt.Task.{ 30 «Draft the proposal.» } } { Nexus Soft.Notice.«Reminder 1 of 4: task has no Done.» } { Sender.{ Mind flow Secondary } Soft.Done.Answered.{ Task.{ 30 «Draft the proposal.» } «Proposal drafted.» } } ] } }";
+    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ Notification Waking.[ { Sender.{ Psyche flow Fable } MiddleAbrupt.Task.{ 30 «Draft the proposal.» } } { Notification Soft.Notice.«Reminder 1 of 4: task has no Done.» } { Sender.{ Mind flow Sol } Soft.Done.Answered.{ Task.{ 30 «Draft the proposal.» } «Proposal drafted.» } } ] } }";
     let query = Potential::<Query>::from(text)
         .actualize(&mut budget())
         .unwrap_or_else(|error| panic!("{text}: {error:?}"));
@@ -636,7 +634,7 @@ fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
     // One input alone is a Waking of one; the single-input form is gone.
     assert!(
         Potential::<Query>::from(
-            "Deliver.{ attempt-8 7d41e0 Soft.{ Nexus NativeInput.{ Nexus Soft.Notice.«One alone.» } } }"
+            "Deliver.{ attempt-8 7d41e0 Soft.{ Notification NativeInput.{ Notification Soft.Notice.«One alone.» } } }"
         )
         .actualize(&mut budget())
         .is_err()

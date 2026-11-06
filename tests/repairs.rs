@@ -2,7 +2,7 @@
 //! where its flow lives, and takes one queued request out of its queue. The
 //! expected texts are written out here, not computed through the codec.
 
-use flow_ethos::{Address, Aspect, Layer, Lock, State};
+use flow_ethos::{Address, Aspect, Lock, Model, State};
 use meta_signal_flow::{
     Binding, InspectRejected_Data, Inspected_Data, Query, Rebind_Data, RebindRejected_Data,
     Rebinding, Response, VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery,
@@ -17,7 +17,7 @@ fn address() -> Address {
     Address {
         aspect: Aspect::Mind,
         topic: "flow".into(),
-        layer: Layer::Secondary,
+        model: Model::Sol,
     }
 }
 
@@ -25,7 +25,7 @@ fn sender() -> Address {
     Address {
         aspect: Aspect::Psyche,
         topic: "core".into(),
-        layer: Layer::Secondary,
+        model: Model::Opus,
     }
 }
 
@@ -171,10 +171,10 @@ mod datom {
     #[test]
     fn repair_queries_have_concrete_datoms() {
         let texts = [
-            "Inspect.{ Mind flow Secondary }",
-            "Rebind.{ { Mind flow Secondary } Pane.w7B }",
-            "Rebind.{ { Mind flow Secondary } Flow.f1c841 }",
-            "Withdraw.{ { Mind flow Secondary } logical-7 }",
+            "Inspect.{ Mind flow Sol }",
+            "Rebind.{ { Mind flow Sol } Pane.w7B }",
+            "Rebind.{ { Mind flow Sol } Flow.f1c841 }",
+            "Withdraw.{ { Mind flow Sol } logical-7 }",
         ];
         for (query, text) in queries().into_iter().zip(texts) {
             assert_eq!(query.datomize(vec![]).protosize().compact(), text);
@@ -190,16 +190,16 @@ mod datom {
     #[test]
     fn repair_replies_have_concrete_datoms() {
         let texts = [
-            "Inspected.{ { { Mind flow Secondary } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Secondary } Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Secondary } { Mind flow Secondary } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Secondary } Soft.Order.go } Prepared } ] }",
-            "Inspected.{ { { Mind flow Secondary } Asleep [] [] } { None None } [] [] }",
+            "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.go } Prepared } ] }",
+            "Inspected.{ { { Mind flow Sol } Asleep [] [] } { None None } [] [] }",
             "InspectRejected.UnknownAddress",
-            "Rebound.{ Mind flow Secondary }",
+            "Rebound.{ Mind flow Sol }",
             "RebindRejected.UnknownAddress",
             "RebindRejected.PaneAbsent",
             "RebindRejected.FlowUnknown",
             "RebindRejected.NotAwake",
             "RebindRejected.HerdrUnavailable",
-            "RebindRejected.FlowTaken.{ Mind flow Secondary }",
+            "RebindRejected.FlowTaken.{ Mind flow Sol }",
             "Withdrawn",
             "WithdrawRejected.UnknownAddress",
             "WithdrawRejected.NotQueued",

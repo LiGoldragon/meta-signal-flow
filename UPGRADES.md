@@ -2,6 +2,16 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 56.0.0: a model is configured per Model
+
+- `signal-flow` moves to 44.0.0: an `Address` is `{ Aspect Topic Model }`.
+- `ConfigureModel` is `{ Model Native.String }`: one native model per Model,
+  in every aspect, in place of one per Layer and Aspect.
+  `Configure.Models.[ { Fable claude-fable-5-1 } { Opus claude-opus-5-5 }
+  { Sonnet claude-sonnet-5-5 } { Haiku claude-haiku-5-5 } { Astra gpt-6-astra }
+  { Sol gpt-6.1-sol } { Luna gpt-6-luna } { Terra gpt-6-luna } ]`.
+- Every producer and consumer moves to 56.0.0 together.
+
 ## 54.0.0: share the ordinary running-seat adoption contract
 
 - The `signal-flow` dependency moves to 42.0.0 so the Nexus has one ordinary

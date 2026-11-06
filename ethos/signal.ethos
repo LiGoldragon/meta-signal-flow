@@ -49,7 +49,7 @@
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
 ; value already equals the declaration and nothing is written. Each family
-; holds one entry per key: Models one per Layer and Aspect, Thresholds one
+; holds one entry per key: Models one per Model, Thresholds one
 ; per ModelName, LeaveOuts one per Address and HarnessKind (the default
 ; leave-outs of one metaflow started on one harness, which a Start naming
 ; its own replaces; a Start whose harness has no entry for its Address takes
@@ -202,7 +202,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect PowerLevel ModelName HarnessKind NativeSessionId HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest VisibleMessage VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Layer Address LogicalDeliveryId Metaflow State Lock Minutes ] ]
+  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -268,9 +268,9 @@ Signal
   ; record is not a Configure wire payload.
   ; A Nexus that does not own a Message Nexus executable carries None.
   NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> Lease }
-  ; The model a seat of one layer and aspect runs; a Start naming another
-  ; model for that seat is refused.
-  ConfigureModel.{ Layer Aspect Native.String }
+  ; The native model a seat of one Model runs, in every aspect; a Start
+  ; naming another native model for that seat is refused.
+  ConfigureModel.{ Model Native.String }
   ; The refresh threshold of the flows that run one model, in tokens.
   ConfigureThreshold.{ ModelName Refresh.Integer }
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
@@ -292,7 +292,7 @@ Signal
   ; unexpectedly (its harness gone) is followed by a successor whether or
   ; not anything is queued, the successor confirmed before the predecessor
   ; is reaped, and an idle flow keeps its harness. A metaflow is Maintained
-  ; by its exact Address, never by its layer.
+  ; by its exact Address, never by its Model.
   Continuity.[ OnDemand Maintained ]
   ; What the metaflow is for, composed with the brief into the first prompt.
   Purpose.String
