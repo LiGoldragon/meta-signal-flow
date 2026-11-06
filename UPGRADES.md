@@ -2,6 +2,18 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 63.0.0: protos 0.33, datom-codec 0.33, signal 10.3
+
+Built on 62.0.0. The contract is unchanged; its stack moves.
+
+- `signal-flow` moves to 50.0.0 (8143240); `signal` 10.3.0 (7afb68b),
+  `datom-codec` 0.33.0 and `protos` 0.33.0 by the revs signal names
+  (`eabead4`, `3c7ade3`); `flow-ethos` 5ea2aa4. The generator stays
+  ethos-zero 17.0.0 (07714b0).
+- A guillemet string is read by balance, and a bare String prints bare.
+- `ReaderBudget` is built by `ReaderBudget::try_from(n)`.
+- Every producer and consumer moves to 63.0.0 together, on this stack.
+
 ## 62.0.0: a protected Address
 
 Built on 58.0.0; 59.0.0 to 61.0.0 are other lines.
