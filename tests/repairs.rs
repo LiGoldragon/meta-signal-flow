@@ -10,8 +10,8 @@ use meta_signal_flow::{
     VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
 };
 use signal_flow::{
-    EndpointSelection, FlowLifecycle, FlowNode, HarnessKind, HerdrRoute, HerdrRouteSelection,
-    Origin, Process, VisibleMessage, VisibleNativeInput, VisibleRequest, VisibleSender,
+    DeliveredMessage, DeliveredRequest, EndpointSelection, FlowLifecycle, FlowNode, HarnessKind,
+    HerdrRoute, HerdrRouteSelection, Origin, Process, VisibleNativeInput, VisibleSender,
 };
 
 fn address() -> Address {
@@ -50,7 +50,12 @@ fn node() -> FlowNode {
 fn visible_entry() -> VisibleNativeInput {
     VisibleNativeInput {
         visible_sender: VisibleSender::Sender(sender()),
-        visible_message: VisibleMessage::Soft(VisibleRequest::Order("go".into())),
+        delivered_message: DeliveredMessage::Soft(DeliveredRequest::Order(
+            signal_flow::Order_Data {
+                request_id: "req1".into(),
+                string: "go".into(),
+            },
+        )),
     }
 }
 
@@ -217,7 +222,7 @@ mod datom {
     #[test]
     fn repair_replies_have_concrete_datoms() {
         let texts = [
-            "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.go } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.go } Prepared } ] Some.{ f1c841 s1 { Mind flow Sol } { { default mind-flow w7B t1 } Some.{ 4242 17 } } Failed.BindMismatch 2 } }",
+            "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } Prepared } ] Some.{ f1c841 s1 { Mind flow Sol } { { default mind-flow w7B t1 } Some.{ 4242 17 } } Failed.BindMismatch 2 } }",
             "Inspected.{ { { Mind flow Sol } Asleep [] [] } { None None } [] [] None }",
             "InspectRejected.UnknownAddress",
             "Rebound.{ Mind flow Sol }",
