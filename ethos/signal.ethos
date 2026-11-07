@@ -228,8 +228,8 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest VisibleMessage VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshRejection ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId Metaflow State Lock Minutes ] ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshRejection ]
+  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -249,6 +249,7 @@ Signal
   Debug.Address
   ResolveQueueDelivery.QueueDeliveryResolution
   Inspect.Address                               ; the metaflow whole: state, binding, queue, locks, attempts
+  DebugDelivery.RequestId
   Rebind.{ Address
            Rebinding.[ Pane.HerdrPaneId         ; the current flow now lives in this pane
                        Flow.FlowId ] }          ; the metaflow's current flow is now this flow
@@ -294,6 +295,8 @@ Signal
   Rebound.Address
   RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
   Withdrawn
+  DeliveryDebugged.{ DeliverySnapshot Receipt.Option<NativeReceipt> ReadBy.Option<LogicalDeliveryId> }
+  DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   Debugged.DebugSnapshot
   WithdrawRejected.[ UnknownAddress NotQueued ] ]
 [ ; Flow Library owns the shared configuration field types.
@@ -355,6 +358,8 @@ Signal
   ConfigureHarnessFlags.{ Address HarnessFlags }
   ; The next id each family allocates.
   ConfigureCounters.{ LogicalDelivery.Integer QueueAttempt.Integer SendOutcome.Integer }
+  DrawBound.Integer
+  TryBound.Integer
   HeartbeatPeriodSeconds.Integer
   HeartbeatRecipients.Vector<Address>
   HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
@@ -375,9 +380,11 @@ Signal
                          DefaultMinutes.Minutes
                          Heartbeat.Option<HeartbeatConfig>
                          ProtectedAddresses.Vector<Address>
-                         Counters.ConfigureCounters ]
+                         Counters.ConfigureCounters
+                         RequestIdDraws.DrawBound
+                         AnnouncementTries.TryBound ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> HandoverPolicies.HandoverPoliciesConfiguration HandoverArchive.HandoverArchiveConfiguration HandoverCount.HandoverCountConfiguration PublicationDeadline.Duration DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> HandoverPolicies.HandoverPoliciesConfiguration HandoverArchive.HandoverArchiveConfiguration HandoverCount.HandoverCountConfiguration PublicationDeadline.Duration DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters RequestIdDraws.DrawBound AnnouncementTries.TryBound }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
@@ -385,7 +392,7 @@ Signal
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   HandoverConfigurationRefusal.[ InvalidWarningShareLeft InvalidEveryMinutes InvalidHandoverCount NegativeHandoverCount InvalidPublicationDeadline DuplicatePolicy DuplicateArchive StoreRefused ]
-  ConfigureRejection.[ HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal ]
+  ConfigureRejection.[ HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap LeaveOutNotForHarness TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer
@@ -482,7 +489,7 @@ Signal
   QueueDeliveryResolution.{ QueueAttemptId QueueResolutionOutcome QueueResolutionReason }
   ResolverIdentity.{ ProcessIdentity Option<FlowId> }
   QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
-  ResolveQueueDeliveryRejection.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered.NativeReceipt ]
+  ResolveQueueDeliveryRejection.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered AlreadyRead ]
   QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueueEvidence QueueDeliveryStanding }
   QueueRequestId.String
   LegacyArchiveEntry.{ QueueRequestId Address QueueEvidence Vector<QueueAttemptId> }
@@ -519,7 +526,7 @@ Signal
                          Legacy.{ VisibleSender VisibleRequest } ]
   VisibleQueueDelivery.{ NativeSessionId HarnessKind VisibleQueueEvidence VisibleQueueDeliveryStanding }
   VisibleQueueDeliveryResolution.{ QueueResolutionOutcome QueueResolutionReason }
-  VisibleResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.VisibleQueueResolutionRecord AlreadyDelivered.NativeReceipt ]
+  VisibleResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.VisibleQueueResolutionRecord AlreadyDelivered AlreadyRead ]
   VisibleOrdinarySendOutcome.[ Accepted.VisibleSendAcceptance
                                Refused.VisibleRefusal
                                PriorAdmission.PriorSendOutcome
