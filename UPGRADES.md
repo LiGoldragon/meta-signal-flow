@@ -578,3 +578,7 @@ The ordinary Send ledger names only Send outcomes (Queued, Delivered, or its typ
 - The ordinary contract is signal-flow 39.0.0, which adds Rehearse.
 
 Flow and both clients must move with this contract.
+# 68.0.0: ordinary retirement observation dependency
+
+Pin signal-flow 55.0.0, whose ordinary Observe subscription exposes ephemeral
+handover-retirement state and FIFO changes. The privileged wire is unchanged.
