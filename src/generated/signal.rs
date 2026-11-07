@@ -77,13 +77,6 @@ pub type Duration = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum PublicationDeadlineConfiguration {
-    Configured(Duration),
-    Unconfigured,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureLeaveOut {
     pub address: flow_ethos::Address,
     pub harness_kind: signal_flow::HarnessKind,
@@ -231,7 +224,7 @@ pub type HandoverArchive = HandoverArchiveConfiguration;
 #[rustfmt::skip]
 pub type HandoverCount = HandoverCountConfiguration;
 #[rustfmt::skip]
-pub type PublicationDeadline = PublicationDeadlineConfiguration;
+pub type PublicationDeadline = Duration;
 #[rustfmt::skip]
 pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
 #[rustfmt::skip]

@@ -316,7 +316,6 @@ Signal
   HandoverCountConfiguration.[ Configured.Integer Unconfigured ]
   ; Whole handover archive publication budget, in milliseconds.
   Duration.Integer
-  PublicationDeadlineConfiguration.[ Configured.Duration Unconfigured ]
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
   ConfigureLeaveOut.{ Address HarnessKind LeaveOuts }
   CurriculumNexusPath.String
@@ -378,7 +377,7 @@ Signal
                          ProtectedAddresses.Vector<Address>
                          Counters.ConfigureCounters ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> HandoverPolicies.HandoverPoliciesConfiguration HandoverArchive.HandoverArchiveConfiguration HandoverCount.HandoverCountConfiguration PublicationDeadline.PublicationDeadlineConfiguration DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> HandoverPolicies.HandoverPoliciesConfiguration HandoverArchive.HandoverArchiveConfiguration HandoverCount.HandoverCountConfiguration PublicationDeadline.Duration DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
