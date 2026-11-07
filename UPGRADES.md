@@ -2,6 +2,15 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 65.0.0: a handover that cannot be read refuses the launch
+
+Built on 64.0.0.
+
+- `signal-flow` moves to 52.0.0 (2f9e2bf): `CompositionRefusal` gains
+  `HandoverUnreadable.{ FlowId HandoverFault }`. The meta contract's own
+  generated code is unchanged.
+- Every producer and consumer moves to 65.0.0 together.
+
 ## 64.0.0: a composer's rejection carries its text
 
 Built on 63.0.0.
