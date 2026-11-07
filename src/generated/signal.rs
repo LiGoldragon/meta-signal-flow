@@ -163,6 +163,10 @@ pub struct ConfigureCounters {
     pub send_outcome: SendOutcome,
 }
 #[rustfmt::skip]
+pub type DrawBound = i64;
+#[rustfmt::skip]
+pub type TryBound = i64;
+#[rustfmt::skip]
 pub type HeartbeatPeriodSeconds = i64;
 #[rustfmt::skip]
 pub type HeartbeatRecipients = std::vec::Vec<flow_ethos::Address>;
@@ -200,6 +204,8 @@ pub enum ConfigurationChange {
     Heartbeat(std::option::Option<HeartbeatConfig>),
     ProtectedAddresses(std::vec::Vec<flow_ethos::Address>),
     Counters(ConfigureCounters),
+    RequestIdDraws(DrawBound),
+    AnnouncementTries(TryBound),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -239,6 +245,10 @@ pub type ProtectedAddresses = std::vec::Vec<flow_ethos::Address>;
 #[rustfmt::skip]
 pub type Counters = ConfigureCounters;
 #[rustfmt::skip]
+pub type RequestIdDraws = DrawBound;
+#[rustfmt::skip]
+pub type AnnouncementTries = TryBound;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -257,6 +267,8 @@ pub struct ConfigurationSnapshot {
     pub heartbeat: Heartbeat,
     pub protected_addresses: ProtectedAddresses,
     pub counters: Counters,
+    pub request_id_draws: RequestIdDraws,
+    pub announcement_tries: AnnouncementTries,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
@@ -309,6 +321,8 @@ pub enum ConfigureRejection {
     TopicRefused(flow_ethos::Topic),
     MinutesRefused(signal_flow::MinutesRefusal),
     CountersRefused(CountersRefusal),
+    RequestIdDrawsRefused,
+    AnnouncementTriesRefused,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -750,7 +764,8 @@ pub enum ResolveQueueDeliveryRejection {
     NativeReceiptRequired,
     LegacyUncorrelated,
     AlreadyResolved(QueueResolutionRecord),
-    AlreadyDelivered(signal_flow::NativeReceipt),
+    AlreadyDelivered,
+    AlreadyRead,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -920,7 +935,8 @@ pub enum VisibleResolveQueueDeliveryRejected {
     NativeReceiptRequired,
     LegacyUncorrelated,
     AlreadyResolved(VisibleQueueResolutionRecord),
-    AlreadyDelivered(signal_flow::NativeReceipt),
+    AlreadyDelivered,
+    AlreadyRead,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1001,6 +1017,7 @@ pub enum Query {
     Debug(flow_ethos::Address),
     ResolveQueueDelivery(QueueDeliveryResolution),
     Inspect(flow_ethos::Address),
+    DebugDelivery(flow_ethos::RequestId),
     Rebind(Rebind_Data),
     Withdraw(Withdraw_Data),
 }
@@ -1073,6 +1090,25 @@ pub enum RebindRejected_Data {
     FlowTaken(flow_ethos::Address),
 }
 #[rustfmt::skip]
+pub type Receipt = std::option::Option<signal_flow::NativeReceipt>;
+#[rustfmt::skip]
+pub type ReadBy = std::option::Option<flow_ethos::LogicalDeliveryId>;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DeliveryDebugged_Data {
+    pub delivery_snapshot: signal_flow::DeliverySnapshot,
+    pub receipt: Receipt,
+    pub read_by: ReadBy,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum DebugDeliveryRejected_Data {
+    UnknownRequest,
+    StoreRefused,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum WithdrawRejected_Data {
@@ -1124,6 +1160,8 @@ pub enum Response {
     Rebound(flow_ethos::Address),
     RebindRejected(RebindRejected_Data),
     Withdrawn,
+    DeliveryDebugged(DeliveryDebugged_Data),
+    DebugDeliveryRejected(DebugDeliveryRejected_Data),
     Debugged(DebugSnapshot),
     WithdrawRejected(WithdrawRejected_Data),
 }
