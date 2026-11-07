@@ -73,6 +73,15 @@ pub enum HandoverCountConfiguration {
     Unconfigured,
 }
 #[rustfmt::skip]
+pub type Duration = i64;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum PublicationDeadlineConfiguration {
+    Configured(Duration),
+    Unconfigured,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureLeaveOut {
@@ -190,6 +199,7 @@ pub enum ConfigurationChange {
     HandoverPolicies(std::vec::Vec<HandoverPolicy>),
     HandoverArchive(Path),
     HandoverCount(i64),
+    PublicationDeadline(Duration),
     LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
@@ -221,6 +231,8 @@ pub type HandoverArchive = HandoverArchiveConfiguration;
 #[rustfmt::skip]
 pub type HandoverCount = HandoverCountConfiguration;
 #[rustfmt::skip]
+pub type PublicationDeadline = PublicationDeadlineConfiguration;
+#[rustfmt::skip]
 pub type DefaultLeaveOuts = std::vec::Vec<ConfigureLeaveOut>;
 #[rustfmt::skip]
 pub type SendServers = std::vec::Vec<ConfigureSendServer>;
@@ -248,6 +260,7 @@ pub struct ConfigurationSnapshot {
     pub handover_policies: HandoverPolicies,
     pub handover_archive: HandoverArchive,
     pub handover_count: HandoverCount,
+    pub publication_deadline: PublicationDeadline,
     pub default_leave_outs: DefaultLeaveOuts,
     pub send_servers: SendServers,
     pub metaflows: Metaflows,
@@ -293,6 +306,7 @@ pub enum HandoverConfigurationRefusal {
     InvalidEveryMinutes,
     InvalidHandoverCount,
     NegativeHandoverCount,
+    InvalidPublicationDeadline,
     DuplicatePolicy,
     DuplicateArchive,
     StoreRefused,
