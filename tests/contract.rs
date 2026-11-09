@@ -741,6 +741,7 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "RestartRefused.Protected.c1a0de",
         "RestartRefused.Unsupported.c1a0de",
         "Refreshed.{ { Psyche core Fable } c1a0de }",
+        "RefreshQueued.{ { Psyche core Fable } c1a0de }",
         "RefreshRejected.Protected",
         "RetireRejected.Protected",
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",

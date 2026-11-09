@@ -14,6 +14,7 @@ fn events_read() -> Response {
                 native_session_id_option: Some("s1".into()),
                 transcript_path_option: None,
                 last_assistant_message_option: None,
+                background_work: vec![],
             }),
             Event::Cleared(Some("s1".into())),
             Event::Started(Some("s2".into())),
@@ -65,7 +66,7 @@ mod datom {
         assert_eq!(query, Query::ReadEvents("f1c841".into()));
         assert_eq!(
             events_read().datomize(vec![]).protosize().compact(),
-            "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] }"
+            "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None [] } Cleared.Some.s1 Started.Some.s2 ] }"
         );
         assert_eq!(
             Response::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow)
@@ -75,7 +76,7 @@ mod datom {
             "ReadEventsRejected.UnknownFlow"
         );
         let read =
-            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None } Cleared.Some.s1 Started.Some.s2 ] }")
+            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None [] } Cleared.Some.s1 Started.Some.s2 ] }")
                 .actualize(&mut budget())
                 .unwrap();
         assert_eq!(read, events_read());

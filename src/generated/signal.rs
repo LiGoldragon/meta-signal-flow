@@ -1171,4 +1171,5 @@ pub enum Response {
     DebugDeliveryRejected(DebugDeliveryRejected_Data),
     Debugged(DebugSnapshot),
     WithdrawRejected(WithdrawRejected_Data),
+    RefreshQueued(signal_flow::RefreshQueued),
 }

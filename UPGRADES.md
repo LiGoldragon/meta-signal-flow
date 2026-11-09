@@ -2,6 +2,16 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 72.0.0: signal-flow 57; a Refresh of a working flow is queued
+
+Built on 71.0.0 (1d3ebf0).
+
+- signal-flow 57.0.0: `Event`'s `Stopped` carries `BackgroundWork`, so
+  `EventsRead` shows it, as in `Stopped.{ Some.s1 None None [] }`.
+- `Response` gains `RefreshQueued.RefreshQueued`, last: `Refresh.Address`
+  of a working flow waits for its idle event, as the ordinary one does.
+- Every consumer moves to 72.0.0 with signal-flow 57.0.0.
+
 ## 65.0.0: a handover that cannot be read refuses the launch
 
 Built on 64.0.0.

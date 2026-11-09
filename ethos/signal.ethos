@@ -198,7 +198,9 @@
 ; refreshed for its model's threshold; it is handed its messages past it,
 ; and a Compact of it is refused as below the threshold. Restart and
 ; Refresh here take a flow or an Address as the ordinary ones do, with
-; their answers, from any peer this socket admits; what the ordinary one
+; their answers, from any peer this socket admits: a Refresh of a working
+; flow waits for its idle event and answers RefreshQueued, as the ordinary
+; one does; what the ordinary one
 ; answers Refused is OrdinaryRefused here. On the ordinary socket a
 ; protected Address answers only its own seat (signal-flow Protected).
 ; Retire of a protected Address's flow is refused Protected when the peer
@@ -228,7 +230,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshRejection ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId Caller CallerResolutionRejection Event LeaveOuts FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint StableCodex NextCodex KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -298,7 +300,8 @@ Signal
   DeliveryDebugged.{ DeliverySnapshot Receipt.Option<NativeReceipt> ReadBy.Option<LogicalDeliveryId> }
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   Debugged.DebugSnapshot
-  WithdrawRejected.[ UnknownAddress NotQueued ] ]
+  WithdrawRejected.[ UnknownAddress NotQueued ]
+  RefreshQueued.RefreshQueued ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Start; this
