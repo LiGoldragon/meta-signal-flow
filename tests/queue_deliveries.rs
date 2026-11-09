@@ -2,32 +2,33 @@
 //! metaflow's queue. The expected texts are written out here, not computed
 //! through the codec.
 
-use flow_ethos::{Address, Aspect, Model};
+use flow_ethos::{Address, Aspect, Model, Topic};
 use meta_signal_flow::{
-    AbsenceProof, ProcessIdentity, Query, QueueDeliveriesRead_Data, QueueDeliveryResolution,
-    QueueDeliveryResolved_Data, QueueResolutionOutcome, ReadQueueDeliveriesRejected_Data, Response,
-    Undecided, VisibleQueueDelivery, VisibleQueueDeliveryResolution, VisibleQueueDeliveryStanding,
-    VisibleQueueEvidence, VisibleQueueEvidence_Legacy_Data, VisibleQueueResolutionRecord,
-    VisibleResolveQueueDeliveryRejected,
+    AbsenceProof, ProcessId, ProcessIdentity, ProcessStartToken, ProcessUserId, Query,
+    QueueAttemptId, QueueDeliveriesRead_Data, QueueDeliveryResolution, QueueDeliveryResolved_Data,
+    QueueResolutionOutcome, QueueResolutionReason, ReadQueueDeliveriesRejected_Data, Response,
+    Undecided, UnixSeconds, VisibleQueueDelivery, VisibleQueueDeliveryResolution,
+    VisibleQueueDeliveryStanding, VisibleQueueEvidence, VisibleQueueEvidence_Legacy_Data,
+    VisibleQueueResolutionRecord, VisibleResolveQueueDeliveryRejected,
 };
-use signal_flow::{HarnessKind, VisibleRequest, VisibleSender};
+use signal_flow::{HarnessKind, NativeSessionId, VisibleRequest, VisibleSender};
 
 fn address() -> Address {
     Address {
         aspect: Aspect::Mind,
-        topic: "flow".into(),
+        topic: Topic("flow".to_string()),
         model: Model::Sol,
     }
 }
 
 fn delivery(standing: VisibleQueueDeliveryStanding) -> VisibleQueueDelivery {
     VisibleQueueDelivery {
-        native_session_id: "s1".into(),
+        native_session_id: NativeSessionId("s1".to_string()),
         harness_kind: HarnessKind::Claude,
         visible_queue_evidence: VisibleQueueEvidence::Legacy(VisibleQueueEvidence_Legacy_Data {
             visible_sender: VisibleSender::Sender(Address {
                 aspect: Aspect::Psyche,
-                topic: "core".into(),
+                topic: Topic("core".to_string()),
                 model: Model::Opus,
             }),
             visible_request: VisibleRequest::Order("go".into()),
@@ -76,22 +77,22 @@ fn read_queue_deliveries_round_trips_as_an_archive() {
 
 fn resolution(outcome: QueueResolutionOutcome) -> QueueDeliveryResolution {
     QueueDeliveryResolution {
-        queue_attempt_id: "queue-attempt-3".into(),
+        queue_attempt_id: QueueAttemptId("queue-attempt-3".to_string()),
         queue_resolution_outcome: outcome,
-        queue_resolution_reason: "seen in the pane".into(),
+        queue_resolution_reason: QueueResolutionReason("seen in the pane".to_string()),
     }
 }
 
 fn record() -> VisibleQueueResolutionRecord {
     VisibleQueueResolutionRecord {
         queue_resolution_outcome: QueueResolutionOutcome::Absent,
-        visible_resolver_identity: ProcessIdentity {
-            process_id: 7,
-            process_user_id: 1001,
-            process_start_token: "99".into(),
+        process_identity: ProcessIdentity {
+            process_id: ProcessId(7),
+            process_user_id: ProcessUserId(1001),
+            process_start_token: ProcessStartToken("99".to_string()),
         },
-        queue_resolution_reason: "seen in the pane".into(),
-        unix_seconds: 1_790_000_000,
+        queue_resolution_reason: QueueResolutionReason("seen in the pane".to_string()),
+        unix_seconds: UnixSeconds(1_790_000_000),
     }
 }
 
@@ -113,7 +114,7 @@ fn resolve_queue_delivery_round_trips_as_an_archive() {
             address: address(),
             visible_queue_delivery_resolution: VisibleQueueDeliveryResolution {
                 queue_resolution_outcome: QueueResolutionOutcome::Absent,
-                queue_resolution_reason: "seen in the pane".into(),
+                queue_resolution_reason: QueueResolutionReason("seen in the pane".to_string()),
             },
         }),
         Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::UnknownAttempt),

@@ -2,22 +2,24 @@
 //! The expected texts are written out here, not computed through the codec.
 
 use meta_signal_flow::{EventsRead_Data, Query, ReadEventsRejected_Data, Response};
-use signal_flow::{Event, NativeStop};
+use signal_flow::{
+    BackgroundWork, Event, FlowId, LastAssistantMessageOption, NativeSessionId, NativeStop,
+};
 
 fn events_read() -> Response {
     Response::EventsRead(EventsRead_Data {
-        flow_id: "f1c841".into(),
+        flow_id: FlowId("f1c841".to_string()),
         event_vector: vec![
-            Event::Started(Some("s1".into())),
+            Event::Started(Some(NativeSessionId("s1".to_string()))),
             Event::ToolUsed("Bash".into()),
             Event::Stopped(NativeStop {
-                native_session_id_option: Some("s1".into()),
+                native_session_id_option: Some(NativeSessionId("s1".to_string())),
                 transcript_path_option: None,
-                last_assistant_message_option: None,
-                background_work: vec![],
+                last_assistant_message_option: LastAssistantMessageOption(None),
+                background_work: BackgroundWork(vec![]),
             }),
-            Event::Cleared(Some("s1".into())),
-            Event::Started(Some("s2".into())),
+            Event::Cleared(Some(NativeSessionId("s1".to_string()))),
+            Event::Started(Some(NativeSessionId("s2".to_string()))),
         ],
     })
 }
@@ -35,7 +37,7 @@ fn read_events_round_trips_as_an_archive() {
             reply
         );
     }
-    let query = Query::ReadEvents("f1c841".into());
+    let query = Query::ReadEvents(FlowId("f1c841".to_string()));
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
         rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
@@ -63,7 +65,7 @@ mod datom {
         let query = Potential::<Query>::from("ReadEvents.f1c841")
             .actualize(&mut budget())
             .unwrap();
-        assert_eq!(query, Query::ReadEvents("f1c841".into()));
+        assert_eq!(query, Query::ReadEvents(FlowId("f1c841".to_string())));
         assert_eq!(
             events_read().datomize(vec![]).protosize().compact(),
             "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None [] } Cleared.Some.s1 Started.Some.s2 ] }"

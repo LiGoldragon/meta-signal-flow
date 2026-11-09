@@ -1,5 +1,21 @@
 # Upgrades
 
+## 73.0.0: ethos-zero 1976e45, signal-flow bd54916, flow-ethos d1effd4b, datom-codec 09a0526, protos c93b598, signal d77169d
+
+Built on 72.0.0. Every datom text form is unchanged.
+
+- ethos-zero 22 makes each one-type head a newtype, so a consumer wraps a
+  value with the constructor and reads it with `.0`.
+- StableCodex and NextCodex are gone: ConfigureNexus and NexusRuntimeSettings
+  hold CodexEndpoint twice (first_codex_endpoint, second_codex_endpoint).
+- Names that collided with a variant of the same name are renamed:
+  HarnessCommand is HarnessCommandKind, HarnessFlags is HarnessFlagText, the
+  Refresh integer is RefreshThreshold, and the configuration snapshot's field
+  types carry a Configured prefix (ConfiguredNexus, ConfiguredModels, ...).
+  VisibleSendReceipt is NativeReceipt; Caller is CallerIdentity.
+- Built on build-base 9ee222c: one derivation per crate from the committed
+  Cargo.nix.
+
 How to deploy each breaking change of meta-signal-flow.
 
 ## 72.0.0: signal-flow 57; a Refresh of a working flow is queued

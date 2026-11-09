@@ -2,22 +2,26 @@
 //! where its flow lives, and takes one queued request out of its queue. The
 //! expected texts are written out here, not computed through the codec.
 
-use flow_ethos::{Address, Aspect, Lock, Model, State};
+use flow_ethos::{
+    Address, Aspect, Lock, LogicalDeliveryId, Model, Pid, Started, State, Topic, Until,
+};
 use meta_signal_flow::{
-    Binding, InspectRejected_Data, Inspected_Data, OldSeat, Query, Rebind_Data,
+    Attempts, Binding, InspectRejected_Data, Inspected_Data, OldSeat, Query, Rebind_Data,
     RebindRejected_Data, Rebinding, Response, RestartFailure, RestartPhase, RestartRecord,
     VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
     VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
 };
 use signal_flow::{
-    DeliveredMessage, DeliveredRequest, EndpointSelection, FlowLifecycle, FlowNode, HarnessKind,
-    HerdrRoute, HerdrRouteSelection, Origin, Process, VisibleNativeInput, VisibleSender,
+    DeliveredMessage, DeliveredRequest, EndpointSelection, FlowId, FlowLifecycle, FlowNode,
+    HarnessKind, HerdrAgentName, HerdrPaneId, HerdrRoute, HerdrRouteSelection, HerdrSessionName,
+    HerdrTerminalId, NativeSessionId, Origin, Process, RequestId, SessionId, VisibleNativeInput,
+    VisibleSender,
 };
 
 fn address() -> Address {
     Address {
         aspect: Aspect::Mind,
-        topic: "flow".into(),
+        topic: Topic("flow".to_string()),
         model: Model::Sol,
     }
 }
@@ -25,22 +29,22 @@ fn address() -> Address {
 fn sender() -> Address {
     Address {
         aspect: Aspect::Psyche,
-        topic: "core".into(),
+        topic: Topic("core".to_string()),
         model: Model::Opus,
     }
 }
 
 fn node() -> FlowNode {
     FlowNode {
-        flow_id: "f1c841".into(),
-        session_id: "s1".into(),
+        flow_id: FlowId("f1c841".to_string()),
+        session_id: SessionId("s1".to_string()),
         harness_kind: HarnessKind::Claude,
         endpoint_selection: EndpointSelection::Unavailable,
         herdr_route_selection: HerdrRouteSelection::Available(HerdrRoute {
-            herdr_session_name: "default".into(),
-            herdr_agent_name: "mind-flow".into(),
-            herdr_pane_id: "w7B".into(),
-            herdr_terminal_id: "t1".into(),
+            herdr_session_name: HerdrSessionName("default".to_string()),
+            herdr_agent_name: HerdrAgentName("mind-flow".to_string()),
+            herdr_pane_id: HerdrPaneId("w7B".to_string()),
+            herdr_terminal_id: HerdrTerminalId("t1".to_string()),
         }),
         origin: Origin::Unbound,
         flow_lifecycle: FlowLifecycle::Active,
@@ -52,7 +56,7 @@ fn visible_entry() -> VisibleNativeInput {
         visible_sender: VisibleSender::Sender(sender()),
         delivered_message: DeliveredMessage::Soft(DeliveredRequest::Order(
             signal_flow::Order_Data {
-                request_id: "req1".into(),
+                request_id: RequestId("req1".to_string()),
                 string: "go".into(),
             },
         )),
@@ -61,7 +65,7 @@ fn visible_entry() -> VisibleNativeInput {
 
 fn attempt() -> VisibleAttempt {
     VisibleAttempt::Queued(VisibleQueueDelivery {
-        native_session_id: "s1".into(),
+        native_session_id: NativeSessionId("s1".to_string()),
         harness_kind: HarnessKind::Claude,
         visible_queue_evidence: VisibleQueueEvidence::Logical(visible_entry()),
         visible_queue_delivery_standing: VisibleQueueDeliveryStanding::Prepared,
@@ -72,21 +76,21 @@ fn inspected() -> Response {
     Response::Inspected(Inspected_Data {
         visible_metaflow: VisibleMetaflow {
             address: address(),
-            state: State::Awake("f1c841".into()),
-            flow_id_vector: vec!["9a83ec".into()],
+            state: State::Awake(FlowId("f1c841".to_string())),
+            flow_id_vector: vec![FlowId("9a83ec".to_string())],
             visible_native_input_vector: vec![visible_entry()],
         },
         binding: Binding {
             flow_node_option: Some(node()),
             process_option: Some(Process {
-                pid: 4242,
-                started: 17,
+                pid: Pid(4242),
+                started: Started(17),
             }),
         },
         lock_vector: vec![Lock {
-            sender: sender(),
-            address: address(),
-            until: 1_790_000_060,
+            first_address: sender(),
+            second_address: address(),
+            until: Until(1_790_000_060),
         }],
         visible_attempt_vector: vec![attempt()],
         restart_record_option: Some(restart_record()),
@@ -97,23 +101,23 @@ fn inspected() -> Response {
 /// the session, the old route and the birth of the old harness.
 fn restart_record() -> RestartRecord {
     RestartRecord {
-        flow_id: "f1c841".into(),
-        native_session_id: "s1".into(),
+        flow_id: FlowId("f1c841".to_string()),
+        native_session_id: NativeSessionId("s1".to_string()),
         address: address(),
         old_seat: OldSeat {
             herdr_route: HerdrRoute {
-                herdr_session_name: "default".into(),
-                herdr_agent_name: "mind-flow".into(),
-                herdr_pane_id: "w7B".into(),
-                herdr_terminal_id: "t1".into(),
+                herdr_session_name: HerdrSessionName("default".to_string()),
+                herdr_agent_name: HerdrAgentName("mind-flow".to_string()),
+                herdr_pane_id: HerdrPaneId("w7B".to_string()),
+                herdr_terminal_id: HerdrTerminalId("t1".to_string()),
             },
             process_option: Some(Process {
-                pid: 4242,
-                started: 17,
+                pid: Pid(4242),
+                started: Started(17),
             }),
         },
         restart_phase: RestartPhase::Failed(RestartFailure::BindMismatch),
-        attempts: 2,
+        attempts: Attempts(2),
     }
 }
 
@@ -122,15 +126,15 @@ fn queries() -> Vec<Query> {
         Query::Inspect(address()),
         Query::Rebind(Rebind_Data {
             address: address(),
-            rebinding: Rebinding::Pane("w7B".into()),
+            rebinding: Rebinding::Pane(HerdrPaneId("w7B".to_string())),
         }),
         Query::Rebind(Rebind_Data {
             address: address(),
-            rebinding: Rebinding::Flow("f1c841".into()),
+            rebinding: Rebinding::Flow(FlowId("f1c841".to_string())),
         }),
         Query::Withdraw(Withdraw_Data {
             address: address(),
-            logical_delivery_id: "logical-7".into(),
+            logical_delivery_id: LogicalDeliveryId("logical-7".to_string()),
         }),
     ]
 }

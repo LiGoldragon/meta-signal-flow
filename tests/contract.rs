@@ -113,73 +113,82 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
     let Response::Configuration(configuration) = &response else {
         panic!("expected Configuration snapshot");
     };
-    assert_eq!(configuration.nexus.source_root, "/srv/source");
+    let nexus = &configuration.configured_nexus.0;
+    assert_eq!(nexus.source_root.0, "/srv/source");
     assert_eq!(
-        configuration.nexus.stable_codex.client_path,
+        nexus.first_codex_endpoint.client_path.0,
         "codex-stable-flow-client"
     );
+    assert_eq!(nexus.first_codex_endpoint.home.0, "/home/someone/.codex");
     assert_eq!(
-        configuration.nexus.stable_codex.home,
-        "/home/someone/.codex"
-    );
-    assert_eq!(
-        configuration.nexus.stable_codex.control_socket_path,
+        nexus.first_codex_endpoint.control_socket_path.0,
         "/home/someone/.codex/app-server-control/app-server-control.sock"
     );
     assert_eq!(
-        configuration.nexus.stable_codex.model_name_vector,
-        vec!["gpt-5.6-terra".to_owned()]
+        nexus.first_codex_endpoint.model_name_vector,
+        vec![meta_signal_flow::ModelName("gpt-5.6-terra".to_owned())]
     );
     assert_eq!(
-        configuration.nexus.next_codex.model_name_vector,
-        vec!["gpt-6.1".to_owned()]
+        nexus.second_codex_endpoint.model_name_vector,
+        vec![meta_signal_flow::ModelName("gpt-6.1".to_owned())]
     );
-    assert_eq!(configuration.nexus.harness_profiles.len(), 1);
+    assert_eq!(nexus.harness_profiles.0.len(), 1);
     assert_eq!(
-        configuration.nexus.harness_profiles[0].harness_kind,
+        nexus.harness_profiles.0[0].harness_kind,
         meta_signal_flow::HarnessKind::Claude
     );
     assert_eq!(
-        configuration.nexus.harness_profiles[0].command_sigil_vector,
-        vec!["/".to_owned(), "!".to_owned(), "#".to_owned()]
+        nexus.harness_profiles.0[0].command_sigil_vector,
+        vec![
+            meta_signal_flow::CommandSigil("/".to_owned()),
+            meta_signal_flow::CommandSigil("!".to_owned()),
+            meta_signal_flow::CommandSigil("#".to_owned())
+        ]
     );
     assert_eq!(
-        configuration.nexus.harness_profiles[0].interrupt_keys,
-        vec!["esc".to_owned(), "esc".to_owned()]
+        nexus.harness_profiles.0[0].interrupt_keys,
+        meta_signal_flow::InterruptKeys(vec![
+            meta_signal_flow::KeyName("esc".to_owned()),
+            meta_signal_flow::KeyName("esc".to_owned())
+        ])
     );
     assert_eq!(
-        configuration.nexus.harness_profiles[0].submit_keys,
-        vec!["enter".to_owned()]
+        nexus.harness_profiles.0[0].submit_keys,
+        meta_signal_flow::SubmitKeys(vec![meta_signal_flow::KeyName("enter".to_owned())])
     );
     assert_eq!(
-        configuration.nexus.meta_aspects.as_slice(),
+        nexus.meta_aspects.0.as_slice(),
         &[signal_flow::Aspect::Psyche, signal_flow::Aspect::Mind]
     );
     assert_eq!(
-        configuration.nexus.message_nexus_path_option,
-        Some("/srv/message-nexus.sock".to_owned())
+        nexus.message_nexus_path_option,
+        Some(meta_signal_flow::MessageNexusPath(
+            "/srv/message-nexus.sock".to_owned()
+        ))
     );
     assert_eq!(
-        configuration.nexus.message_nexus_binary_option,
-        Some("/usr/bin/message-nexus".to_owned())
+        nexus.message_nexus_binary_option,
+        Some(meta_signal_flow::MessageNexusBinary(
+            "/usr/bin/message-nexus".to_owned()
+        ))
     );
     assert_eq!(
-        configuration.nexus.curriculum_nexus_path,
+        nexus.curriculum_nexus_path.0,
         "/srv/curriculum/curriculum.sock"
     );
-    assert_eq!(configuration.nexus.lease, 60);
-    assert_eq!(configuration.nexus.presentation_prompt_option, None);
+    assert_eq!(nexus.lease.0, 60);
+    assert_eq!(nexus.presentation_prompt_option, None);
     // Each model holds its one native model.
     assert_eq!(
-        configuration.models,
+        configuration.configured_models.0,
         vec![
             meta_signal_flow::ConfigureModel {
                 model: meta_signal_flow::Model::Opus,
-                native: "claude-opus".into(),
+                native: meta_signal_flow::Native("claude-opus".to_string()),
             },
             meta_signal_flow::ConfigureModel {
                 model: meta_signal_flow::Model::Sol,
-                native: "gpt-6.1".into(),
+                native: meta_signal_flow::Native("gpt-6.1".to_string()),
             },
         ]
     );
@@ -189,78 +198,99 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             .actualize(&mut budget())
             .is_err()
     );
-    assert_eq!(configuration.thresholds.len(), 1);
-    assert_eq!(configuration.thresholds[0].model_name, "claude-opus-5-5");
-    assert_eq!(configuration.thresholds[0].refresh, 200000);
+    assert_eq!(configuration.configured_thresholds.0.len(), 1);
+    assert_eq!(
+        configuration.configured_thresholds.0[0].model_name.0,
+        "claude-opus-5-5"
+    );
+    assert_eq!(
+        configuration.configured_thresholds.0[0].refresh_threshold,
+        meta_signal_flow::RefreshThreshold(200000)
+    );
     assert_eq!(
         configuration
-            .investigation
+            .configured_investigation
+            .0
             .as_ref()
-            .map(|address| address.topic.as_str()),
+            .map(|address| address.topic.0.as_str()),
         Some("compaction")
     );
-    assert_eq!(configuration.default_minutes, 30);
+    assert_eq!(configuration.configured_default_minutes.0.0, 30);
     assert_eq!(
-        configuration.harness_hook,
+        configuration.configured_harness_hook.0,
         meta_signal_flow::HarnessHookConfiguration::Configured(
-            "/home/someone/.local/bin/flow-hook".into()
+            meta_signal_flow::generated::signal::Path(
+                "/home/someone/.local/bin/flow-hook".to_string()
+            )
         )
     );
     // A store that has allocated nothing names the first id of each family.
     assert_eq!(
-        configuration.counters,
+        configuration.configured_counters.0,
         meta_signal_flow::ConfigureCounters {
-            logical_delivery: 1,
-            queue_attempt: 3,
-            send_outcome: 1,
+            logical_delivery: meta_signal_flow::LogicalDelivery(1),
+            queue_attempt: meta_signal_flow::QueueAttempt(3),
+            send_outcome: meta_signal_flow::SendOutcome(1),
         }
     );
-    assert_eq!(configuration.default_leave_outs.len(), 1);
+    assert_eq!(configuration.default_leave_outs.0.len(), 1);
     assert_eq!(
-        configuration.default_leave_outs[0].harness_kind,
+        configuration.default_leave_outs.0[0].harness_kind,
         meta_signal_flow::HarnessKind::Claude
     );
     assert_eq!(
-        configuration.default_leave_outs[0].leave_outs,
+        configuration.default_leave_outs.0[0].leave_outs.0,
         [
             signal_flow::LeaveOut::SkillTool,
             signal_flow::LeaveOut::WorkflowTool
         ]
     );
     assert_eq!(
-        configuration.send_servers,
+        configuration.configured_send_servers.0,
         vec![meta_signal_flow::ConfigureSendServer {
-            codex_app_server_binary: "/nix/store/codex/bin/codex".into(),
-            mcp_send_server_binary: "/nix/store/send/bin/flow-send-mcp".into(),
+            codex_app_server_binary: meta_signal_flow::CodexAppServerBinary(
+                "/nix/store/codex/bin/codex".to_string()
+            ),
+            mcp_send_server_binary: meta_signal_flow::McpSendServerBinary(
+                "/nix/store/send/bin/flow-send-mcp".to_string()
+            ),
         }]
     );
     assert_eq!(
-        configuration.metaflows,
+        configuration.configured_metaflows.0,
         vec![meta_signal_flow::ConfigureMetaflow {
             address: signal_flow::Address {
                 aspect: meta_signal_flow::Aspect::Mind,
-                topic: "core".into(),
+                topic: meta_signal_flow::Topic("core".to_string()),
                 model: meta_signal_flow::Model::Sol,
             },
-            root_option: Some("/srv/core".into()),
-            system_modules: vec!["spirit:core".into()],
-            user_modules: vec!["vision:flow".into()],
+            root_option: Some(meta_signal_flow::Root("/srv/core".to_string())),
+            system_modules: signal_flow::SystemModules(vec![signal_flow::ModuleIdentity(
+                "spirit:core".to_string()
+            )]),
+            user_modules: signal_flow::UserModules(vec![signal_flow::ModuleIdentity(
+                "vision:flow".to_string()
+            )]),
             flow_kind: signal_flow::FlowKind::Regular,
             tool_set: signal_flow::ToolSet::Default,
             continuity: meta_signal_flow::Continuity::Maintained,
-            purpose: "Keeps Flow running.".into(),
-            records: vec!["flows/a68420/vision/flow.md".into()],
+            purpose: meta_signal_flow::Purpose("Keeps Flow running.".to_string()),
+            records: meta_signal_flow::Records(vec![meta_signal_flow::RecordPath(
+                "flows/a68420/vision/flow.md".to_string()
+            )]),
         }]
     );
     assert_eq!(
-        configuration.configured_harness_flags,
+        configuration.configured_harness_flags.0,
         vec![meta_signal_flow::ConfigureHarnessFlags {
             address: signal_flow::Address {
                 aspect: meta_signal_flow::Aspect::Mind,
-                topic: "core".into(),
+                topic: meta_signal_flow::Topic("core".to_string()),
                 model: meta_signal_flow::Model::Sol,
             },
-            harness_flags: "--disallowedTools 'Artifact*'".into(),
+            harness_flag_text: meta_signal_flow::HarnessFlagText(
+                "--disallowedTools 'Artifact*'".to_string()
+            ),
         }]
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
@@ -297,7 +327,13 @@ fn presentation_prompt_round_trip_preserves_multiline_boundary_whitespace() {
     let Query::Configure(meta_signal_flow::ConfigurationChange::Nexus(nexus)) = &query else {
         panic!("expected Nexus configuration");
     };
-    assert_eq!(nexus.presentation_prompt_option.as_deref(), Some(prompt));
+    assert_eq!(
+        nexus
+            .presentation_prompt_option
+            .as_ref()
+            .map(|p| p.0.as_str()),
+        Some(prompt)
+    );
 
     let encoded = query.datomize(vec![]).protosize().compact();
     let restored = Potential::<Query>::from(encoded.as_str())
@@ -309,7 +345,10 @@ fn presentation_prompt_round_trip_preserves_multiline_boundary_whitespace() {
         panic!("expected restored Nexus configuration");
     };
     assert_eq!(
-        restored_nexus.presentation_prompt_option.as_deref(),
+        restored_nexus
+            .presentation_prompt_option
+            .as_ref()
+            .map(|p| p.0.as_str()),
         Some(prompt)
     );
 
@@ -354,7 +393,7 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
     let query = Potential::<Query>::from(request)
         .actualize(&mut budget())
         .unwrap();
-    assert!(matches!(&query, Query::Retire(flow_id) if flow_id == "d8df70"));
+    assert!(matches!(&query, Query::Retire(flow_id) if flow_id.0 == "d8df70"));
     assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
@@ -441,7 +480,7 @@ fn a_message_textualizes_with_its_priority_head_first() {
     let message = meta_signal_flow::Message::Soft(meta_signal_flow::Letter {
         visible_sender: signal_flow::VisibleSender::Sender(signal_flow::Address {
             aspect: signal_flow::Aspect::Psyche,
-            topic: "flow".into(),
+            topic: meta_signal_flow::Topic("flow".to_string()),
             model: signal_flow::Model::Opus,
         }),
         content: meta_signal_flow::Content::Text("Stage 1 is deployed; run the tier tests.".into()),
@@ -528,8 +567,12 @@ fn configure_send_servers_has_a_concrete_datom() {
         query,
         meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::SendServers(
             vec![meta_signal_flow::ConfigureSendServer {
-                codex_app_server_binary: "/nix/store/codex/bin/codex".into(),
-                mcp_send_server_binary: "/nix/store/send/bin/flow-send-mcp".into(),
+                codex_app_server_binary: meta_signal_flow::CodexAppServerBinary(
+                    "/nix/store/codex/bin/codex".to_string()
+                ),
+                mcp_send_server_binary: meta_signal_flow::McpSendServerBinary(
+                    "/nix/store/send/bin/flow-send-mcp".to_string()
+                ),
             }]
         ))
     );
@@ -546,7 +589,7 @@ fn configure_metaflows_has_a_concrete_datom() {
     assert!(matches!(
         &query,
         meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::Metaflows(declared))
-            if declared.len() == 1 && declared[0].system_modules.len() == 2
+            if declared.len() == 1 && declared[0].system_modules.0.len() == 2
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
 }
@@ -561,7 +604,7 @@ fn configure_harness_flags_has_a_concrete_datom() {
     assert!(matches!(
         &query,
         meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::HarnessFlags(flags))
-            if flags.len() == 1 && flags[0].harness_flags == "--disallowedTools 'Artifact*'"
+            if flags.len() == 1 && flags[0].harness_flag_text.0 == "--disallowedTools 'Artifact*'"
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
 }
@@ -603,7 +646,7 @@ fn configure_topic_refusal_round_trips() {
     assert_eq!(
         response,
         Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::TopicRefused(
-            "Flow_Repair".into()
+            meta_signal_flow::Topic("Flow_Repair".to_string())
         ))
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
