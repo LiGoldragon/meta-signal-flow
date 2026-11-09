@@ -168,7 +168,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
             usesDefaultFeatures = false;
             features = [ "clone-impls" "derive" "full" "parsing" "printing" "proc-macro" ];
           }
@@ -318,7 +318,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
             features = [ "full" ];
           }
         ];
@@ -666,7 +666,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
             usesDefaultFeatures = false;
             features = [ "full" ];
           }
@@ -679,7 +679,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
             usesDefaultFeatures = false;
             features = [ "clone-impls" "extra-traits" "parsing" "printing" "visit-mut" ];
           }
@@ -780,7 +780,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
             usesDefaultFeatures = false;
             features = [ "clone-impls" "derive" "full" "parsing" "printing" "proc-macro" ];
           }
@@ -974,7 +974,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
             usesDefaultFeatures = false;
             features = [ "clone-impls" "derive" "parsing" "printing" "proc-macro" ];
           }
@@ -1149,11 +1149,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "clone-impls" "default" "derive" "full" "parsing" "printing" "proc-macro" ];
       };
-      "syn 3.0.6" = rec {
+      "syn 3.0.5" = rec {
         crateName = "syn";
-        version = "3.0.6";
+        version = "3.0.5";
         edition = "2021";
-        sha256 = "1vmw7s58rzrs926nv5m06x7qbgswm1aa9iw3s1bj5var47kyi4w5";
+        sha256 = "1yc9vbm1wqs68fyj5f1f3f9isyh6i7wpxccvfrgpfnzn200jxpqj";
         authors = [
           "David Tolnay <dtolnay@gmail.com>"
         ];
@@ -1222,7 +1222,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
           }
         ];
 
@@ -1439,7 +1439,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 3.0.6";
+            packageId = "syn 3.0.5";
             features = [ "visit" "visit-mut" "full" "extra-traits" ];
           }
           {
