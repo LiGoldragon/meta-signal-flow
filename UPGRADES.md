@@ -1,6 +1,6 @@
 # Upgrades
 
-## 73.0.0: ethos-zero 1976e45, signal-flow bd54916, flow-ethos d1effd4b, datom-codec 09a0526, protos c93b598, signal d77169d
+## 73.0.0: ethos-zero 1976e45, signal-flow 0d515ed, flow-ethos d1effd4b, datom-codec 09a0526, protos c93b598, signal d77169d
 
 Built on 72.0.0. Every datom text form is unchanged.
 
