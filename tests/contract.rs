@@ -105,7 +105,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { { Field flow Terra } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { { Field flow Terra } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook }";
 
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
@@ -200,6 +200,12 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         Some("compaction")
     );
     assert_eq!(configuration.default_minutes, 30);
+    assert_eq!(
+        configuration.harness_hook,
+        meta_signal_flow::HarnessHookConfiguration::Configured(
+            "/home/someone/.local/bin/flow-hook".into()
+        )
+    );
     // A store that has allocated nothing names the first id of each family.
     assert_eq!(
         configuration.counters,
@@ -454,6 +460,8 @@ fn configure_declares_one_whole_family() {
         "Configure.Investigation.{ Psyche compaction Sonnet }",
         "Configure.LeaveOuts.[ { { Field core Astra } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Opus } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Opus } Codex [ CodexAgentsMd ] } ]",
         "Configure.LeaveOuts.[]",
+        "Configure.HarnessHook./home/li/.local/bin/flow-hook",
+        "ObserveConfiguration",
     ] {
         let query = Potential::<Query>::from(text)
             .actualize(&mut budget())
@@ -621,7 +629,7 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
         "ConfigureRejected.MinutesRefused.Zero",
         "ConfigureRejected.MinutesRefused.Negative",
         "ConfigureRejected.MinutesRefused.Unreachable",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 45 None [] { 1 3 1 } 64 3 }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 45 None [] { 1 3 1 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -684,7 +692,7 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         "ConfigureRejected.CountersRefused.NotEmpty",
         "ConfigureRejected.CountersRefused.Lowered.{ 121 46 301 }",
         "ConfigureRejected.CountersRefused.NotRunning",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 45 None [] { 120 45 300 } 64 3 }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 45 None [] { 120 45 300 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -745,7 +753,7 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "RefreshRejected.Protected",
         "RetireRejected.Protected",
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())

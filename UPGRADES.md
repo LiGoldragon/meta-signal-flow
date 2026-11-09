@@ -6,6 +6,15 @@ How to deploy each breaking change of meta-signal-flow.
 
 Built on 71.0.0 (1d3ebf0).
 
+- `ConfigurationChange` gains `HarnessHook.Path`, last: the hook command a
+  Claude flow is launched with, declared through the meta surface (a
+  deployment's stable path) rather than read from the Nexus's environment.
+  `ConfigurationSnapshot` gains `HarnessHook.HarnessHookConfiguration`
+  (`Configured.Path` or `Unconfigured`), last.
+- `Query` gains `ObserveConfiguration`, last: the configuration as
+  `Configuration` answers it on open, then again each time a Configure
+  replaces a family, until the peer goes. A running Nexus takes a replaced
+  configuration at once.
 - signal-flow 57.0.0: `Event`'s `Stopped` carries `BackgroundWork`, so
   `EventsRead` shows it, as in `Stopped.{ Some.s1 None None [] }`.
 - `Response` gains `RefreshQueued.RefreshQueued`, last: `Refresh.Address`

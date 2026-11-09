@@ -73,6 +73,13 @@ pub enum HandoverCountConfiguration {
     Unconfigured,
 }
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HarnessHookConfiguration {
+    Configured(Path),
+    Unconfigured,
+}
+#[rustfmt::skip]
 pub type Duration = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -209,6 +216,7 @@ pub enum ConfigurationChange {
     Counters(ConfigureCounters),
     RequestIdDraws(DrawBound),
     AnnouncementTries(TryBound),
+    HarnessHook(Path),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -254,6 +262,8 @@ pub type RequestIdDraws = DrawBound;
 #[rustfmt::skip]
 pub type AnnouncementTries = TryBound;
 #[rustfmt::skip]
+pub type HarnessHook = HarnessHookConfiguration;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -275,6 +285,7 @@ pub struct ConfigurationSnapshot {
     pub counters: Counters,
     pub request_id_draws: RequestIdDraws,
     pub announcement_tries: AnnouncementTries,
+    pub harness_hook: HarnessHook,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
@@ -1027,6 +1038,7 @@ pub enum Query {
     DebugDelivery(flow_ethos::RequestId),
     Rebind(Rebind_Data),
     Withdraw(Withdraw_Data),
+    ObserveConfiguration,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

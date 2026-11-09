@@ -45,7 +45,7 @@
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
 ; LeaveOuts, Nexus, SendServers, Metaflows, Investigation, DefaultMinutes,
-; ProtectedAddresses or Counters. The declared value replaces that family's committed
+; ProtectedAddresses, Counters or HarnessHook. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured.Replaced, or Configured.Unchanged when the committed
@@ -102,8 +102,19 @@
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
 ; CurriculumNexusPath is the socket of the Curriculum Nexus that composes
 ; every launch's context. A running Nexus reads its Codex endpoints and its
-; Curriculum socket when it opens, so a replaced one is served from the
-; next start.
+; Curriculum socket from the committed configuration, and a running Nexus
+; takes a replaced value at once, without a restart.
+;
+; HarnessHook is the hook command a Claude flow is launched with: written
+; into the flow's settings so the flow runs it on its harness events. A
+; deployment names a stable path it repoints at each Flow it activates, so
+; a flow keeps the deployed hook across upgrades. Unconfigured, or a path
+; that is not absolute, names the flow-hook beside the Nexus's executable.
+;
+; ObserveConfiguration subscribes to the configuration: the snapshot as
+; Configuration answers it (Unconfigured while no Nexus is declared) on
+; open, then one more each time a Configure replaces a family, until the
+; peer goes.
 ;
 ; A send server is an MCP server a Codex app-server runs for one thread,
 ; trusted to name the thread whose tool calls it serves (signal-flow
@@ -255,7 +266,8 @@ Signal
   Rebind.{ Address
            Rebinding.[ Pane.HerdrPaneId         ; the current flow now lives in this pane
                        Flow.FlowId ] }          ; the metaflow's current flow is now this flow
-  Withdraw.{ Address LogicalDeliveryId } ]      ; one queued delivery leaves the queue
+  Withdraw.{ Address LogicalDeliveryId }        ; one queued delivery leaves the queue
+  ObserveConfiguration ]                        ; the configuration, then each change
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -304,7 +316,7 @@ Signal
   RefreshQueued.RefreshQueued ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
-  ; The process sockets are separately supplied by Library.Start; this
+  ; The process sockets are separately supplied by Library.Place; this
   ; record is not a Configure wire payload.
   ; A Nexus that does not own a Message Nexus executable carries None.
   NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot StableCodex NextCodex Vector<HarnessProfile> MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> Lease }
@@ -320,6 +332,7 @@ Signal
   HandoverPoliciesConfiguration.[ Configured.Vector<HandoverPolicy> Unconfigured ]
   HandoverArchiveConfiguration.[ Configured.Path Unconfigured ]
   HandoverCountConfiguration.[ Configured.Integer Unconfigured ]
+  HarnessHookConfiguration.[ Configured.Path Unconfigured ]
   ; Whole handover archive publication budget, in milliseconds.
   Duration.Integer
   ; The leave-outs a metaflow's Start on one harness takes when it names none.
@@ -385,9 +398,10 @@ Signal
                          ProtectedAddresses.Vector<Address>
                          Counters.ConfigureCounters
                          RequestIdDraws.DrawBound
-                         AnnouncementTries.TryBound ]
+                         AnnouncementTries.TryBound
+                         HarnessHook.Path ]
   ConfigureOutcome.[ Replaced Unchanged ]
-  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> HandoverPolicies.HandoverPoliciesConfiguration HandoverArchive.HandoverArchiveConfiguration HandoverCount.HandoverCountConfiguration PublicationDeadline.Duration DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters RequestIdDraws.DrawBound AnnouncementTries.TryBound }
+  ConfigurationSnapshot.{ Nexus.ConfigureNexus Models.Vector<ConfigureModel> Thresholds.Vector<ConfigureThreshold> HandoverPolicies.HandoverPoliciesConfiguration HandoverArchive.HandoverArchiveConfiguration HandoverCount.HandoverCountConfiguration PublicationDeadline.Duration DefaultLeaveOuts.Vector<ConfigureLeaveOut> SendServers.Vector<ConfigureSendServer> Metaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> Investigation.Option<Address> DefaultMinutes.Minutes Heartbeat.Option<HeartbeatConfig> ProtectedAddresses.Vector<Address> Counters.ConfigureCounters RequestIdDraws.DrawBound AnnouncementTries.TryBound HarnessHook.HarnessHookConfiguration }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
