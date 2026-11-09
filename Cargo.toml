@@ -17,7 +17,7 @@ datom = ["dep:datom-codec", "dep:protos", "flow-ethos/datom", "signal-flow/datom
 datom-codec = { git = "https://github.com/LiGoldragon/datom-codec", rev = "0bbeb11", optional = true }
 protos = { git = "https://github.com/LiGoldragon/protos", rev = "4024614", optional = true }
 signal = { git = "https://github.com/LiGoldragon/signal", rev = "7e6dfe5", default-features = false }
-signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "04423a9486eae604b19072c1a166dc4cfdd432e3" }
+signal-flow = { git = "https://github.com/LiGoldragon/signal-flow", rev = "79eaa70bb6595f7708ea63ca0d11802b0958852e" }
 flow-ethos = { git = "https://github.com/LiGoldragon/flow", rev = "c585ea6", default-features = false }
 rkyv = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 
@@ -28,3 +28,7 @@ ethos-zero = { git = "https://github.com/LiGoldragon/ethos-zero", rev = "07714b0
 unsafe_code = "forbid"
 unused = { level = "warn", priority = -1 }
 dead_code = "warn"
+
+# The generated contract is committed byte for byte from its ethos source.
+[lints.clippy]
+large_enum_variant = "allow"
