@@ -19,11 +19,11 @@ Built on 71.0.0 (1d3ebf0).
   `EventsRead` shows it, as in `Stopped.{ Some.s1 None None [] }`.
 - `Response` gains `RefreshQueued.RefreshQueued`, last: `Refresh.Address`
   of a working flow waits for its idle event, as the ordinary one does.
-- signal-flow 57.0.0 at 8e56457: a frame on the ordinary socket that
+- signal-flow 57.0.0 at 3d0a4cd: a frame on the ordinary socket that
   decodes as no Query is answered `FrameRefused` and recorded, and
   `Observe.Undecodable` shows the records; `Observe.TurnEnds` shows the last
-  turn end of each harness, then each one. The meta contract is unchanged
-  by either.
+  turn end of each harness, then each one; `Observe.Metaflows` shows the
+  metaflows, then each change. The meta contract is unchanged by any.
 - Every consumer moves to 72.0.0 with signal-flow 57.0.0.
 
 ## 65.0.0: a handover that cannot be read refuses the launch
