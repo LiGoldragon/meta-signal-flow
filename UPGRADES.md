@@ -1,5 +1,10 @@
 # Upgrades
 
+## 73.0.1: signal 6d4eb74 (11.0.0) and signal-flow 6881724, on build-base d5ad91d
+
+The signal pin moves from d77169d to 6d4eb74 and signal-flow to 6881724, which
+pins the same signal. The contract and every datom form are unchanged.
+
 ## 73.0.0: ethos-zero 1976e45, signal-flow 0d515ed, flow-ethos d1effd4b, datom-codec 09a0526, protos c93b598, signal d77169d
 
 Built on 72.0.0. Every datom text form is unchanged.
