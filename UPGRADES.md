@@ -1,5 +1,11 @@
 # Upgrades
 
+## 73.0.3: flow-ethos 5c61d666 (0.54.0) and signal-flow 15790be
+
+The flow-ethos pin moves from d1effd4b to flow main 5c61d666 (0.54.0, the
+flow-ethos source unchanged) and signal-flow to 15790be, which pins the same.
+The contract and every datom form are unchanged.
+
 ## 73.0.2: Sent carries VisibleSendReceipt again
 
 73.0.0 changed the Sent arm of VisibleOrdinarySendOutcome to carry a
