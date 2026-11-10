@@ -241,7 +241,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection Event FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection Event FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ]
   flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -545,7 +545,7 @@ Signal
   VisibleOrdinarySendOutcome.[ Accepted.VisibleSendAcceptance
                                Refused.VisibleRefusal
                                PriorAdmission.PriorSendOutcome
-                               Sent.NativeReceipt
+                               Sent.VisibleSendReceipt
                                Failed.VisibleSendFailure ]
   VisibleSendOutcomeRecord.{ Option<Process> Option<Address> Option<Address> RequestDigest VisibleOrdinarySendOutcome }
   VisibleLegacyArchiveEntry.{ Address VisibleQueueEvidence }

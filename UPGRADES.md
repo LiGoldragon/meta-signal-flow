@@ -1,5 +1,12 @@
 # Upgrades
 
+## 73.0.2: Sent carries VisibleSendReceipt again
+
+73.0.0 changed the Sent arm of VisibleOrdinarySendOutcome to carry a
+NativeReceipt. 73.0.2 restores Sent.VisibleSendReceipt, the signal-flow
+6881724 type that holds the request id; the datom form is Sent.<id> again.
+A consumer of 73.0.0 or 73.0.1 reads the request id from the arm.
+
 ## 73.0.1: signal 6d4eb74 (11.0.0) and signal-flow 6881724, on build-base d5ad91d
 
 The signal pin moves from d77169d to 6d4eb74 and signal-flow to 6881724, which

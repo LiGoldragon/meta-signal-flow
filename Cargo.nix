@@ -530,7 +530,7 @@ rec {
       };
       "meta-signal-flow" = rec {
         crateName = "meta-signal-flow";
-        version = "73.0.1";
+        version = "73.0.2";
         edition = "2024";
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };
         libName = "meta_signal_flow";

@@ -1096,7 +1096,7 @@ pub enum VisibleOrdinarySendOutcome {
     Accepted(signal_flow::VisibleSendAcceptance),
     Refused(signal_flow::VisibleRefusal),
     PriorAdmission(PriorSendOutcome),
-    Sent(signal_flow::NativeReceipt),
+    Sent(signal_flow::VisibleSendReceipt),
     Failed(signal_flow::VisibleSendFailure),
 }
 #[rustfmt::skip]
