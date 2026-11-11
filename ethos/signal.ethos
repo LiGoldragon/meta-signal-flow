@@ -29,12 +29,9 @@
 ; recipient was seen reacting on the exact pane. InterruptWitness says
 ; whether a HardAbrupt interrupt was seen to leave Working.
 ;
-; Every query on this socket answers MetaRefused unless the peer is the
-; configured Message Nexus executable, a process in no flow's pane (the
-; owner), or a flow whose aspect is in MetaAspects.
-;
-; MessageNexusBinary is the executable identity used by Bind as Message on
-; the ordinary socket. A payload PID does not establish that identity.
+; Every query on this socket gives the same answer to every peer, a flow,
+; a subflow or the living at a shell. MetaAspects and MessageNexusBinary
+; are configured and read by nothing.
 ;
 ; ResolvePeer names the flow a process runs in, as ResolveCaller does for
 ; an ordinary connection's own peer.
@@ -42,6 +39,15 @@
 ; ReadEvents answers the harness events Flow holds in its Memory for one
 ; flow, in the order its Reports were recorded: EventsRead, or
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
+;
+; Configure.Permaflow, Configure.Harness and Configure.Refresh change one
+; declaration alone, keyed by its name: one metaflow by its Address, one
+; HarnessProfile by its HarnessKind, one model's refresh threshold by its
+; ModelName. It is added or replaced in one atomic commit, the rest of its
+; family kept. Remove takes one away by the same key. Each answers
+; Configured.Replaced, or Configured.Unchanged when the committed value
+; already is the declaration, or holds no entry of that key; a Harness
+; while no Nexus is declared answers Unconfigured. The names are tentative.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
 ; LeaveOuts, Nexus, SendServers, Metaflows, Investigation, DefaultMinutes,
@@ -143,7 +149,8 @@
 ; true and why. Delivered: the request reached the seat, so it leaves the
 ; queue. Absent: it did not, so a new attempt is authorised. Flow records the
 ; resolution with the identity of the requesting meta peer (its process, and
-; the flow it runs in when it runs in one), the reason, and the time in Unix
+; the flow it runs in when it runs in one; process 0 when the peer could not
+; be read), the reason, and the time in Unix
 ; seconds, in the same commit as the settlement or authorisation; the
 ; attempt then lists as Resolved. Flow never resolves by itself.
 ; QueueDeliveryResolved answers with the attempt and the resolution.
@@ -180,7 +187,9 @@
 ; reports none and no rollout whose session_meta names the session exists),
 ; HerdrUnreadable (the session's snapshot or the pane's processes could not
 ; be read), RoleMismatch (the binding's aspect is not its Address's, or its
-; model is not the native model configured for its Address's Model).
+; model is not the native model configured for its Address's Model). It is
+; taken from any peer; MetaFlowOwnerId is recorded and checked against
+; nothing.
 
 ; Inspect answers the metaflow at Address whole, as Flow holds it now: its
 ; state, its Past and its queue; its binding, the row of the flow it is
@@ -207,15 +216,12 @@
 ; ProtectedAddresses names the Addresses whose flows Flow keeps: one entry
 ; per Address, none by default. A protected Address's flow is never
 ; refreshed for its model's threshold; it is handed its messages past it,
-; and a Compact of it is refused as below the threshold. Restart and
-; Refresh here take a flow or an Address as the ordinary ones do, with
-; their answers, from any peer this socket admits: a Refresh of a working
-; flow waits for its idle event and answers RefreshQueued, as the ordinary
-; one does; what the ordinary one
-; answers Refused is OrdinaryRefused here. On the ordinary socket a
-; protected Address answers only its own seat (signal-flow Protected).
-; Retire of a protected Address's flow is refused Protected when the peer
-; is a flow other than it; the owner, or the flow itself, retires it.
+; and a Compact of it is refused as below the threshold. Every other act on
+; it is answered as for any Address, to any peer. Restart and Refresh here
+; take a flow or an Address as the ordinary ones do, with their answers: a
+; Refresh of a working flow waits for its idle event and answers
+; RefreshQueued, as the ordinary one does; what the ordinary one answers
+; Refused is OrdinaryRefused here.
 
 ; Rebind repairs where a metaflow's flow lives, with no harness action.
 ; Rebinding.Pane: the flow the metaflow is Awake as now lives in this pane
@@ -267,7 +273,8 @@ Signal
            Rebinding.[ Pane.HerdrPaneId         ; the current flow now lives in this pane
                        Flow.FlowId ] }          ; the metaflow's current flow is now this flow
   Withdraw.{ Address LogicalDeliveryId }        ; one queued delivery leaves the queue
-  ObserveConfiguration ]                        ; the configuration, then each change
+  ObserveConfiguration                          ; the configuration, then each change
+  Remove.Removal ]                              ; one declaration leaves its family
 [ Configured.ConfigureOutcome
   Configuration.ConfigurationSnapshot
   Unconfigured
@@ -292,7 +299,6 @@ Signal
   CommandRejected.CommandRejection
   PeerResolved.CallerIdentity
   PeerResolutionRejected.CallerResolutionRejection
-  MetaRefused.MetaRefusal
   Refused.StoreRefusal
   EventsRead.{ FlowId Vector<Event> }
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
@@ -399,7 +405,14 @@ Signal
                          Counters.ConfigureCounters
                          RequestIdDraws.DrawBound
                          AnnouncementTries.TryBound
-                         HarnessHook.Path ]
+                         HarnessHook.Path
+                         Permaflow.ConfigureMetaflow
+                         Harness.HarnessProfile
+                         Refresh.ConfigureThreshold ]
+  ; One declaration taken away, by its key.
+  Removal.[ Permaflow.Address
+            Harness.HarnessKind
+            Refresh.ModelName ]
   ConfigureOutcome.[ Replaced Unchanged ]
   ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration DefaultLeaveOuts.Vector<ConfigureLeaveOut> ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration }
   IdempotencyKey.String
@@ -430,13 +443,12 @@ Signal
   FlowBindingResult.[ Bound.BoundFlowBinding
                       Refused.RefusedFlowBinding ]
   BoundExisting.{ FlowContainer FlowBindingResult }
-  BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch OwnerMismatch StoreRefused ]
+  BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch StoreRefused ]
   ; CloseRefused: the retired flow's pane is still there and Herdr refused
   ; to close it; nothing is recorded and the flow is not retired.
   ; Maintained: the flow is the one a Maintained metaflow is Awake as;
   ; nothing changes, and its declaration's continuity is changed first.
-  ; Protected: the flow's Address is protected and the peer is another flow.
-  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained RestartUnresolved Protected ]
+  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained RestartUnresolved ]
   OldSeat.{ HerdrRoute Option<Process> }
   RestartFailure.[ CloseRefused CloseUnproven ResumeRefused.String BindMismatch Stopped ]
   RestartPhase.[ Closing
@@ -488,8 +500,6 @@ Signal
   ContextBelowThreshold.{ ContextTokens RefreshTokens }
   CompactionRefusal.[ BelowThreshold.ContextBelowThreshold Unmeasured NoThreshold ]
   CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited CompactionRefused.CompactionRefusal ]
-  MetaRefusal.[ PeerUnknown
-                PeerNotAuthorized.CallerIdentity ]
   StoreRefusal.[ Store.String ]
   QueueAttemptId.String
   Undecided.[ HistoryUnreadable HistoryReplaced PendingInHarness Ambiguous SeatNotResting AbsenceUnprovable ]

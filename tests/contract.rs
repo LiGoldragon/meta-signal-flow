@@ -460,8 +460,6 @@ fn delivery_replies_have_concrete_datoms() {
         "CommandRejected.CompactionRefused.NoThreshold",
         "PeerResolved.{ e167d8 Psyche claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
-        "MetaRefused.PeerNotAuthorized.{ da88cf Field gpt-5.5 }",
-        "MetaRefused.PeerUnknown",
     ] {
         let response = Potential::<Response>::from(text)
             .actualize(&mut budget())
@@ -592,6 +590,31 @@ fn configure_metaflows_has_a_concrete_datom() {
             if declared.len() == 1 && declared[0].system_modules.0.len() == 2
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+}
+
+/// One declaration is added, replaced or removed alone, keyed by its name:
+/// a permaflow by its Address, a harness profile by its harness, a model's
+/// refresh by its model name.
+#[test]
+fn one_declaration_is_configured_and_removed_alone() {
+    for text in [
+        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ spirit:core ] [] Regular Default OnDemand «» [] }",
+        "Configure.Harness.{ Claude [ / ] [ Escape Escape ] [ Enter ] }",
+        "Configure.Refresh.{ claude-fable-5-2 280000 }",
+        "Remove.Permaflow.{ Psyche book Haiku }",
+        "Remove.Harness.Codex",
+        "Remove.Refresh.claude-fable-5-2",
+    ] {
+        let query = Potential::<meta_signal_flow::Query>::from(text)
+            .actualize(&mut budget())
+            .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<meta_signal_flow::Query, rkyv::rancor::Error>(&archive).unwrap(),
+            query
+        );
+    }
 }
 
 #[test]
@@ -767,8 +790,7 @@ fn a_send_outcome_refused_unidentified_carries_its_seat_evidence() {
 /// ProtectedAddresses is a configuration family of its own: the Addresses
 /// whose flows Flow keeps, declared whole over Configure and read back in
 /// the snapshot before the counters. Restart and Refresh are taken here as
-/// on the ordinary socket, with their answers; a Retire of a protected
-/// Address's flow by another flow answers Protected.
+/// on the ordinary socket, with their answers.
 #[test]
 fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
     for text in [
@@ -789,12 +811,9 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
     }
     for reply in [
         "Restarted.c1a0de",
-        "RestartRefused.Protected.c1a0de",
         "RestartRefused.Unsupported.c1a0de",
         "Refreshed.{ { Psyche core Fable } c1a0de }",
         "RefreshQueued.{ { Psyche core Fable } c1a0de }",
-        "RefreshRejected.Protected",
-        "RetireRejected.Protected",
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured }",
     ] {

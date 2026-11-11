@@ -270,6 +270,17 @@ pub enum ConfigurationChange {
     RequestIdDraws(DrawBound),
     AnnouncementTries(TryBound),
     HarnessHook(Path),
+    Permaflow(ConfigureMetaflow),
+    Harness(flow_ethos::HarnessProfile),
+    Refresh(ConfigureThreshold),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Removal {
+    Permaflow(flow_ethos::Address),
+    Harness(signal_flow::HarnessKind),
+    Refresh(signal_flow::ModelName),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -582,7 +593,6 @@ pub struct BoundExisting {
 pub enum BindExistingRejection {
     ContainerUnavailable,
     ContainerIdentityMismatch,
-    OwnerMismatch,
     StoreRefused,
 }
 #[rustfmt::skip]
@@ -595,7 +605,6 @@ pub enum RetireRejection {
     CloseRefused,
     Maintained,
     RestartUnresolved,
-    Protected,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -814,13 +823,6 @@ pub enum CommandRejection {
     FlowRetired,
     FlowExited,
     CompactionRefused(CompactionRefusal),
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum MetaRefusal {
-    PeerUnknown,
-    PeerNotAuthorized(signal_flow::CallerIdentity),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1172,6 +1174,7 @@ pub enum Query {
     Rebind(Rebind_Data),
     Withdraw(Withdraw_Data),
     ObserveConfiguration,
+    Remove(Removal),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1299,7 +1302,6 @@ pub enum Response {
     CommandRejected(CommandRejection),
     PeerResolved(signal_flow::CallerIdentity),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
-    MetaRefused(MetaRefusal),
     Refused(StoreRefusal),
     EventsRead(EventsRead_Data),
     ReadEventsRejected(ReadEventsRejected_Data),

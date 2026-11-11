@@ -1,5 +1,27 @@
 # Upgrades
 
+## 74.0.0: every peer answered alike; one declaration changed alone
+
+Built on 73.0.3 (5f90d4c), for Flow 0.54.2, on signal-flow 59.0.0
+(fd66b4e).
+
+- `MetaRefused` and `MetaRefusal` are gone: every query on this socket
+  gives the same answer to every peer. `MetaAspects` and
+  `MessageNexusBinary` stay configured and are read by nothing.
+- `OwnerMismatch` leaves `BindExistingRejection`: MetaBindExisting is taken
+  from any peer, and `MetaFlowOwnerId` is checked against nothing.
+  `Protected` leaves `RetireRejection`.
+- `ConfigurationChange` gains, last, `Permaflow.ConfigureMetaflow`,
+  `Harness.HarnessProfile` and `Refresh.ConfigureThreshold`: one
+  declaration added or replaced alone, keyed by its Address, its harness
+  or its model name. `Query` gains `Remove.Removal`, last, with
+  `Removal.[ Permaflow.Address Harness.HarnessKind Refresh.ModelName ]`.
+  Both answer `Configured.[ Replaced Unchanged ]`. The names are
+  tentative.
+- A queue resolution whose peer could not be read records process 0.
+- The Response variants after `PeerResolutionRejected` move up one place,
+  so a meta client is rebuilt on this revision.
+
 ## 73.0.3: flow-ethos 5c61d666 (0.54.0) and signal-flow 15790be
 
 The flow-ethos pin moves from d1effd4b to flow main 5c61d666 (0.54.0, the
