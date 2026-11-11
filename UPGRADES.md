@@ -3,7 +3,7 @@
 ## 74.0.0: every peer answered alike; one declaration changed alone
 
 Built on 73.0.3 (5f90d4c), for Flow 0.54.2, on signal-flow 59.0.0
-(fd66b4e).
+(d2a4ca5).
 
 - `MetaRefused` and `MetaRefusal` are gone: every query on this socket
   gives the same answer to every peer. `MetaAspects` and
