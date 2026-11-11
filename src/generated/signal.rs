@@ -132,6 +132,7 @@ pub struct ConfigureNexus {
     pub curriculum_nexus_path: CurriculumNexusPath,
     pub lease: flow_ethos::Lease,
     pub presentation_prompt_option: std::option::Option<PresentationPrompt>,
+    pub herdr_session_name: signal_flow::HerdrSessionName,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -662,19 +663,11 @@ pub struct CommandLine(pub String);
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ByteOffset(pub i64);
 #[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct PsycheContext(pub String);
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct PsycheVerbatim(pub String);
-#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct Psyche_Data {
-    pub psyche_context: PsycheContext,
-    pub psyche_verbatim: PsycheVerbatim,
+pub struct Living_Data {
+    pub context: flow_ethos::Context,
+    pub verbatim: flow_ethos::Verbatim,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -682,7 +675,7 @@ pub struct Psyche_Data {
 pub enum Content {
     Waking(std::vec::Vec<signal_flow::VisibleNativeInput>),
     Text(String),
-    Psyche(Psyche_Data),
+    Living(Living_Data),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -985,8 +978,8 @@ pub enum OrdinarySendOutcome {
 pub struct SendOutcomeRecord {
     pub send_outcome_id: SendOutcomeId,
     pub process_option: std::option::Option<signal_flow::Process>,
-    pub first_address_option: std::option::Option<flow_ethos::Address>,
-    pub second_address_option: std::option::Option<flow_ethos::Address>,
+    pub sent_by: signal_flow::SentBy,
+    pub address_option: std::option::Option<flow_ethos::Address>,
     pub request_digest: RequestDigest,
     pub ordinary_send_outcome: OrdinarySendOutcome,
 }
@@ -1106,8 +1099,8 @@ pub enum VisibleOrdinarySendOutcome {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct VisibleSendOutcomeRecord {
     pub process_option: std::option::Option<signal_flow::Process>,
-    pub first_address_option: std::option::Option<flow_ethos::Address>,
-    pub second_address_option: std::option::Option<flow_ethos::Address>,
+    pub sent_by: signal_flow::SentBy,
+    pub address_option: std::option::Option<flow_ethos::Address>,
     pub request_digest: RequestDigest,
     pub visible_ordinary_send_outcome: VisibleOrdinarySendOutcome,
 }
@@ -1323,4 +1316,5 @@ pub enum Response {
     Debugged(DebugSnapshot),
     WithdrawRejected(WithdrawRejected_Data),
     RefreshQueued(signal_flow::RefreshQueued),
+    RestartQueued(signal_flow::FlowId),
 }

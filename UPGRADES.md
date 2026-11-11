@@ -1,5 +1,24 @@
 # Upgrades
 
+## 75.0.0: a configured Herdr session, Living, a Send's sender
+
+Built on 74.0.0, for Flow 0.54.3, on signal-flow 60.0.0 (`04a72fd`) and
+flow-ethos 0.54.3 (`062ef9e1`).
+
+- `ConfigureNexus` gains `HerdrSessionName`, last: the one Herdr session
+  every launch opens its pane in. A `Configure.Nexus` without it is
+  refused by the reader; the deployment's datom adds it.
+- `Content.Living.{ Context Verbatim }` takes `Content.Psyche`'s place, the
+  same bytes; `PsycheContext` and `PsycheVerbatim` are gone.
+- `SendOutcomeRecord` and `VisibleSendOutcomeRecord` carry the sender as
+  `SentBy`, where they carried `Option<Address>`: an Address, `Unbound`
+  for a caller in no flow, `Unknown` for one not kept.
+- `Response` gains `RestartQueued.FlowId`, last: the meta Restart of a
+  working flow answers as the ordinary one does.
+- signal-flow 60.0.0 moves `DeliveredRequest`, `VisibleRequest` and the
+  queue types this contract carries: Psyches is gone and Living stands in
+  Psyche's place.
+
 ## 74.0.0: every peer answered alike; one declaration changed alone
 
 Built on 73.0.3 (5f90d4c), for Flow 0.54.2, on signal-flow 59.0.0

@@ -104,7 +104,8 @@
 ; declaration with the investigation as its brief, or queues it for the
 ; seat when it is Awake. A seat's context is named by its launch, never
 ; configured here.
-; Configure.Nexus names the actual Message executable in MessageNexusBinary.
+; Configure.Nexus names the actual Message executable in MessageNexusBinary,
+; and the one Herdr session every launch opens its pane in, whoever asks.
 ; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
 ; CurriculumNexusPath is the socket of the Curriculum Nexus that composes
 ; every launch's context. A running Nexus reads its Codex endpoints and its
@@ -160,7 +161,8 @@
 ; EmptyReason, StoreRefused.
 
 ; ReadSendOutcomes answers every completed ordinary Send invocation with the
-; typed response, caller when known, sender and recipient when known, and a
+; typed response, caller when known, its sender (an Address, Unbound for a
+; caller in no flow, Unknown for one not kept), recipient when known, and a
 ; digest of its request. The private request body is not stored. Each outcome
 ; is committed before its response is emitted. Count these rows to establish
 ; the number of completed Send outcomes independently.
@@ -220,7 +222,7 @@
 ; it is answered as for any Address, to any peer. Restart and Refresh here
 ; take a flow or an Address as the ordinary ones do, with their answers: a
 ; Refresh of a working flow waits for its idle event and answers
-; RefreshQueued, as the ordinary one does; what the ordinary one answers
+; RefreshQueued, and a Restart of one RestartQueued, as the ordinary ones do; what the ordinary one answers
 ; Refused is OrdinaryRefused here.
 
 ; Rebind repairs where a metaflow's flow lives, with no harness action.
@@ -248,7 +250,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection Event FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ]
-  flow_ethos:[ NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
+  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -319,7 +321,8 @@ Signal
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   Debugged.DebugSnapshot
   WithdrawRejected.[ UnknownAddress NotQueued ]
-  RefreshQueued ]
+  RefreshQueued
+  RestartQueued.FlowId ]
 [ ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Place; this
@@ -348,7 +351,8 @@ Signal
   ; its whitespace and line breaks.
   PresentationPrompt.String
   ; A Nexus that does not own a Message Nexus executable carries None.
-  ConfigureNexus.{ SourceRoot CodexEndpoint CodexEndpoint HarnessProfiles MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> CurriculumNexusPath Lease Option<PresentationPrompt> }
+  ; HerdrSessionName is the one Herdr session every launch opens its pane in.
+  ConfigureNexus.{ SourceRoot CodexEndpoint CodexEndpoint HarnessProfiles MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> CurriculumNexusPath Lease Option<PresentationPrompt> HerdrSessionName }
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
@@ -461,13 +465,11 @@ Signal
   DeliveryId.String
   CommandLine.String
   ByteOffset.Integer
-  PsycheContext.String
-  PsycheVerbatim.String
   ; A Waking is what one hand-over types: every queued input under its
   ; sender, recipient and priority, one top-level vector, oldest first.
   Content.[ Waking.Vector<VisibleNativeInput>
             Text.String
-            Psyche.{ PsycheContext PsycheVerbatim } ]
+            Living.{ Context Verbatim } ]
   Letter.{ VisibleSender Content }
   Message.[ HardAbrupt.Letter
             MiddleAbrupt.Letter
@@ -524,7 +526,9 @@ Signal
   QueueEvidence.[ Logical.QueueEntry Legacy.{ SentBy Request } ]
   PriorSendOutcome.[ Queued Delivered ]
   OrdinarySendOutcome.[ Accepted.SendAcceptance Refused.Refusal PriorAdmission.PriorSendOutcome Sent.SendReceipt Failed.SendFailure ]
-  SendOutcomeRecord.{ SendOutcomeId Option<Process> Option<Address> Option<Address> RequestDigest OrdinarySendOutcome }
+  ; A Send's outcome: its caller when read, its sender, its recipient when
+  ; named, the digest of its request, and what it was answered.
+  SendOutcomeRecord.{ SendOutcomeId Option<Process> SentBy Option<Address> RequestDigest OrdinarySendOutcome }
   ; What binds a metaflow to a running seat: the row of the flow it is
   ; Awake as, with the Herdr pane it lives in, none while it is Asleep; and
   ; the process bound to its Address, if one is.
@@ -557,7 +561,7 @@ Signal
                                PriorAdmission.PriorSendOutcome
                                Sent.VisibleSendReceipt
                                Failed.VisibleSendFailure ]
-  VisibleSendOutcomeRecord.{ Option<Process> Option<Address> Option<Address> RequestDigest VisibleOrdinarySendOutcome }
+  VisibleSendOutcomeRecord.{ Option<Process> SentBy Option<Address> RequestDigest VisibleOrdinarySendOutcome }
   VisibleLegacyArchiveEntry.{ Address VisibleQueueEvidence }
   DebugSnapshot.{ Address Vector<FlowId> Vector<LogicalDeliveryId> }
   ]
