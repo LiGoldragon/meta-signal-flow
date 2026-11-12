@@ -105,7 +105,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { { Field flow Terra } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { { Field flow Terra } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook }";
 
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
@@ -258,8 +258,8 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         }]
     );
     assert_eq!(
-        configuration.configured_metaflows.0,
-        vec![meta_signal_flow::ConfigureMetaflow {
+        configuration.configured_permaflows.0,
+        vec![meta_signal_flow::ConfigurePermaflow {
             address: signal_flow::Address {
                 aspect: meta_signal_flow::Aspect::Mind,
                 topic: meta_signal_flow::Topic("core".to_string()),
@@ -595,13 +595,13 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
+    let text = "Configure.Permaflows.[ { { Psyche core Opus } None [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert!(matches!(
         &query,
-        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::Metaflows(declared))
+        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::Permaflows(declared))
             if declared.len() == 1 && declared[0].system_modules.0.len() == 2
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
@@ -877,4 +877,53 @@ fn handover_configuration_round_trips_zero_count_policy_and_archive_path() {
             );
         }
     }
+}
+
+#[test]
+fn cohesive_configuration_round_trips_without_the_old_batch_alias() {
+    for text in [
+        "Configure.Metaflow.{ flowTeam [ { Mind core Sol } { Psyche core Fable } ] }",
+        "Configure.Join.{ flowTeam { Mind core Sol } }",
+        "Configure.Leave.{ flowTeam { Mind core Sol } }",
+        "Configure.Dissolve.flowTeam",
+        "Configure.Permaflows.[]",
+    ] {
+        let query = Potential::<Query>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&bytes).unwrap(),
+            query
+        );
+    }
+    assert!(
+        Potential::<Query>::from("Configure.Metaflows.[]")
+            .actualize(&mut budget())
+            .is_err()
+    );
+    for text in [
+        "ConfigureRejected.MetaflowNameRefused.BadName",
+        "ConfigureRejected.UnknownMetaflow.flowTeam",
+    ] {
+        let reply = Potential::<Response>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(reply.datomize(vec![]).protosize().compact(), text);
+    }
+}
+
+#[test]
+fn debug_logical_delivery_identity_is_an_integer() {
+    let text = "Debugged.{ { Mind core Sol } [] [ 7 42 ] }";
+    let reply = Potential::<Response>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(reply.datomize(vec![]).protosize().compact(), text);
+    assert!(
+        Potential::<Response>::from("Debugged.{ { Mind core Sol } [] [ logical-delivery-7 ] }")
+            .actualize(&mut budget())
+            .is_err()
+    );
 }

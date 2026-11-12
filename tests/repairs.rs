@@ -3,12 +3,12 @@
 //! expected texts are written out here, not computed through the codec.
 
 use flow_ethos::{
-    Address, Aspect, Lock, LogicalDeliveryId, Model, Pid, Started, State, Topic, Until,
+    Address, Aspect, Lock, LogicalDeliveryId, Model, PermaflowState, Pid, Started, Topic, Until,
 };
 use meta_signal_flow::{
     Attempt, Attempts, Binding, InspectRejected_Data, Inspected_Data, OldSeat, Query, Rebind_Data,
     RebindRejected_Data, Rebinding, Response, RestartFailure, RestartPhase, RestartRecord,
-    VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
+    VisibleAttempt, VisiblePermaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
     VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
 };
 use signal_flow::{
@@ -78,9 +78,9 @@ fn attempt() -> VisibleAttempt {
 
 fn inspected() -> Response {
     Response::Inspected(Inspected_Data {
-        visible_metaflow: VisibleMetaflow {
+        visible_permaflow: VisiblePermaflow {
             address: address(),
-            state: State::Awake(FlowId("f1c841".to_string())),
+            permaflow_state: PermaflowState::Awake(FlowId("f1c841".to_string())),
             flow_id_vector: vec![FlowId("9a83ec".to_string())],
             visible_native_input_vector: vec![visible_entry()],
         },
@@ -138,7 +138,7 @@ fn queries() -> Vec<Query> {
         }),
         Query::Withdraw(Withdraw_Data {
             address: address(),
-            logical_delivery_id: LogicalDeliveryId("logical-7".to_string()),
+            logical_delivery_id: LogicalDeliveryId(7),
         }),
     ]
 }
@@ -147,9 +147,9 @@ fn replies() -> Vec<Response> {
     vec![
         inspected(),
         Response::Inspected(Inspected_Data {
-            visible_metaflow: VisibleMetaflow {
+            visible_permaflow: VisiblePermaflow {
                 address: address(),
-                state: State::Asleep,
+                permaflow_state: PermaflowState::Asleep,
                 flow_id_vector: vec![],
                 visible_native_input_vector: vec![],
             },
@@ -298,7 +298,7 @@ mod datom {
             "Inspect.{ Mind flow Sol }",
             "Rebind.{ { Mind flow Sol } Pane.w7B }",
             "Rebind.{ { Mind flow Sol } Flow.f1c841 }",
-            "Withdraw.{ { Mind flow Sol } logical-7 }",
+            "Withdraw.{ { Mind flow Sol } 7 }",
         ];
         for (query, text) in queries().into_iter().zip(texts) {
             assert_eq!(query.datomize(vec![]).protosize().compact(), text);

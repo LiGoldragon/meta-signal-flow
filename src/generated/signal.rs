@@ -194,7 +194,7 @@ pub struct Records(pub std::vec::Vec<RecordPath>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ConfigureMetaflow {
+pub struct ConfigurePermaflow {
     pub address: flow_ethos::Address,
     pub root_option: std::option::Option<Root>,
     pub system_modules: signal_flow::SystemModules,
@@ -270,6 +270,20 @@ pub enum CountersRefusal {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Join_Data {
+    pub metaflow_name: flow_ethos::MetaflowName,
+    pub address: flow_ethos::Address,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Leave_Data {
+    pub metaflow_name: flow_ethos::MetaflowName,
+    pub address: flow_ethos::Address,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
     Models(std::vec::Vec<ConfigureModel>),
     Thresholds(std::vec::Vec<ConfigureThreshold>),
@@ -280,7 +294,7 @@ pub enum ConfigurationChange {
     LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
-    Metaflows(std::vec::Vec<ConfigureMetaflow>),
+    Permaflows(std::vec::Vec<ConfigurePermaflow>),
     HarnessFlags(std::vec::Vec<ConfigureHarnessFlags>),
     Investigation(flow_ethos::Address),
     DefaultMinutes(flow_ethos::Minutes),
@@ -290,7 +304,11 @@ pub enum ConfigurationChange {
     RequestIdDraws(DrawBound),
     AnnouncementTries(TryBound),
     HarnessHook(Path),
-    Permaflow(ConfigureMetaflow),
+    Metaflow(flow_ethos::Metaflow),
+    Join(Join_Data),
+    Leave(Leave_Data),
+    Dissolve(flow_ethos::MetaflowName),
+    Permaflow(ConfigurePermaflow),
     Harness(flow_ethos::HarnessProfile),
     Refresh(ConfigureThreshold),
 }
@@ -348,7 +366,11 @@ pub struct ConfiguredSendServers(pub std::vec::Vec<ConfigureSendServer>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ConfiguredMetaflows(pub std::vec::Vec<ConfigureMetaflow>);
+pub struct ConfiguredPermaflows(pub std::vec::Vec<ConfigurePermaflow>);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfiguredMetaflows(pub std::vec::Vec<flow_ethos::Metaflow>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
@@ -398,6 +420,7 @@ pub struct ConfigurationSnapshot {
     pub configured_publication_deadline: ConfiguredPublicationDeadline,
     pub default_leave_outs: DefaultLeaveOuts,
     pub configured_send_servers: ConfiguredSendServers,
+    pub configured_permaflows: ConfiguredPermaflows,
     pub configured_metaflows: ConfiguredMetaflows,
     pub configured_harness_flags: ConfiguredHarnessFlags,
     pub configured_investigation: ConfiguredInvestigation,
@@ -467,6 +490,8 @@ pub enum ConfigureRejection {
     CountersRefused(CountersRefusal),
     RequestIdDrawsRefused,
     AnnouncementTriesRefused,
+    MetaflowNameRefused(flow_ethos::MetaflowName),
+    UnknownMetaflow(flow_ethos::MetaflowName),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1034,9 +1059,9 @@ pub enum VisibleAttempt {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct VisibleMetaflow {
+pub struct VisiblePermaflow {
     pub address: flow_ethos::Address,
-    pub state: flow_ethos::State,
+    pub permaflow_state: flow_ethos::PermaflowState,
     pub flow_id_vector: std::vec::Vec<signal_flow::FlowId>,
     pub visible_native_input_vector: std::vec::Vec<signal_flow::VisibleNativeInput>,
 }
@@ -1241,7 +1266,7 @@ pub struct QueueDeliveryResolved_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Inspected_Data {
-    pub visible_metaflow: VisibleMetaflow,
+    pub visible_permaflow: VisiblePermaflow,
     pub binding: Binding,
     pub lock_vector: std::vec::Vec<flow_ethos::Lock>,
     pub visible_attempt_vector: std::vec::Vec<VisibleAttempt>,
