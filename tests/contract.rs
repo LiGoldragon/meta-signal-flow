@@ -710,7 +710,7 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
         "ConfigureRejected.MinutesRefused.Zero",
         "ConfigureRejected.MinutesRefused.Negative",
         "ConfigureRejected.MinutesRefused.Unreachable",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 45 None [] { 1 3 1 } 64 3 Unconfigured }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] [] None 45 None [] { 1 3 1 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -773,7 +773,7 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         "ConfigureRejected.CountersRefused.NotEmpty",
         "ConfigureRejected.CountersRefused.Lowered.{ 121 46 301 }",
         "ConfigureRejected.CountersRefused.NotRunning",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 45 None [] { 120 45 300 } 64 3 Unconfigured }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] [] None 45 None [] { 120 45 300 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -832,7 +832,7 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } Owed }",
         "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } CloseRefused }",
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
