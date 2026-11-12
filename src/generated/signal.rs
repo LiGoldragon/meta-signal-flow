@@ -7,6 +7,25 @@
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct StopMetadata {
+    pub native_session_id_option: std::option::Option<signal_flow::NativeSessionId>,
+    pub transcript_path_option: std::option::Option<signal_flow::TranscriptPath>,
+    pub background_work: signal_flow::BackgroundWork,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HarnessEventMetadata {
+    Started(std::option::Option<signal_flow::NativeSessionId>),
+    ToolUsed(String),
+    Stopped(StopMetadata),
+    PromptSubmitted(signal_flow::NativePrompt),
+    Ended(std::option::Option<signal_flow::NativeSessionId>),
+    Cleared(std::option::Option<signal_flow::NativeSessionId>),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct NexusRuntimeSettings {
     pub ordinary_socket_path: flow_ethos::OrdinarySocketPath,
     pub meta_socket_path: flow_ethos::MetaSocketPath,
@@ -1174,7 +1193,7 @@ pub enum Query {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct EventsRead_Data {
     pub flow_id: signal_flow::FlowId,
-    pub event_vector: std::vec::Vec<signal_flow::Event>,
+    pub harness_event_metadata_vector: std::vec::Vec<HarnessEventMetadata>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

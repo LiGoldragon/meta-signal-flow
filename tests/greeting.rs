@@ -12,10 +12,10 @@ fn a_peer_built_from_this_source_is_greeted() {
 }
 
 #[test]
-fn a_peer_built_from_another_source_is_refused_with_this_digest() {
-    let older = format!("{ETHOS}\n");
+fn a_peer_built_from_the_previous_contract_is_refused_with_this_digest() {
+    let older = include_str!("fixtures/meta-signal-flow-75.ethos");
     assert_eq!(
-        Query::receipt(&Handshake::of_source(&older)),
+        Query::receipt(&Handshake::of_source(older)),
         HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
             Query::contract_digest()
         ))

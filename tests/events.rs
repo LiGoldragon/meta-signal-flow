@@ -1,25 +1,38 @@
 //! ReadEvents: the owner reads the harness events Flow holds for one flow.
 //! The expected texts are written out here, not computed through the codec.
 
-use meta_signal_flow::{EventsRead_Data, Query, ReadEventsRejected_Data, Response};
+use meta_signal_flow::{
+    EventsRead_Data, HarnessEventMetadata, Query, ReadEventsRejected_Data, Response, StopMetadata,
+};
 use signal_flow::{
-    BackgroundWork, Event, FlowId, LastAssistantMessageOption, NativeSessionId, NativeStop,
+    BackgroundTask, BackgroundTaskId, BackgroundTaskKind, BackgroundTaskStatus, BackgroundWork,
+    Description, FlowId, NativePrompt, NativeSessionId, PromptId, PromptSha256, TranscriptPath,
 };
 
 fn events_read() -> Response {
     Response::EventsRead(EventsRead_Data {
         flow_id: FlowId("f1c841".to_string()),
-        event_vector: vec![
-            Event::Started(Some(NativeSessionId("s1".to_string()))),
-            Event::ToolUsed("Bash".into()),
-            Event::Stopped(NativeStop {
+        harness_event_metadata_vector: vec![
+            HarnessEventMetadata::Started(Some(NativeSessionId("s1".to_string()))),
+            HarnessEventMetadata::ToolUsed("Bash".into()),
+            HarnessEventMetadata::Stopped(StopMetadata {
                 native_session_id_option: Some(NativeSessionId("s1".to_string())),
-                transcript_path_option: None,
-                last_assistant_message_option: LastAssistantMessageOption(None),
-                background_work: BackgroundWork(vec![]),
+                transcript_path_option: Some(TranscriptPath("/tmp/transcript".into())),
+                background_work: BackgroundWork(vec![BackgroundTask {
+                    background_task_id: BackgroundTaskId("job1".into()),
+                    background_task_kind: BackgroundTaskKind::Shell,
+                    background_task_status: BackgroundTaskStatus("running".into()),
+                    description: Description("build".into()),
+                }]),
             }),
-            Event::Cleared(Some(NativeSessionId("s1".to_string()))),
-            Event::Started(Some(NativeSessionId("s2".to_string()))),
+            HarnessEventMetadata::PromptSubmitted(NativePrompt {
+                native_session_id_option: Some(NativeSessionId("s1".into())),
+                prompt_id_option: Some(PromptId("p1".into())),
+                prompt_sha256: PromptSha256("digest".into()),
+            }),
+            HarnessEventMetadata::Ended(None),
+            HarnessEventMetadata::Cleared(Some(NativeSessionId("s1".to_string()))),
+            HarnessEventMetadata::Started(Some(NativeSessionId("s2".to_string()))),
         ],
     })
 }
@@ -61,6 +74,34 @@ mod datom {
     }
 
     #[test]
+    fn stop_metadata_has_exactly_three_positions() {
+        let text = "Stopped.{ None None [] }";
+        let stop = Potential::<HarnessEventMetadata>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(
+            stop,
+            HarnessEventMetadata::Stopped(StopMetadata {
+                native_session_id_option: None,
+                transcript_path_option: None,
+                background_work: BackgroundWork(vec![]),
+            })
+        );
+        assert_eq!(stop.datomize(vec![]).protosize().compact(), text);
+        for old in [
+            "Stopped.{ None None None [] }",
+            "Stopped.{ None None Some.«assistant marker» [] }",
+        ] {
+            assert!(
+                Potential::<HarnessEventMetadata>::from(old)
+                    .actualize(&mut budget())
+                    .is_err(),
+                "previous four-position Stop must be refused: {old}"
+            );
+        }
+    }
+
+    #[test]
     fn read_events_has_concrete_datoms() {
         let query = Potential::<Query>::from("ReadEvents.f1c841")
             .actualize(&mut budget())
@@ -68,7 +109,7 @@ mod datom {
         assert_eq!(query, Query::ReadEvents(FlowId("f1c841".to_string())));
         assert_eq!(
             events_read().datomize(vec![]).protosize().compact(),
-            "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None [] } Cleared.Some.s1 Started.Some.s2 ] }"
+            "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 Some./tmp/transcript [ { job1 Shell running build } ] } PromptSubmitted.{ Some.s1 Some.p1 digest } Ended.None Cleared.Some.s1 Started.Some.s2 ] }"
         );
         assert_eq!(
             Response::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow)
@@ -78,7 +119,7 @@ mod datom {
             "ReadEventsRejected.UnknownFlow"
         );
         let read =
-            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 None None [] } Cleared.Some.s1 Started.Some.s2 ] }")
+            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 Some./tmp/transcript [ { job1 Shell running build } ] } PromptSubmitted.{ Some.s1 Some.p1 digest } Ended.None Cleared.Some.s1 Started.Some.s2 ] }")
                 .actualize(&mut budget())
                 .unwrap();
         assert_eq!(read, events_read());
