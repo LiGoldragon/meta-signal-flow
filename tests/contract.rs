@@ -461,6 +461,8 @@ fn delivery_replies_have_concrete_datoms() {
         "DeliveryRejected.BodyRefused.EmptyBody",
         "DeliveryRejected.BodyRefused.HarnessCommand./compact",
         "DeliveryRejected.BodyRefused.ControlCharacter.14",
+        "DeliveryRejected.Superseded.908786",
+        "DeliveryRejected.Unconfirmed",
         "Vetted",
         "Commanded.{ 7d41e0 Compact Transported }",
         "CommandRejected.UnsupportedForHarness",
@@ -469,6 +471,8 @@ fn delivery_replies_have_concrete_datoms() {
         "CommandRejected.CompactionRefused.BelowThreshold.{ 120000 200000 }",
         "CommandRejected.CompactionRefused.Unmeasured",
         "CommandRejected.CompactionRefused.NoThreshold",
+        "CommandRejected.Superseded.908786",
+        "CommandRejected.Unconfirmed",
         "PeerResolved.{ e167d8 Psyche claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
     ] {
@@ -825,6 +829,8 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "RestartRefused.Unsupported.c1a0de",
         "Refreshed.{ { Psyche core Fable } c1a0de }",
         "RefreshQueued.{ { Psyche core Fable } c1a0de }",
+        "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } Owed }",
+        "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } CloseRefused }",
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured }",
     ] {

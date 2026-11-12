@@ -768,6 +768,8 @@ pub enum DeliveryRejection {
     FlowRetired,
     FlowExited,
     PastThreshold,
+    Superseded(signal_flow::FlowId),
+    Unconfirmed,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -835,6 +837,8 @@ pub enum CommandRejection {
     FlowRetired,
     FlowExited,
     CompactionRefused(CompactionRefusal),
+    Superseded(signal_flow::FlowId),
+    Unconfirmed,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1015,6 +1019,8 @@ pub struct Binding {
 pub enum Attempt {
     Queued(QueueDelivery),
     Launch(signal_flow::LaunchAttempt),
+    Reap(signal_flow::ReapPending),
+    Handover(signal_flow::HandoverPending),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1022,6 +1028,8 @@ pub enum Attempt {
 pub enum VisibleAttempt {
     Queued(VisibleQueueDelivery),
     Launch(signal_flow::LaunchAttempt),
+    Reap(signal_flow::ReapPending),
+    Handover(signal_flow::HandoverPending),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1336,4 +1344,5 @@ pub enum Response {
     WithdrawRejected(WithdrawRejected_Data),
     RefreshQueued(signal_flow::RefreshQueued),
     RestartQueued(signal_flow::FlowId),
+    ReapPending(signal_flow::ReapPending),
 }

@@ -1,5 +1,35 @@
 # Upgrades
 
+## 77.0.0: Inspect lists pending reaps and handovers; Superseded and Unconfirmed; ReapPending
+
+Built on 76.0.0 (3b1f6f0), for Flow 0.54.7, on signal-flow 61.0.0
+(`4871bb8`, branch 61.0.0-5e88e5) and flow-ethos 0.54.3 (`062ef9e1`).
+
+- signal-flow 61.0.0: `RefreshRejection.SuccessorRefused` carries the
+  `ReplaceRejection` without `ReapRefused`. The import list adds
+  `ReapPending` and `HandoverPending`.
+- `Response` gains `ReapPending`, last: a meta Refresh whose successor
+  started answers as the ordinary one does, `ReapPending.{ { Psyche core
+  Fable } c1a0de { 908786 session-2 Unavailable Unbound } Owed }`.
+- `Attempt` and `VisibleAttempt` gain, last, `Reap.ReapPending` and
+  `Handover.HandoverPending`: Inspect lists each reap owed at the Address
+  and the handover owed at it, with where each stands, those whose own
+  record a refused commit left unwritten among them. A predecessor or an
+  owner no flow row names is `PredecessorMissing` or `Owner.Missing`, one
+  whose row could not be read `PredecessorUnknown` or `Owner.Unknown`.
+- `DeliveryRejection` and `CommandRejection` gain, last, `Superseded.FlowId`
+  (the Address receives as that later flow) and `Unconfirmed` (the flow's
+  launch holds its Address unconfirmed).
+- A first frame on the meta socket that is not this contract's greeting
+  is answered `GreetingRefused.ContractMismatch` with 77's digest and
+  recorded as an `UndecodableFrame`, metadata alone. A peer built on 76.0.0
+  is refused so (tests/fixtures/meta-signal-flow-76.ethos replaces the 75
+  fixture).
+- The crate re-exports `Contracted`, `ContractDigest`, `Handshake`,
+  `HandshakeReceipt` and `HandshakeRejection` from signal 11.0.0.
+- On build-base 896f2fb (branch 61-77-5e88e5), whose set holds signal-flow
+  61.0.0. The names are tentative.
+
 ## 75.0.0: a configured Herdr session, Living, a Send's sender
 
 Built on 74.0.0, for Flow 0.54.3, on signal-flow 60.0.0 (`04a72fd`) and

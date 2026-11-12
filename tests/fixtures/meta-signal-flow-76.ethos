@@ -37,7 +37,10 @@
 ; an ordinary connection's own peer.
 ;
 ; ReadEvents answers the harness events Flow holds in its Memory for one
-; flow, in the order its Reports were recorded: EventsRead, or
+; flow, in the order its Reports were recorded, with metadata alone:
+; a Stop carries its session, transcript path and background work, while
+; assistant-message content remains only in the transient ordinary Report.
+; The answer is EventsRead, or
 ; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
 ;
 ; Configure.Permaflow, Configure.Harness and Configure.Refresh change one
@@ -249,7 +252,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection Event FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ]
   flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -302,7 +305,7 @@ Signal
   PeerResolved.CallerIdentity
   PeerResolutionRejected.CallerResolutionRejection
   Refused.StoreRefusal
-  EventsRead.{ FlowId Vector<Event> }
+  EventsRead.{ FlowId Vector<HarnessEventMetadata> } ; the ordered, metadata-only event history
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   QueueDeliveriesRead.{ Address Vector<VisibleQueueDelivery> }
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
@@ -323,7 +326,19 @@ Signal
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RefreshQueued
   RestartQueued.FlowId ]
-[ ; Flow Library owns the shared configuration field types.
+[ ; The meta contract owns this read projection; Memory owns its stored form.
+  StopMetadata.{                     ; a Stop's correlation and background-work metadata
+     Option<NativeSessionId>
+     Option<TranscriptPath>
+     BackgroundWork }
+  HarnessEventMetadata.[             ; event identity and metadata, in ordinary Event's order
+     Started.Option<NativeSessionId>
+     ToolUsed.String
+     Stopped.StopMetadata
+     PromptSubmitted.NativePrompt
+     Ended.Option<NativeSessionId>
+     Cleared.Option<NativeSessionId> ]
+  ; Flow Library owns the shared configuration field types.
   ; This record exists only for Flow's current internal launch defaults.
   ; The process sockets are separately supplied by Library.Place; this
   ; record is not a Configure wire payload.

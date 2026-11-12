@@ -15,6 +15,10 @@ pub use flow_ethos::Repository as SourceRepository;
 
 pub use signal::{ByteViewable, Restorable, Signal, Signalizable};
 
+/// The greeting every meta connection opens with, re-exported so a peer
+/// greets through this contract alone.
+pub use signal::{ContractDigest, Contracted, Handshake, HandshakeReceipt, HandshakeRejection};
+
 pub const ETHOS: &str = include_str!("../ethos/signal.ethos");
 pub const WIRE_VERSION: &str = env!("CARGO_PKG_VERSION");
 

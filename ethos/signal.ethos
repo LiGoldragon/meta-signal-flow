@@ -18,7 +18,12 @@
 ; pane text), and a first line that is a harness command (a sigil of the
 ; recipient's HarnessProfile, then a command word) is refused as
 ; HarnessCommand: harness commands go through Command. Vet answers what
-; Deliver would refuse and types nothing. Deliver is idempotent on its
+; Deliver would refuse and types nothing. A flow its Address no longer
+; receives as is refused Superseded, naming the flow the Address receives
+; as; a flow whose launch holds its Address unconfirmed is refused
+; Unconfirmed. Which flow an Address receives as is read from the record
+; its launch writes at confirmation, never from a reap or a handover still
+; pending, and Command refuses the same two. Deliver is idempotent on its
 ; DeliveryId: a repeat answers the stored Delivery and types nothing. A
 ; delivery a crash left under the lease settles Uncertain and is never
 ; retried.
@@ -32,6 +37,15 @@
 ; Every query on this socket gives the same answer to every peer, a flow,
 ; a subflow or the living at a shell. MetaAspects and MessageNexusBinary
 ; are configured and read by nothing.
+;
+; Every connection to this socket greets first, through Signal's
+; Handshake, before any Query is decoded: Greeted with this contract's
+; digest, or GreetingRefused.ContractMismatch carrying it. A first frame
+; that is not this contract's greeting, a greeting of an earlier contract
+; or of the ordinary one, a Query written first or a frame too short to be
+; a greeting, is answered that typed refusal and the connection ends; Flow
+; records it as the ordinary socket records its own, an UndecodableFrame of
+; metadata alone, seen through the ordinary Observe.Undecodable.
 ;
 ; ResolvePeer names the flow a process runs in, as ResolveCaller does for
 ; an ordinary connection's own peer.
@@ -97,7 +111,7 @@
 ; A model's refresh threshold is the context, in tokens, past which a flow
 ; running that model is refreshed: it is given no new message, Flow keeps
 ; the metaflow's next messages for its next flow, and the flow is replaced
-; as it goes idle and reaped in the same event. It is told nothing and
+; as it goes idle, its reap owed in the same event. It is told nothing and
 ; writes no handover. A model with no threshold configured is never
 ; refreshed.
 ;
@@ -201,9 +215,16 @@
 ; Awake as with the Herdr pane that flow lives in, and the process bound to
 ; its Address; the sender lock held on it; and every attempt outstanding
 ; for it, a queued request handed to a seat and not settled, or a launch at
-; its Address not settled; and the restart of the flow it is Awake as, while
-; one is recorded. It changes nothing. InspectRejected.UnknownAddress
-; names an Address Flow holds no metaflow for.
+; its Address not settled; each reap owed at its Address and the handover
+; owed at it, as ReapPending and HandoverPending with where each stands;
+; and the restart of the flow it is Awake as, while one is recorded. A reap
+; or a handover Flow owes without its own record yet, because the commit
+; that would record it was refused, is listed too: the reap at Unrecorded,
+; the handover with its owner as Flow judges it at the Inspect. An owner or
+; a predecessor no flow row names is listed Missing, and one whose row
+; could not be read Unknown. It changes nothing.
+; InspectRejected.UnknownAddress names an Address Flow holds no metaflow
+; for.
 ;
 ; A RestartRecord is the durable lock a flow's restart holds on its
 ; Address, written before each effect it names: Closing before the old
@@ -226,7 +247,8 @@
 ; take a flow or an Address as the ordinary ones do, with their answers: a
 ; Refresh of a working flow waits for its idle event and answers
 ; RefreshQueued, and a Restart of one RestartQueued, as the ordinary ones do; what the ordinary one answers
-; Refused is OrdinaryRefused here.
+; Refused is OrdinaryRefused here. A Refresh whose successor started answers
+; ReapPending, as the ordinary one does.
 
 ; Rebind repairs where a metaflow's flow lives, with no harness action.
 ; Rebinding.Pane: the flow the metaflow is Awake as now lives in this pane
@@ -252,7 +274,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet SystemModules UserModules Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ReapPending HandoverPending ]
   flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -325,7 +347,8 @@ Signal
   Debugged.DebugSnapshot
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RefreshQueued
-  RestartQueued.FlowId ]
+  RestartQueued.FlowId
+  ReapPending ]
 [ ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>
@@ -507,7 +530,9 @@ Signal
                       PersistenceRefused
                       FlowRetired
                       FlowExited
-                      PastThreshold ]
+                      PastThreshold
+                      Superseded.FlowId ; the Address receives as this later flow
+                      Unconfirmed ]     ; the flow's launch holds its Address unconfirmed
   HarnessCommandKind.[ Compact Interrupt ]
   CommandRequest.{ FlowId HarnessCommandKind }
   CommandGrade.[ Transported Observed Uncertain ]
@@ -516,7 +541,7 @@ Signal
   RefreshTokens.Integer
   ContextBelowThreshold.{ ContextTokens RefreshTokens }
   CompactionRefusal.[ BelowThreshold.ContextBelowThreshold Unmeasured NoThreshold ]
-  CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited CompactionRefused.CompactionRefusal ]
+  CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited CompactionRefused.CompactionRefusal Superseded.FlowId Unconfirmed ]
   StoreRefusal.[ Store.String ]
   QueueAttemptId.String
   Undecided.[ HistoryUnreadable HistoryReplaced PendingInHarness Ambiguous SeatNotResting AbsenceUnprovable ]
@@ -550,12 +575,16 @@ Signal
   Binding.{ Option<FlowNode> Option<Process> }
   ; One attempt Flow holds outstanding for a metaflow.
   Attempt.[ Queued.QueueDelivery                ; a queued request handed to a seat and not settled
-            Launch.LaunchAttempt ]              ; a launch at the metaflow's Address not settled
+            Launch.LaunchAttempt                ; a launch at the metaflow's Address not settled
+            Reap.ReapPending                    ; a reap owed at the Address, and where it stands
+            Handover.HandoverPending ]          ; the handover owed at the Address, and why
   ; Inspect keeps launch lifecycle detail for the next lifecycle projection,
   ; while its queued-delivery branch exposes no private attempt, run or
   ; logical-delivery key.
   VisibleAttempt.[ Queued.VisibleQueueDelivery
-                   Launch.LaunchAttempt ]
+                   Launch.LaunchAttempt
+                   Reap.ReapPending
+                   Handover.HandoverPending ]
   VisibleMetaflow.{ Address State Vector<FlowId> Vector<VisibleNativeInput> }
   ; Operational meta replies project private routing and ledger keys away.
   ; Debug is the one explicit interface that exposes them.

@@ -6,7 +6,7 @@ use flow_ethos::{
     Address, Aspect, Lock, LogicalDeliveryId, Model, Pid, Started, State, Topic, Until,
 };
 use meta_signal_flow::{
-    Attempts, Binding, InspectRejected_Data, Inspected_Data, OldSeat, Query, Rebind_Data,
+    Attempt, Attempts, Binding, InspectRejected_Data, Inspected_Data, OldSeat, Query, Rebind_Data,
     RebindRejected_Data, Rebinding, Response, RestartFailure, RestartPhase, RestartRecord,
     VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
     VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
@@ -16,6 +16,10 @@ use signal_flow::{
     HarnessKind, HerdrAgentName, HerdrPaneId, HerdrRoute, HerdrRouteSelection, HerdrSessionName,
     HerdrTerminalId, NativeSessionId, Origin, Process, RequestId, SessionId, VisibleNativeInput,
     VisibleSender,
+};
+use signal_flow::{
+    HandoverCloseRefusal, HandoverOwner, HandoverOwnerRefusal, HandoverPending, Launched,
+    Predecessor, ReapPending, ReapStanding,
 };
 
 fn address() -> Address {
@@ -189,6 +193,90 @@ fn repairs_round_trip_as_an_archive() {
     }
 }
 
+fn launched() -> Launched {
+    Launched {
+        flow_id: FlowId("f1c841".to_string()),
+        session_id: SessionId("s1".to_string()),
+        herdr_route_selection: HerdrRouteSelection::Unavailable,
+        origin: Origin::Unbound,
+    }
+}
+
+fn owner() -> FlowId {
+    FlowId("751881".to_string())
+}
+
+/// Every reap owed at the Address and the handover owed at it, at each
+/// standing: Missing and Unknown each as itself, never folded into Live.
+fn obligations() -> Vec<VisibleAttempt> {
+    let reaps = [
+        ReapStanding::Owed,
+        ReapStanding::Unrecorded,
+        ReapStanding::PredecessorMissing,
+        ReapStanding::PredecessorUnknown,
+        ReapStanding::HerdrUnavailable,
+        ReapStanding::CloseRefused,
+        ReapStanding::HandoverRefused(HandoverCloseRefusal::Owner(HandoverOwnerRefusal::Live(
+            owner(),
+        ))),
+        ReapStanding::SettleUnrecorded,
+    ]
+    .into_iter()
+    .map(|reap_standing| {
+        VisibleAttempt::Reap(ReapPending {
+            address: address(),
+            predecessor: Predecessor(FlowId("9a83ec".to_string())),
+            launched: launched(),
+            reap_standing,
+        })
+    });
+    let handovers = [
+        HandoverCloseRefusal::PersistenceRefused,
+        HandoverCloseRefusal::Owner(HandoverOwnerRefusal::Live(owner())),
+        HandoverCloseRefusal::Owner(HandoverOwnerRefusal::Missing(owner())),
+        HandoverCloseRefusal::Owner(HandoverOwnerRefusal::Unknown(owner())),
+    ]
+    .into_iter()
+    .map(|handover_close_refusal| {
+        VisibleAttempt::Handover(HandoverPending {
+            address: address(),
+            handover_owner: HandoverOwner(owner()),
+            launched: launched(),
+            handover_close_refusal,
+        })
+    });
+    reaps.chain(handovers).collect()
+}
+
+fn inspected_with_obligations() -> Response {
+    let Response::Inspected(mut data) = inspected() else {
+        unreachable!()
+    };
+    data.visible_attempt_vector.extend(obligations());
+    Response::Inspected(data)
+}
+
+#[test]
+fn inspect_lists_pending_reaps_and_handovers_as_an_archive() {
+    let reply = inspected_with_obligations();
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        reply
+    );
+    let private = Attempt::Reap(ReapPending {
+        address: address(),
+        predecessor: Predecessor(FlowId("9a83ec".to_string())),
+        launched: launched(),
+        reap_standing: ReapStanding::Owed,
+    });
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&private).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Attempt, rkyv::rancor::Error>(&archive).unwrap(),
+        private
+    );
+}
+
 #[cfg(feature = "datom")]
 mod datom {
     use super::*;
@@ -249,5 +337,54 @@ mod datom {
                 reply
             );
         }
+    }
+
+    #[test]
+    fn inspect_lists_pending_reaps_and_handovers_with_missing_and_unknown_typed() {
+        let launched = "{ f1c841 s1 Unavailable Unbound }";
+        let mut texts = Vec::new();
+        for standing in [
+            "Owed",
+            "Unrecorded",
+            "PredecessorMissing",
+            "PredecessorUnknown",
+            "HerdrUnavailable",
+            "CloseRefused",
+            "HandoverRefused.Owner.Live.751881",
+            "SettleUnrecorded",
+        ] {
+            texts.push(format!(
+                "Reap.{{ {{ Mind flow Sol }} 9a83ec {launched} {standing} }}"
+            ));
+        }
+        for refusal in [
+            "PersistenceRefused",
+            "Owner.Live.751881",
+            "Owner.Missing.751881",
+            "Owner.Unknown.751881",
+        ] {
+            texts.push(format!(
+                "Handover.{{ {{ Mind flow Sol }} 751881 {launched} {refusal} }}"
+            ));
+        }
+        let attempts = obligations();
+        assert_eq!(attempts.len(), texts.len());
+        for (attempt, text) in attempts.into_iter().zip(&texts) {
+            assert_eq!(&attempt.datomize(vec![]).protosize().compact(), text);
+            assert_eq!(
+                Potential::<VisibleAttempt>::from(text.as_str())
+                    .actualize(&mut budget())
+                    .unwrap(),
+                attempt
+            );
+        }
+        let reply = inspected_with_obligations();
+        let text = reply.datomize(vec![]).protosize().compact();
+        assert_eq!(
+            Potential::<Response>::from(text.as_str())
+                .actualize(&mut budget())
+                .unwrap(),
+            reply
+        );
     }
 }
