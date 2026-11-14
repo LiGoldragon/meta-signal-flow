@@ -2,10 +2,7 @@
 //! thread's turn ledger keeps. It is set and echoed whole, the snapshot
 //! carries it last, and a negative bound is refused.
 
-use meta_signal_flow::{
-    ConfigurationChange, ConfigureRefusal, ConfiguredEndedTurnRetention, Input, Output,
-    TurnRetentionBound,
-};
+use meta_signal_flow::{ConfigurationChange, ConfigureRefusal, Input, Output, TurnRetentionBound};
 
 #[test]
 fn retention_is_one_configuration_value_on_the_binary_wire() {
@@ -41,7 +38,7 @@ fn retention_is_the_reserved_breaking_release() {
 mod textual {
     use super::*;
     use datom_codec::{Actualizing, Budget, Datomizable, Potential};
-    use meta_signal_flow::ConfigurationSnapshot;
+    use meta_signal_flow::{ConfigurationSnapshot, ConfiguredEndedTurnRetention};
     use protos::{Compactable, Protosizable, ReaderBudget};
 
     fn budget() -> Budget {
