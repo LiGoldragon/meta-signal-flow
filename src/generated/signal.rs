@@ -952,7 +952,7 @@ pub enum CommandRejection {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct StoreRefusal(pub String);
+pub struct StoreFailure(pub String);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
@@ -1428,11 +1428,11 @@ pub enum Output {
     DeliveryRejected(DeliveryRejection),
     CommandRejected(CommandRejection),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
-    Refused(StoreRefusal),
+    Refused(StoreFailure),
     ReadEventsRejected(ReadEventsRejected_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
     ReadSendOutcomesRejected,
-    ObserveLegacyArchiveRejected(StoreRefusal),
+    ObserveLegacyArchiveRejected(StoreFailure),
     ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected),
     InspectRejected,
     RebindRejected(RebindRejected_Data),

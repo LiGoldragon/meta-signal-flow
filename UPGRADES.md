@@ -20,8 +20,8 @@ branch `context-warnings-7cd167`), for Flow on ethos-zero 29.0.0
     `ReadSendOutcomesRejected` where it was
     `ReadSendOutcomesRejected.StoreRefused`. The generated
     `ReadSendOutcomesRejected_Data` and `InspectRejected_Data` are gone.
-  - `StoreRefusal.[ Store.String ]` is `StoreRefusal.String`, a newtype
-    `StoreRefusal(String)`. `Refused` and `ObserveLegacyArchiveRejected`
+  - `StoreRefusal.[ Store.String ]` is renamed and becomes `StoreFailure.String`, a newtype
+    `StoreFailure(String)`. `Refused` and `ObserveLegacyArchiveRejected`
     carry it as before; the datom is `Refused.«text»` where it was
     `Refused.Store.«text»`.
 - Output positions are unchanged. Both ends of the meta socket repin
@@ -30,8 +30,8 @@ branch `context-warnings-7cd167`), for Flow on ethos-zero 29.0.0
   (tests/fixtures/meta-signal-flow-79.ethos).
 - Consumers: `Output::InspectRejected(InspectRejected_Data::UnknownAddress)`
   becomes `Output::InspectRejected`; `Output::ReadSendOutcomesRejected(..)`
-  becomes `Output::ReadSendOutcomesRejected`; `StoreRefusal::Store(text)`
-  becomes `StoreRefusal(text)`.
+  becomes `Output::ReadSendOutcomesRejected`; `StoreFailure::Store(text)`
+  becomes `StoreFailure(text)`; every use of the type `StoreRefusal` is `StoreFailure`.
 
 ## 79.0.0: Input and Output, paired by position
 
