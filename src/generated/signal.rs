@@ -983,11 +983,9 @@ pub enum CommandRejection {
     Unconfirmed,
 }
 #[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum StoreRefusal {
-    Store(String),
-}
+pub struct StoreRefusal(pub String);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
@@ -1402,18 +1400,6 @@ pub enum ReadQueueDeliveriesRejected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ReadSendOutcomesRejected_Data {
-    StoreRefused,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum InspectRejected_Data {
-    UnknownAddress,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum RebindRejected_Data {
     UnknownAddress,
     PaneAbsent,
@@ -1478,10 +1464,10 @@ pub enum Output {
     Refused(StoreRefusal),
     ReadEventsRejected(ReadEventsRejected_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
-    ReadSendOutcomesRejected(ReadSendOutcomesRejected_Data),
+    ReadSendOutcomesRejected,
     ObserveLegacyArchiveRejected(StoreRefusal),
     ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected),
-    InspectRejected(InspectRejected_Data),
+    InspectRejected,
     RebindRejected(RebindRejected_Data),
     DebugDeliveryRejected(DebugDeliveryRejected_Data),
     WithdrawRejected(WithdrawRejected_Data),

@@ -10,11 +10,11 @@ fn a_peer_built_from_this_source_is_greeted() {
     );
 }
 
-/// A peer built on meta-signal-flow 78.0.0 greets with 78's digest and is
-/// refused with 79's, before any of its inputs is read.
+/// A peer built on meta-signal-flow 79.0.0 greets with 79's digest and is
+/// refused with 80's, before any of its inputs is read.
 #[test]
-fn a_meta_78_peer_is_refused_with_this_digest() {
-    let older = include_str!("fixtures/meta-signal-flow-78.ethos");
+fn a_meta_79_peer_is_refused_with_this_digest() {
+    let older = include_str!("fixtures/meta-signal-flow-79.ethos");
     assert_ne!(Handshake::of_source(older), Input::greeting());
     assert_eq!(
         Input::receipt(&Handshake::of_source(older)),

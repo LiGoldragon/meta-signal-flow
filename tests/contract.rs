@@ -395,7 +395,7 @@ fn configure_nexus_without_its_herdr_session_is_refused_by_the_reader() {
 
 #[test]
 fn store_refusal_preserves_its_error_text() {
-    let text = "Refused.Store.«database rejected configuration»";
+    let text = "Refused.«database rejected configuration»";
     let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -405,6 +405,34 @@ fn store_refusal_preserves_its_error_text() {
     assert_eq!(
         rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
         response
+    );
+}
+
+/// An enum of one variant is that variant: a refusal that can say one thing
+/// is that thing, bare, and one that carries one value is that value.
+#[test]
+fn a_refusal_of_one_variant_is_that_variant() {
+    for text in [
+        "ReadSendOutcomesRejected",
+        "InspectRejected",
+        "ObserveLegacyArchiveRejected.«archive unreadable»",
+    ] {
+        let response = Potential::<Output>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
+            response
+        );
+    }
+    assert_eq!(
+        Potential::<Output>::from("Refused.«no space»")
+            .actualize(&mut budget())
+            .unwrap(),
+        Output::Refused(meta_signal_flow::StoreRefusal("no space".into()))
     );
 }
 
