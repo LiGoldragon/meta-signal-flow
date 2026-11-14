@@ -105,7 +105,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { { Field flow Terra } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook }";
 
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
@@ -234,18 +234,6 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             send_outcome: meta_signal_flow::SendOutcome(1),
         }
     );
-    assert_eq!(configuration.default_leave_outs.0.len(), 1);
-    assert_eq!(
-        configuration.default_leave_outs.0[0].harness_kind,
-        meta_signal_flow::HarnessKind::Claude
-    );
-    assert_eq!(
-        configuration.default_leave_outs.0[0].leave_outs.0,
-        [
-            signal_flow::LeaveOut::SkillTool,
-            signal_flow::LeaveOut::WorkflowTool
-        ]
-    );
     assert_eq!(
         configuration.configured_send_servers.0,
         vec![meta_signal_flow::ConfigureSendServer {
@@ -266,6 +254,12 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
                 model: meta_signal_flow::Model::Sol,
             },
             root_option: Some(meta_signal_flow::Root("/srv/core".to_string())),
+            // A permaflow carries its own leave-outs, of the harness its
+            // Model runs on.
+            leave_outs: signal_flow::LeaveOuts(vec![
+                signal_flow::LeaveOut::CodexAgentsMd,
+                signal_flow::LeaveOut::CodexSkillListing,
+            ]),
             system_modules: signal_flow::SystemModules(vec![signal_flow::ModuleIdentity(
                 "spirit:core".to_string()
             )]),
@@ -510,8 +504,6 @@ fn configure_declares_one_whole_family() {
         "Configure.Models.[ { Haiku claude-haiku-5-5 } { Opus claude-opus-5-5 } { Sol gpt-6-sol } { Luna gpt-6-luna } ]",
         "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
         "Configure.Investigation.{ Psyche compaction Sonnet }",
-        "Configure.LeaveOuts.[ { { Field core Astra } Codex [ CodexAgentsMd CodexSkillListing ] } { { Psyche flow Opus } Claude [ SkillTool ClaudeMd ] } { { Psyche flow Opus } Codex [ CodexAgentsMd ] } ]",
-        "Configure.LeaveOuts.[]",
         "Configure.HarnessHook./home/li/.local/bin/flow-hook",
         "ObserveConfiguration",
     ] {
@@ -595,7 +587,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ spirit:core intent:psyche ] [ compensation:truth ] Regular Default OnDemand «» [] } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OnDemand «» [] } ]";
     let query = Potential::<meta_signal_flow::Query>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -613,7 +605,7 @@ fn configure_metaflows_has_a_concrete_datom() {
 #[test]
 fn one_declaration_is_configured_and_removed_alone() {
     for text in [
-        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ spirit:core ] [] Regular Default OnDemand «» [] }",
+        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ ClaudeMd ] [ spirit:core:0 ] [] Regular Default OnDemand «» [] }",
         "Configure.Harness.{ Claude [ / ] [ Escape Escape ] [ Enter ] }",
         "Configure.Refresh.{ claude-fable-5-2 280000 }",
         "Remove.Permaflow.{ Psyche book Haiku }",
@@ -647,23 +639,35 @@ fn configure_harness_flags_has_a_concrete_datom() {
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
 }
 
+/// The leave-out family is gone: a permaflow carries its leave-outs, and
+/// a leave-out of another harness than its Model runs on is refused
+/// UnknownFeature, naming it.
 #[test]
-fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_rejection() {
-    // An entry without its harness is no longer a ConfigureLeaveOut.
+fn leave_outs_are_the_permaflow_s_and_a_foreign_one_is_an_unknown_feature() {
     assert!(
         Potential::<Query>::from(
-            "Configure.LeaveOuts.[ { { Psyche flow Opus } [ SkillTool ClaudeMd ] } ]"
+            "Configure.LeaveOuts.[ { { Psyche flow Opus } Claude [ SkillTool ClaudeMd ] } ]"
         )
         .actualize(&mut budget())
         .is_err()
     );
-    let text = "ConfigureRejected.LeaveOutNotForHarness";
+    // A permaflow without its leave-outs is no longer a ConfigureMetaflow.
+    assert!(
+        Potential::<Query>::from(
+            "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OnDemand «» [] }"
+        )
+        .actualize(&mut budget())
+        .is_err()
+    );
+    let text = "ConfigureRejected.UnknownFeature.CodexAgentsMd";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(
         response,
-        Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::LeaveOutNotForHarness)
+        Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::UnknownFeature(
+            signal_flow::LeaveOut::CodexAgentsMd
+        ))
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
@@ -671,6 +675,80 @@ fn a_leave_out_default_names_its_harness_and_a_foreign_leave_out_is_its_own_reje
         rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
         response
     );
+}
+
+/// One value of one permaflow is changed alone: a single value replaced,
+/// or one element added to or removed from its list.
+#[test]
+fn amend_changes_one_value_of_one_permaflow() {
+    for text in [
+        "Configure.Amend.{ { Mind atomicTrialAlpha Luna } Purpose.«Alpha after» }",
+        "Configure.Amend.{ { Psyche book Haiku } Workspace.Some./home/li/book }",
+        "Configure.Amend.{ { Psyche book Haiku } Workspace.None }",
+        "Configure.Amend.{ { Psyche book Haiku } Kind.Simplified }",
+        "Configure.Amend.{ { Psyche book Haiku } Continuity.Maintained }",
+        "Configure.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }",
+        "Configure.Amend.{ { Psyche core Fable } Add.SystemModule.spirit:core:0 }",
+        "Configure.Amend.{ { Psyche core Fable } Remove.PromptModule.vision:energy-nexus:1 }",
+        "Configure.Amend.{ { Psyche core Fable } Add.LeaveOut.ClaudeMd }",
+        "Configure.Amend.{ { Psyche core Fable } Remove.LeaveOut.ClaudeMd }",
+    ] {
+        let query = Potential::<Query>::from(text)
+            .actualize(&mut budget())
+            .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        assert!(matches!(
+            &query,
+            Query::Configure(meta_signal_flow::ConfigurationChange::Amend(_))
+        ));
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            query
+        );
+    }
+    let Query::Configure(meta_signal_flow::ConfigurationChange::Amend(amend)) =
+        Potential::<Query>::from(
+            "Configure.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }",
+        )
+        .actualize(&mut budget())
+        .unwrap()
+    else {
+        panic!("an Amend");
+    };
+    assert_eq!(amend.address.topic.0, "core");
+    assert_eq!(
+        amend.change,
+        meta_signal_flow::Change::Add(meta_signal_flow::Element::PromptModule(
+            signal_flow::ModuleIdentity("vision:energy-nexus:1".to_string())
+        ))
+    );
+    for (text, rejection) in [
+        (
+            "ConfigureRejected.UnknownPermaflow.{ Mind atomicTrialGamma Luna }",
+            meta_signal_flow::ConfigureRejection::UnknownPermaflow(signal_flow::Address {
+                aspect: meta_signal_flow::Aspect::Mind,
+                topic: meta_signal_flow::Topic("atomicTrialGamma".to_string()),
+                model: meta_signal_flow::Model::Luna,
+            }),
+        ),
+        (
+            "ConfigureRejected.UnknownModule.vision:absent:0",
+            meta_signal_flow::ConfigureRejection::UnknownModule(signal_flow::ModuleIdentity(
+                "vision:absent:0".to_string(),
+            )),
+        ),
+        (
+            "ConfigureRejected.CurriculumUnavailable",
+            meta_signal_flow::ConfigureRejection::CurriculumUnavailable,
+        ),
+    ] {
+        let response = Potential::<Response>::from(text)
+            .actualize(&mut budget())
+            .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        assert_eq!(response, Response::ConfigureRejected(rejection));
+        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+    }
 }
 
 /// A configuration entry whose topic is not camelCase is refused by type,

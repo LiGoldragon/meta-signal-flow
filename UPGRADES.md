@@ -1,5 +1,37 @@
 # Upgrades
 
+## 78.0.0: a permaflow carries its leave-outs; one value of one permaflow changed alone
+
+Built on 77.0.0 (e72f555), for Flow 0.55.0, on signal-flow 61.0.0
+(`4871bb8`) and flow-ethos 0.54.3 (`062ef9e1`).
+
+- `ConfigureMetaflow` gains `LeaveOuts` right after `Option<Root>`: a
+  permaflow is one definition and carries the leave-outs its flows start
+  without when a Start names none, of the harness its Model runs on:
+  `{ { Psyche core Fable } None [ ClaudeMd GitInstructions ] [ spirit:core:0 ] [] Regular Default Maintained «» [] }`.
+- The leave-out family goes, with every consumer: `ConfigureLeaveOut`,
+  `ConfigurationChange.LeaveOuts` and the snapshot's `DefaultLeaveOuts`
+  (the snapshot moves up one position after `ConfiguredPublicationDeadline`).
+- `ConfigurationChange` gains `Amend.{ Address Change }`, last: one value of
+  one permaflow changed alone. `Change.[ Workspace.Option<Root> Purpose
+  Kind.FlowKind Continuity Add.Element Remove.Element ]`, and
+  `Element.[ SystemModule.ModuleIdentity PromptModule.ModuleIdentity LeaveOut ]`:
+  `Configure.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }`.
+  It answers `Configured.Replaced` or `Configured.Unchanged` as every
+  Configure does. A Change naming the harness is held back, pending a
+  ruling on whether a permaflow names its harness.
+- `ConfigureRejection` loses `LeaveOutNotForHarness` and gains, last,
+  `UnknownPermaflow.Address`, `UnknownFeature.LeaveOut`,
+  `UnknownModule.ModuleIdentity` and `CurriculumUnavailable`: a leave-out of
+  another harness than the permaflow's is now `UnknownFeature`, naming it.
+- The import list adds `ModuleIdentity`, `LeaveOut` and `LeaveOuts` from
+  signal-flow.
+- A peer built on 77.0.0 is refused with 78's digest
+  (tests/fixtures/meta-signal-flow-77.ethos replaces the 76 fixture).
+- A deployment's datom moves each `Configure.LeaveOuts` entry into its
+  permaflow's declaration, the entry for the harness its Model runs on,
+  and declares no LeaveOuts family. The names are tentative.
+
 ## 77.0.0: Inspect lists pending reaps and handovers; Superseded and Unconfirmed; ReapPending
 
 Built on 76.0.0 (3b1f6f0), for Flow 0.54.7, on signal-flow 61.0.0

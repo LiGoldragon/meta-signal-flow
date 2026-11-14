@@ -122,14 +122,6 @@ pub enum HarnessHookConfiguration {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Duration(pub i64);
 #[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ConfigureLeaveOut {
-    pub address: flow_ethos::Address,
-    pub harness_kind: signal_flow::HarnessKind,
-    pub leave_outs: signal_flow::LeaveOuts,
-}
-#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct CurriculumNexusPath(pub String);
@@ -197,6 +189,7 @@ pub struct Records(pub std::vec::Vec<RecordPath>);
 pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
     pub root_option: std::option::Option<Root>,
+    pub leave_outs: signal_flow::LeaveOuts,
     pub system_modules: signal_flow::SystemModules,
     pub user_modules: signal_flow::UserModules,
     pub flow_kind: signal_flow::FlowKind,
@@ -204,6 +197,25 @@ pub struct ConfigureMetaflow {
     pub continuity: Continuity,
     pub purpose: Purpose,
     pub records: Records,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Change {
+    Workspace(std::option::Option<Root>),
+    Purpose(Purpose),
+    Kind(signal_flow::FlowKind),
+    Continuity(Continuity),
+    Add(Element),
+    Remove(Element),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Element {
+    SystemModule(signal_flow::ModuleIdentity),
+    PromptModule(signal_flow::ModuleIdentity),
+    LeaveOut(signal_flow::LeaveOut),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -270,6 +282,13 @@ pub enum CountersRefusal {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Amend_Data {
+    pub address: flow_ethos::Address,
+    pub change: Change,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
     Models(std::vec::Vec<ConfigureModel>),
     Thresholds(std::vec::Vec<ConfigureThreshold>),
@@ -277,7 +296,6 @@ pub enum ConfigurationChange {
     HandoverArchive(Path),
     HandoverCount(i64),
     PublicationDeadline(Duration),
-    LeaveOuts(std::vec::Vec<ConfigureLeaveOut>),
     Nexus(ConfigureNexus),
     SendServers(std::vec::Vec<ConfigureSendServer>),
     Metaflows(std::vec::Vec<ConfigureMetaflow>),
@@ -293,6 +311,7 @@ pub enum ConfigurationChange {
     Permaflow(ConfigureMetaflow),
     Harness(flow_ethos::HarnessProfile),
     Refresh(ConfigureThreshold),
+    Amend(Amend_Data),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -337,10 +356,6 @@ pub struct ConfiguredHandoverCount(pub HandoverCountConfiguration);
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfiguredPublicationDeadline(pub Duration);
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct DefaultLeaveOuts(pub std::vec::Vec<ConfigureLeaveOut>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
@@ -396,7 +411,6 @@ pub struct ConfigurationSnapshot {
     pub configured_handover_archive: ConfiguredHandoverArchive,
     pub configured_handover_count: ConfiguredHandoverCount,
     pub configured_publication_deadline: ConfiguredPublicationDeadline,
-    pub default_leave_outs: DefaultLeaveOuts,
     pub configured_send_servers: ConfiguredSendServers,
     pub configured_metaflows: ConfiguredMetaflows,
     pub configured_harness_flags: ConfiguredHarnessFlags,
@@ -461,12 +475,15 @@ pub enum ConfigureRejection {
     StoreRefused,
     DuplicateEntry,
     CodexModelsOverlap,
-    LeaveOutNotForHarness,
     TopicRefused(flow_ethos::Topic),
     MinutesRefused(signal_flow::MinutesRefusal),
     CountersRefused(CountersRefusal),
     RequestIdDrawsRefused,
     AnnouncementTriesRefused,
+    UnknownPermaflow(flow_ethos::Address),
+    UnknownFeature(signal_flow::LeaveOut),
+    UnknownModule(signal_flow::ModuleIdentity),
+    CurriculumUnavailable,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
