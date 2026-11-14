@@ -43,6 +43,14 @@ Built on 77.0.0 (e72f555), for Flow 0.55.0, on signal-flow 62.0.0
   signal-flow.
 - A peer built on 77.0.0 is refused with 78's digest
   (tests/fixtures/meta-signal-flow-77.ethos replaces the 76 fixture).
+- `ConfigurationChange` gains `Resumptions.Vector<ConfigureResumption>`,
+  last, and `ConfigurationSnapshot` gains `ConfiguredResumptions`, last:
+  `ConfigureResumption.{ ModelName CacheWarmth.Integer ResumeCeiling.Integer }`,
+  one per native model, the family replaced whole as Thresholds is. A
+  permaflow woken while Asleep resumes its last flow when that flow's last
+  turn ended under CacheWarmth minutes ago and its last context is below
+  ResumeCeiling tokens; a model with no entry always wakes fresh:
+  `Configure.Resumptions.[ { claude-opus-5-5 5 150000 } ]`.
 - A deployment's datom moves each `Configure.LeaveOuts` entry into its
   permaflow's declaration, the entry for the harness its Model runs on,
   and declares no LeaveOuts family. The names are tentative.

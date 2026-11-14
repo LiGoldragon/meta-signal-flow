@@ -102,14 +102,14 @@
 ; leave-outs against the harness it starts on.
 ;
 ; Configure declares one configuration family whole: Models, Thresholds,
-; Nexus, SendServers, Metaflows, Investigation, DefaultMinutes,
+; Resumptions, Nexus, SendServers, Metaflows, Investigation, DefaultMinutes,
 ; ProtectedAddresses, Counters or HarnessHook. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
 ; answers Configured with the declaration it was given, echoed whole, also
 ; when the committed value already equals it and nothing is written. Each family
-; holds one entry per key: Models one per Model, Thresholds one
-; per ModelName, SendServers one per CodexAppServerBinary, Metaflows one per
+; holds one entry per key: Models one per Model, Thresholds and
+; Resumptions one per ModelName, SendServers one per CodexAppServerBinary, Metaflows one per
 ; Address: the declaration an ordinary Launch of that Address starts from. ConfigureRefused changes
 ; nothing: DuplicateEntry when a declaration names one key twice,
 ; TopicRefused when an entry's Address, or an Amend's, has a topic that is
@@ -119,7 +119,7 @@
 ; refused by the rule a Task's Minutes meets at admission (Zero, Negative,
 ; Unreachable), CountersRefused when a Counters is refused (below).
 ; Configuration reads the committed Nexus, the committed
-; model, threshold, send-server and metaflow vectors, the
+; model, threshold, resumption, send-server and metaflow vectors, the
 ; Investigation seat, the default Minutes and the counters; it answers
 ; Unconfigured while no Nexus has been declared.
 ;
@@ -145,6 +145,15 @@
 ; as it goes idle, its reap owed in the same event. It is told nothing and
 ; writes no handover. A model with no threshold configured is never
 ; refreshed.
+;
+; A model's resumption says when a permaflow woken while Asleep resumes its
+; last flow rather than starting a fresh one. It resumes when that flow's
+; last turn ended less than CacheWarmth minutes ago, while the model's
+; prompt cache is still warm, and the context its session last carried is
+; below ResumeCeiling tokens: its harness is started again on the flow's
+; own native session, the same FlowId, and its queue is handed to it.
+; Otherwise, and always for a model with no resumption configured, the
+; wake starts a fresh flow.
 ;
 ; Investigation is the Address of the seat Flow gives the investigation of
 ; a flow that compacted while it kept working without being given more
@@ -404,6 +413,10 @@ Signal
   ConfigureModel.{ Model Native.String }
   ; The refresh threshold of the flows that run one model, in tokens.
   ConfigureThreshold.{ ModelName RefreshThreshold.Integer }
+  ; When a woken permaflow whose last flow ran one model resumes that flow:
+  ; its last turn ended under CacheWarmth minutes ago, and its last context
+  ; is below ResumeCeiling tokens.
+  ConfigureResumption.{ ModelName CacheWarmth.Integer ResumeCeiling.Integer }
   ; The model policy governing handover warning and reminder behavior.
   HandoverPolicy.{ ModelName WarningShareLeft.Integer ReminderText.String EveryMinutes.Integer }
   Repository.String
@@ -497,12 +510,13 @@ Signal
                          Permaflow.ConfigureMetaflow
                          Harness.HarnessProfile
                          Refresh.ConfigureThreshold
-                         Amend.{ Address Change } ]          ; one value of one permaflow
+                         Amend.{ Address Change }            ; one value of one permaflow
+                         Resumptions.Vector<ConfigureResumption> ]
   ; One declaration taken away, by its key.
   Removal.[ Permaflow.Address
             Harness.HarnessKind
             Refresh.ModelName ]
-  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration }
+  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredResumptions.Vector<ConfigureResumption> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next

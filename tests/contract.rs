@@ -124,7 +124,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook [ { claude-opus-5-5 5 150000 } ] }";
 
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
@@ -226,6 +226,14 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
     assert_eq!(
         configuration.configured_thresholds.0[0].refresh_threshold,
         meta_signal_flow::RefreshThreshold(200000)
+    );
+    assert_eq!(
+        configuration.configured_resumptions.0,
+        vec![meta_signal_flow::ConfigureResumption {
+            model_name: meta_signal_flow::ModelName("claude-opus-5-5".to_owned()),
+            cache_warmth: meta_signal_flow::CacheWarmth(5),
+            resume_ceiling: meta_signal_flow::ResumeCeiling(150000),
+        }]
     );
     assert_eq!(
         configuration
@@ -522,6 +530,8 @@ fn configure_declares_one_whole_family() {
     for text in [
         "Configure.Models.[ { Haiku claude-haiku-5-5 } { Opus claude-opus-5-5 } { Sol gpt-6-sol } { Luna gpt-6-luna } ]",
         "Configure.Thresholds.[ { claude-opus-5-5 200000 } { gpt-6.1-sol 150000 } ]",
+        "Configure.Resumptions.[ { claude-opus-5-5 5 150000 } { gpt-6.1-sol 30 100000 } ]",
+        "Configure.Resumptions.[]",
         "Configure.Investigation.{ Psyche compaction Sonnet }",
         "Configure.HarnessHook./home/li/.local/bin/flow-hook",
         "ObserveConfiguration",
@@ -553,6 +563,18 @@ fn configure_declares_one_whole_family() {
     // A threshold belongs to a native model, never to a Model, and has no handover.
     assert!(
         Potential::<Query>::from("Configure.Thresholds.[ { Fable 600000 700000 } ]")
+            .actualize(&mut budget())
+            .is_err()
+    );
+    // A resumption belongs to a native model and names both its cache
+    // warmth and its resume ceiling.
+    assert!(
+        Potential::<Query>::from("Configure.Resumptions.[ { Fable 5 150000 } ]")
+            .actualize(&mut budget())
+            .is_err()
+    );
+    assert!(
+        Potential::<Query>::from("Configure.Resumptions.[ { claude-opus-5-5 5 } ]")
             .actualize(&mut budget())
             .is_err()
     );
@@ -807,7 +829,7 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
         "ConfigureRefused.MinutesRefused.Zero",
         "ConfigureRefused.MinutesRefused.Negative",
         "ConfigureRefused.MinutesRefused.Unreachable",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 1 3 1 } 64 3 Unconfigured }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 1 3 1 } 64 3 Unconfigured [] }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -870,7 +892,7 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         "ConfigureRefused.CountersRefused.NotEmpty",
         "ConfigureRefused.CountersRefused.Lowered.{ 121 46 301 }",
         "ConfigureRefused.CountersRefused.NotRunning",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 120 45 300 } 64 3 Unconfigured }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 120 45 300 } 64 3 Unconfigured [] }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -929,7 +951,7 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } Owed }",
         "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } CloseRefused }",
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured [] }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
