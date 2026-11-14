@@ -412,6 +412,18 @@ Signal
   ConfigureThreshold.{ ModelName RefreshThreshold.Integer }
   ; The model policy governing handover warning and reminder behavior.
   HandoverPolicy.{ ModelName WarningShareLeft.Integer ReminderText.String EveryMinutes.Integer }
+  ; One measured model's event-driven warning policy, set alone.
+  ContextWarningPolicy.{ ModelName NativeCompactionMeasurement Vector<WarningBoundary> }
+  ; Native auto-compaction evidence, never an advertised context capacity.
+  NativeCompactionMeasurement.{ CompactionTokens.Integer HarnessKind HarnessVersion.String TranscriptPath BoundaryIdentity.String }
+  ; Fixed stages, most urgent first; every policy carries exactly one each.
+  WarningStage.[ Emergency Middle Early ]
+  ; Remaining percent, delivery priority and rendered text are configuration.
+  WarningBoundary.{ WarningStage RemainingPercent.Integer WarningPriority WarningText.String }
+  WarningPriority.[ HardAbrupt MiddleAbrupt Soft ]
+  ; The installed native hooks, selected explicitly by running configuration.
+  HarnessHookEvent.[ SessionStart PostToolUse UserPromptSubmit Stop SessionEnd ]
+  ContextWarningConfigurationRefusal.[ InvalidCompactionTokens InvalidRemainingPercent DuplicateStage MissingStage InvalidStageOrder WarningTextRefused DuplicateHookEvent ]
   Repository.String
   Path.String
   HandoverPoliciesConfiguration.[ Configured.Vector<HandoverPolicy> Unconfigured ]
@@ -500,6 +512,8 @@ Signal
                          RequestIdDraws.DrawBound
                          AnnouncementTries.TryBound
                          HarnessHook.Path
+                         ContextWarningPolicy
+                         HarnessHookEvents.Vector<HarnessHookEvent>
                          Permaflow.ConfigureMetaflow
                          Harness.HarnessProfile
                          Refresh.ConfigureThreshold
@@ -507,8 +521,9 @@ Signal
   ; One declaration taken away, by its key.
   Removal.[ Permaflow.Address
             Harness.HarnessKind
-            Refresh.ModelName ]
-  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration }
+            Refresh.ModelName
+            ContextWarning.ModelName ]
+  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
@@ -516,7 +531,7 @@ Signal
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   HandoverConfigurationRefusal.[ InvalidWarningShareLeft InvalidEveryMinutes InvalidHandoverCount NegativeHandoverCount InvalidPublicationDeadline DuplicatePolicy DuplicateArchive StoreRefused ]
-  ConfigureRefusal.[ HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused UnknownPermaflow.Address UnknownFeature.LeaveOut UnknownModule.ModuleIdentity CurriculumUnavailable ]
+  ConfigureRefusal.[ ContextWarningConfigurationRefused.ContextWarningConfigurationRefusal HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused UnknownPermaflow.Address UnknownFeature.LeaveOut UnknownModule.ModuleIdentity CurriculumUnavailable ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

@@ -82,6 +82,91 @@ pub struct HandoverPolicy {
     pub every_minutes: EveryMinutes,
 }
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ContextWarningPolicy {
+    pub model_name: signal_flow::ModelName,
+    pub native_compaction_measurement: NativeCompactionMeasurement,
+    pub warning_boundary_vector: std::vec::Vec<WarningBoundary>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct CompactionTokens(pub i64);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessVersion(pub String);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct BoundaryIdentity(pub String);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct NativeCompactionMeasurement {
+    pub compaction_tokens: CompactionTokens,
+    pub harness_kind: signal_flow::HarnessKind,
+    pub harness_version: HarnessVersion,
+    pub transcript_path: signal_flow::TranscriptPath,
+    pub boundary_identity: BoundaryIdentity,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum WarningStage {
+    Emergency,
+    Middle,
+    Early,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct RemainingPercent(pub i64);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct WarningText(pub String);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct WarningBoundary {
+    pub warning_stage: WarningStage,
+    pub remaining_percent: RemainingPercent,
+    pub warning_priority: WarningPriority,
+    pub warning_text: WarningText,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum WarningPriority {
+    HardAbrupt,
+    MiddleAbrupt,
+    Soft,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum HarnessHookEvent {
+    SessionStart,
+    PostToolUse,
+    UserPromptSubmit,
+    Stop,
+    SessionEnd,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ContextWarningConfigurationRefusal {
+    InvalidCompactionTokens,
+    InvalidRemainingPercent,
+    DuplicateStage,
+    MissingStage,
+    InvalidStageOrder,
+    WarningTextRefused,
+    DuplicateHookEvent,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Repository(pub String);
@@ -308,6 +393,8 @@ pub enum ConfigurationChange {
     RequestIdDraws(DrawBound),
     AnnouncementTries(TryBound),
     HarnessHook(Path),
+    ContextWarningPolicy(ContextWarningPolicy),
+    HarnessHookEvents(std::vec::Vec<HarnessHookEvent>),
     Permaflow(ConfigureMetaflow),
     Harness(flow_ethos::HarnessProfile),
     Refresh(ConfigureThreshold),
@@ -320,6 +407,7 @@ pub enum Removal {
     Permaflow(flow_ethos::Address),
     Harness(signal_flow::HarnessKind),
     Refresh(signal_flow::ModelName),
+    ContextWarning(signal_flow::ModelName),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -396,6 +484,14 @@ pub struct ConfiguredHarnessHook(pub HarnessHookConfiguration);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfiguredContextWarningPolicies(pub std::vec::Vec<ContextWarningPolicy>);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfiguredHarnessHookEvents(pub std::vec::Vec<HarnessHookEvent>);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
     pub configured_nexus: ConfiguredNexus,
     pub configured_models: ConfiguredModels,
@@ -415,6 +511,8 @@ pub struct ConfigurationSnapshot {
     pub configured_request_id_draws: ConfiguredRequestIdDraws,
     pub configured_announcement_tries: ConfiguredAnnouncementTries,
     pub configured_harness_hook: ConfiguredHarnessHook,
+    pub configured_context_warning_policies: ConfiguredContextWarningPolicies,
+    pub configured_harness_hook_events: ConfiguredHarnessHookEvents,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -464,6 +562,7 @@ pub enum HandoverConfigurationRefusal {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigureRefusal {
+    ContextWarningConfigurationRefused(ContextWarningConfigurationRefusal),
     HandoverConfigurationRefused(HandoverConfigurationRefusal),
     StoreRefused,
     DuplicateEntry,
