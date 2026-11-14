@@ -1098,8 +1098,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/signal-flow";
-          rev = "f8ea6faadd2fdfc84ecbaaa7d96884a67ff353bd";
-          sha256 = "0ak37syify90ny4v0bv8azprph1nxr81rfl7xgpx8537316py0wz";
+          rev = "4982eeb6f8b2ef8a86a0070dc02acaf0f2088272";
+          sha256 = "0qgbr9kmbnj51h3ng8677l92kii0pdzg8dliwzgdb53sa1isgin1";
         };
         libName = "signal_flow";
         dependencies = [
