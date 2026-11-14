@@ -566,13 +566,7 @@ fn configure_declares_one_whole_family() {
             .actualize(&mut budget())
             .is_err()
     );
-    // A resumption belongs to a native model and names both its cache
-    // warmth and its resume ceiling.
-    assert!(
-        Potential::<Query>::from("Configure.Resumptions.[ { Fable 5 150000 } ]")
-            .actualize(&mut budget())
-            .is_err()
-    );
+    // A resumption names both its cache warmth and its resume ceiling.
     assert!(
         Potential::<Query>::from("Configure.Resumptions.[ { claude-opus-5-5 5 } ]")
             .actualize(&mut budget())
