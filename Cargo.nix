@@ -379,6 +379,58 @@ rec {
         };
         resolvedDefaultFeatures = [ "datom" "default" ];
       };
+      "ethos-zero 29.0.0" = rec {
+        crateName = "ethos-zero";
+        version = "29.0.0";
+        edition = "2024";
+        crateBin = [];
+        workspace_member = null;
+        src = pkgs.fetchgit {
+          url = "https://github.com/LiGoldragon/ethos-zero";
+          rev = "f23eacf338a90ce4a6dea011554724fa6488fcc9";
+          sha256 = "15wh2r0ljqvjqrh8hc8av4p8210nsdyl9iwhb5zh6k467r59ymm8";
+        };
+        libName = "ethos_zero";
+        dependencies = [
+          {
+            name = "datom-codec";
+            packageId = "datom-codec";
+            features = [ "rkyv" ];
+          }
+          {
+            name = "prettyplease";
+            packageId = "prettyplease";
+          }
+          {
+            name = "proc-macro2";
+            packageId = "proc-macro2";
+          }
+          {
+            name = "protos";
+            packageId = "protos";
+            features = [ "rkyv" ];
+          }
+          {
+            name = "quote";
+            packageId = "quote";
+          }
+          {
+            name = "rkyv";
+            packageId = "rkyv";
+            usesDefaultFeatures = false;
+            features = [ "std" "bytecheck" "little_endian" "pointer_width_32" "unaligned" ];
+          }
+          {
+            name = "syn";
+            packageId = "syn 3.0.5";
+            features = [ "full" ];
+          }
+        ];
+        features = {
+          "default" = [ "datom" ];
+        };
+        resolvedDefaultFeatures = [ "datom" "default" ];
+      };
       "flow-ethos" = rec {
         crateName = "flow-ethos";
         version = "0.54.3";
@@ -621,7 +673,7 @@ rec {
         buildDependencies = [
           {
             name = "ethos-zero";
-            packageId = "ethos-zero 27.0.0";
+            packageId = "ethos-zero 29.0.0";
           }
         ];
         features = {

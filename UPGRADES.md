@@ -1,5 +1,38 @@
 # Upgrades
 
+## 80.0.0: typed per-model context warnings and hook events; an enum of one variant is that variant
+
+Built on 79.0.0 (`cdb4e7d`) with the context-warnings commit (`1c7597e`,
+branch `context-warnings-7cd167`), for Flow on ethos-zero 29.0.0
+(`f23eacf`), on signal-flow 63.0.0 (`4982eeb`) and flow-ethos 0.54.3
+(`062ef9e1`).
+
+- Context warnings (`1c7597e`): `ContextWarningPolicy`, `HarnessHookEvents`
+  and `Removal.ContextWarning` configure per-model warning policy and the
+  installed hook events; `ConfigurationSnapshot` carries
+  `ConfiguredContextWarningPolicies` and `ConfiguredHarnessHookEvents`;
+  `ConfigureRefusal.ContextWarningConfigurationRefused` refuses a bad policy.
+- ethos-zero 29.0.0 refuses an enum of one variant, so each Output that was
+  one carries what its one variant carried:
+  - `ReadSendOutcomesRejected` and `InspectRejected` carried nothing, so
+    they are bare Output variants: the datom is `InspectRejected` where it
+    was `InspectRejected.UnknownAddress`, and
+    `ReadSendOutcomesRejected` where it was
+    `ReadSendOutcomesRejected.StoreRefused`. The generated
+    `ReadSendOutcomesRejected_Data` and `InspectRejected_Data` are gone.
+  - `StoreRefusal.[ Store.String ]` is `StoreRefusal.String`, a newtype
+    `StoreRefusal(String)`. `Refused` and `ObserveLegacyArchiveRejected`
+    carry it as before; the datom is `Refused.«text»` where it was
+    `Refused.Store.«text»`.
+- Output positions are unchanged. Both ends of the meta socket repin
+  together: the datom and the rkyv bytes of these three Outputs change, and
+  the contract digest changes, so a 79 peer is refused with 80's digest
+  (tests/fixtures/meta-signal-flow-79.ethos).
+- Consumers: `Output::InspectRejected(InspectRejected_Data::UnknownAddress)`
+  becomes `Output::InspectRejected`; `Output::ReadSendOutcomesRejected(..)`
+  becomes `Output::ReadSendOutcomesRejected`; `StoreRefusal::Store(text)`
+  becomes `StoreRefusal(text)`.
+
 ## 79.0.0: Input and Output, paired by position
 
 Built on 78.0.0 (ac7db8a), for Flow on ethos-zero 27.0.0 (`8c95310`), on

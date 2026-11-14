@@ -6,10 +6,10 @@ use flow_ethos::{
     Address, Aspect, Lock, LogicalDeliveryId, Model, Pid, Started, State, Topic, Until,
 };
 use meta_signal_flow::{
-    Attempt, Attempts, Binding, Input, InspectRejected_Data, Inspected_Data, OldSeat, Output,
-    Rebind_Data, RebindRejected_Data, Rebinding, RestartFailure, RestartPhase, RestartRecord,
-    VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
-    VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
+    Attempt, Attempts, Binding, Input, Inspected_Data, OldSeat, Output, Rebind_Data,
+    RebindRejected_Data, Rebinding, RestartFailure, RestartPhase, RestartRecord, VisibleAttempt,
+    VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding, VisibleQueueEvidence,
+    Withdraw_Data, WithdrawRejected_Data,
 };
 use signal_flow::{
     DeliveredMessage, DeliveredRequest, EndpointSelection, FlowId, FlowLifecycle, FlowNode,
@@ -161,7 +161,7 @@ fn replies() -> Vec<Output> {
             visible_attempt_vector: vec![],
             restart_record_option: None,
         }),
-        Output::InspectRejected(InspectRejected_Data::UnknownAddress),
+        Output::InspectRejected,
         Output::Rebound(address()),
         Output::RebindRejected(RebindRejected_Data::UnknownAddress),
         Output::RebindRejected(RebindRejected_Data::PaneAbsent),
@@ -316,7 +316,7 @@ mod datom {
         let texts = [
             "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } Prepared } ] Some.{ f1c841 s1 { Mind flow Sol } { { default mind-flow w7B t1 } Some.{ 4242 17 } } Failed.BindMismatch 2 } }",
             "Inspected.{ { { Mind flow Sol } Asleep [] [] } { None None } [] [] None }",
-            "InspectRejected.UnknownAddress",
+            "InspectRejected",
             "Rebound.{ Mind flow Sol }",
             "RebindRejected.UnknownAddress",
             "RebindRejected.PaneAbsent",

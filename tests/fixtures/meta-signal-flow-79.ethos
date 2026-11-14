@@ -39,10 +39,10 @@
 ; are configured and read by nothing.
 ;
 ; Every connection to this socket greets first, through Signal's
-; Handshake, before any Query is decoded: Greeted with this contract's
+; Handshake, before any Input is decoded: Greeted with this contract's
 ; digest, or GreetingRefused.ContractMismatch carrying it. A first frame
 ; that is not this contract's greeting, a greeting of an earlier contract
-; or of the ordinary one, a Query written first or a frame too short to be
+; or of the ordinary one, an Input written first or a frame too short to be
 ; a greeting, is answered that typed refusal and the connection ends; Flow
 ; records it as the ordinary socket records its own, an UndecodableFrame of
 ; metadata alone, seen through the ordinary Observe.Undecodable.
@@ -303,6 +303,12 @@
 ; its sender. Withdrawn names the request. WithdrawRejected changes nothing:
 ; UnknownAddress, Flow holds no metaflow for the Address; NotQueued, the
 ; metaflow's queue holds no request of that id.
+;
+; The n-th output answers the n-th input; the outputs after the last
+; input's answer no input by position. Configuration and
+; ObserveConfiguration both answer Configuration: Configuration has it at
+; its position, and ObserveConfiguration has there Unconfigured, a reply
+; of its own.
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ReapPending HandoverPending ]
@@ -333,54 +339,54 @@ Signal
   Withdraw.{ Address LogicalDeliveryId }        ; one queued delivery leaves the queue
   ObserveConfiguration                          ; the configuration, then each change
   Remove.Removal ]                              ; one declaration leaves its family
-[ Configured.ConfigurationChange                ; the change given, echoed whole
-  Configuration.ConfigurationSnapshot
-  Unconfigured
+[ Configuration.ConfigurationSnapshot
+  Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
   FlowRegistered.FlowNode
+  BoundExisting
+  FlowRetired.FlowNode
+  Restarted.FlowId
+  Refreshed
+  Delivered.VisibleDelivery
+  Vetted
+  Commanded.CommandOutcome
+  PeerResolved.CallerIdentity
+  EventsRead.{ FlowId Vector<HarnessEventMetadata> } ; the ordered, metadata-only event history
+  QueueDeliveriesRead.{ Address Vector<VisibleQueueDelivery> }
+  SendOutcomesRead.Vector<VisibleSendOutcomeRecord>
+  LegacyArchiveObserved.Vector<VisibleLegacyArchiveEntry>
+  Debugged.DebugSnapshot
+  QueueDeliveryResolved.{ Address VisibleQueueDeliveryResolution }
+  Inspected.{ VisibleMetaflow Binding Vector<Lock> Vector<VisibleAttempt> Option<RestartRecord> }
+  DeliveryDebugged.{ DeliverySnapshot Receipt.Option<NativeReceipt> ReadBy.Option<LogicalDeliveryId> }
+  Rebound.Address
+  Withdrawn
+  Unconfigured                                  ; ObserveConfiguration's; its frames are Configuration
+  Removed.Removal                               ; the Removal given, echoed whole
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
-  BoundExisting
   BindExistingRejected.BindExistingRejection
-  FlowRetired.FlowNode
   RetireRejected.RetireRejection
-  Restarted.FlowId
   RestartRefused.RestartRefusal
-  Refreshed
   RefreshRejected.RefreshRejection
   OrdinaryRefused.Refusal
-  Delivered.VisibleDelivery
   DeliveryRejected.DeliveryRejection
-  Vetted
-  Commanded.CommandOutcome
   CommandRejected.CommandRejection
-  PeerResolved.CallerIdentity
   PeerResolutionRejected.CallerResolutionRejection
   Refused.StoreRefusal
-  EventsRead.{ FlowId Vector<HarnessEventMetadata> } ; the ordered, metadata-only event history
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
-  QueueDeliveriesRead.{ Address Vector<VisibleQueueDelivery> }
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
-  SendOutcomesRead.Vector<VisibleSendOutcomeRecord>
   ReadSendOutcomesRejected.[ StoreRefused ]
-  LegacyArchiveObserved.Vector<VisibleLegacyArchiveEntry>
   ObserveLegacyArchiveRejected.StoreRefusal
-  QueueDeliveryResolved.{ Address VisibleQueueDeliveryResolution }
   ResolveQueueDeliveryRejected.VisibleResolveQueueDeliveryRejected
-  Inspected.{ VisibleMetaflow Binding Vector<Lock> Vector<VisibleAttempt> Option<RestartRecord> }
   InspectRejected.[ UnknownAddress ]
-  Rebound.Address
   RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
-  Withdrawn
-  DeliveryDebugged.{ DeliverySnapshot Receipt.Option<NativeReceipt> ReadBy.Option<LogicalDeliveryId> }
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
-  Debugged.DebugSnapshot
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RefreshQueued
   RestartQueued.FlowId
-  ReapPending
-  Removed.Removal ]                             ; the Removal given, echoed whole
+  ReapPending ]
 [ ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>
@@ -475,7 +481,7 @@ Signal
   HeartbeatRecipients.Vector<Address>
   HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
   CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
-  ; Keep the payload type distinct from the unit Query.Configuration variant.
+  ; Keep the payload type distinct from the unit Input.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
                          Thresholds.Vector<ConfigureThreshold>
                          HandoverPolicies.Vector<HandoverPolicy>
