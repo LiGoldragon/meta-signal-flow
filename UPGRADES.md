@@ -15,9 +15,15 @@ commit (`8930ed7`, branch `warning-provenance-6be617`), retaining the 79.0.0
   `ConfiguredContextWarningPolicies` and `ConfiguredHarnessHookEvents`;
   `ConfigureRefusal.ContextWarningConfigurationRefused` refuses a bad policy.
 - Warning provenance (`8930ed7`): `ContextWarningPolicy` carries
-  `ContextWarningLimit` (`NativeEffectiveLimit` or `ProvisionalPolicy`, each
-  with `WarningTokens` and `ContextBoundaryEvidence`) and
-  `ContextUsageProjection` (`CodexLastTotal` or
+  `ContextWarningLimit`, one record of `LimitBasis`, `WarningTokens` and
+  `ContextBoundaryEvidence`; `LimitBasis` is `NativeEffectiveLimit` (a
+  limit the native source establishes) or `ProvisionalPolicy` (an explicitly
+  provisional policy choice). The datom is
+  `{ NativeEffectiveLimit 200000 { Codex ... } }` where a limit was
+  `NativeEffectiveLimit.{ 200000 { Codex ... } }`; the generated
+  `ContextWarningLimit` is a struct with `limit_basis`, and
+  `NativeEffectiveLimit_Data` and `ProvisionalPolicy_Data` are gone. The
+  policy also carries `ContextUsageProjection` (`CodexLastTotal` or
   `ClaudeCompletedInputWithCache`) in place of `NativeCompactionMeasurement`;
   `ContextWarningConfigurationRefusal.InvalidCompactionTokens` is
   `InvalidWarningTokens`.
@@ -41,6 +47,11 @@ commit (`8930ed7`, branch `warning-provenance-6be617`), retaining the 79.0.0
   becomes `Output::InspectRejected`; `Output::ReadSendOutcomesRejected(..)`
   becomes `Output::ReadSendOutcomesRejected`; `StoreFailure::Store(text)`
   becomes `StoreFailure(text)`; every use of the type `StoreRefusal` is `StoreFailure`.
+  A match on `ContextWarningLimit::NativeEffectiveLimit(limit)` or
+  `ContextWarningLimit::ProvisionalPolicy(limit)` becomes a read of
+  `limit.limit_basis` (`LimitBasis::NativeEffectiveLimit` or
+  `LimitBasis::ProvisionalPolicy`) with `limit.warning_tokens` and
+  `limit.context_boundary_evidence` on the one struct.
 
 ## 79.0.0: Input and Output, paired by position
 

@@ -416,8 +416,10 @@ Signal
   ; One model's event-driven warning policy, with denominator and usage provenance.
   ContextWarningPolicy.{ ModelName ContextWarningLimit ContextUsageProjection Vector<WarningBoundary> }
   ; A source-established native limit or an explicitly provisional policy choice.
-  ContextWarningLimit.[ NativeEffectiveLimit.{ WarningTokens ContextBoundaryEvidence }
-                        ProvisionalPolicy.{ WarningTokens ContextBoundaryEvidence } ]
+  ContextWarningLimit.{ LimitBasis WarningTokens ContextBoundaryEvidence }
+  ; NativeEffectiveLimit is a limit established by the native source;
+  ; ProvisionalPolicy is an explicitly provisional policy choice.
+  LimitBasis.[ NativeEffectiveLimit ProvisionalPolicy ]
   WarningTokens.Integer
   ; Native model-call observations; neither names the unreported live context estimate.
   ContextUsageProjection.[ CodexLastTotal ClaudeCompletedInputWithCache ]

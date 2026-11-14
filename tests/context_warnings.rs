@@ -2,7 +2,7 @@
 
 use datom_codec::{Actualizing, Budget, Datomizable, Potential};
 use meta_signal_flow::{
-    ConfigurationChange, ContextUsageProjection, ContextWarningLimit, Input, Output, Removal,
+    ConfigurationChange, ContextUsageProjection, Input, LimitBasis, Output, Removal,
 };
 use protos::{Compactable, Protosizable, ReaderBudget};
 
@@ -17,7 +17,7 @@ fn budget() -> Budget {
 
 #[test]
 fn one_model_policy_carries_native_evidence_and_each_typed_stage() {
-    let text = "Configure.ContextWarningPolicy.{ measured-model NativeEffectiveLimit.{ 200000 { Codex native-version /tmp/native.jsonl boundary-1 «unreported items are not included» } } CodexLastTotal [ { Emergency 10 HardAbrupt «your handover right now, or you lose everything when you are refreshed.» } { Middle 25 MiddleAbrupt «write your handover now» } { Early 50 Soft «you are at {percent} percent of your context» } ] }";
+    let text = "Configure.ContextWarningPolicy.{ measured-model { NativeEffectiveLimit 200000 { Codex native-version /tmp/native.jsonl boundary-1 «unreported items are not included» } } CodexLastTotal [ { Emergency 10 HardAbrupt «your handover right now, or you lose everything when you are refreshed.» } { Middle 25 MiddleAbrupt «write your handover now» } { Early 50 Soft «you are at {percent} percent of your context» } ] }";
     let query = Potential::<Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -25,9 +25,8 @@ fn one_model_policy_carries_native_evidence_and_each_typed_stage() {
         panic!("not a one-model policy");
     };
     assert_eq!(policy.model_name.0, "measured-model");
-    let ContextWarningLimit::NativeEffectiveLimit(limit) = &policy.context_warning_limit else {
-        panic!("not a native effective limit");
-    };
+    let limit = &policy.context_warning_limit;
+    assert_eq!(limit.limit_basis, LimitBasis::NativeEffectiveLimit);
     assert_eq!(limit.warning_tokens.0, 200000);
     assert_eq!(
         policy.context_usage_projection,
@@ -48,16 +47,15 @@ fn one_model_policy_carries_native_evidence_and_each_typed_stage() {
 
 #[test]
 fn provisional_policy_is_distinct_from_a_native_limit_on_text_and_wire() {
-    let text = "Configure.ContextWarningPolicy.{ provisional-model ProvisionalPolicy.{ 916600 { Claude native-version /tmp/native.jsonl auto-boundary «last completed call is a policy choice, not a trigger bound» } } ClaudeCompletedInputWithCache [] }";
+    let text = "Configure.ContextWarningPolicy.{ provisional-model { ProvisionalPolicy 916600 { Claude native-version /tmp/native.jsonl auto-boundary «last completed call is a policy choice, not a trigger bound» } } ClaudeCompletedInputWithCache [] }";
     let query = Potential::<Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
     let Input::Configure(ConfigurationChange::ContextWarningPolicy(policy)) = &query else {
         panic!("not a model policy");
     };
-    let ContextWarningLimit::ProvisionalPolicy(limit) = &policy.context_warning_limit else {
-        panic!("provisional policy lost its basis");
-    };
+    let limit = &policy.context_warning_limit;
+    assert_eq!(limit.limit_basis, LimitBasis::ProvisionalPolicy);
     assert_eq!(limit.warning_tokens.0, 916600);
     assert_eq!(
         policy.context_usage_projection,

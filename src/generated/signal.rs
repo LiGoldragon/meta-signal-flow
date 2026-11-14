@@ -93,23 +93,17 @@ pub struct ContextWarningPolicy {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct NativeEffectiveLimit_Data {
+pub struct ContextWarningLimit {
+    pub limit_basis: LimitBasis,
     pub warning_tokens: WarningTokens,
     pub context_boundary_evidence: ContextBoundaryEvidence,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ProvisionalPolicy_Data {
-    pub warning_tokens: WarningTokens,
-    pub context_boundary_evidence: ContextBoundaryEvidence,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ContextWarningLimit {
-    NativeEffectiveLimit(NativeEffectiveLimit_Data),
-    ProvisionalPolicy(ProvisionalPolicy_Data),
+pub enum LimitBasis {
+    NativeEffectiveLimit,
+    ProvisionalPolicy,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
