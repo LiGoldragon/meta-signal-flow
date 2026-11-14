@@ -82,15 +82,34 @@ fn reset_outcome_round_trips_over_signal_and_datom() {
 
 #[test]
 // These are Signal wire round-trips, not claims about configured store state.
-fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot() {
+fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot() {
     for (text, expected) in [
         (
-            "Configured.Replaced",
-            Response::Configured(meta_signal_flow::ConfigureOutcome::Replaced),
+            "Configured.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }",
+            Response::Configured(meta_signal_flow::ConfigurationChange::Amend(
+                meta_signal_flow::Amend_Data {
+                    address: signal_flow::Address {
+                        aspect: meta_signal_flow::Aspect::Psyche,
+                        topic: meta_signal_flow::Topic("core".to_string()),
+                        model: meta_signal_flow::Model::Fable,
+                    },
+                    change: meta_signal_flow::Change::Add(meta_signal_flow::Element::PromptModule(
+                        signal_flow::ModuleIdentity("vision:energy-nexus:1".to_string()),
+                    )),
+                },
+            )),
         ),
         (
-            "Configured.Unchanged",
-            Response::Configured(meta_signal_flow::ConfigureOutcome::Unchanged),
+            "Configured.DefaultMinutes.30",
+            Response::Configured(meta_signal_flow::ConfigurationChange::DefaultMinutes(
+                flow_ethos::Minutes(30),
+            )),
+        ),
+        (
+            "Removed.Harness.Codex",
+            Response::Removed(meta_signal_flow::Removal::Harness(
+                meta_signal_flow::HarnessKind::Codex,
+            )),
         ),
     ] {
         let configured = Potential::<Response>::from(text)
@@ -263,7 +282,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
             system_modules: signal_flow::SystemModules(vec![signal_flow::ModuleIdentity(
                 "spirit:core".to_string()
             )]),
-            user_modules: signal_flow::UserModules(vec![signal_flow::ModuleIdentity(
+            prompt_modules: signal_flow::PromptModules(vec![signal_flow::ModuleIdentity(
                 "vision:flow".to_string()
             )]),
             flow_kind: signal_flow::FlowKind::Regular,
@@ -544,9 +563,9 @@ fn configure_declares_one_whole_family() {
             .is_err()
     );
     for reply in [
-        "ConfigureRejected.DuplicateEntry",
-        "ConfigureRejected.CodexModelsOverlap",
-        "ConfigureRejected.StoreRefused",
+        "ConfigureRefused.DuplicateEntry",
+        "ConfigureRefused.CodexModelsOverlap",
+        "ConfigureRefused.StoreRefused",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -659,13 +678,13 @@ fn leave_outs_are_the_permaflow_s_and_a_foreign_one_is_an_unknown_feature() {
         .actualize(&mut budget())
         .is_err()
     );
-    let text = "ConfigureRejected.UnknownFeature.CodexAgentsMd";
+    let text = "ConfigureRefused.UnknownFeature.CodexAgentsMd";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(
         response,
-        Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::UnknownFeature(
+        Response::ConfigureRefused(meta_signal_flow::ConfigureRefusal::UnknownFeature(
             signal_flow::LeaveOut::CodexAgentsMd
         ))
     );
@@ -725,28 +744,28 @@ fn amend_changes_one_value_of_one_permaflow() {
     );
     for (text, rejection) in [
         (
-            "ConfigureRejected.UnknownPermaflow.{ Mind atomicTrialGamma Luna }",
-            meta_signal_flow::ConfigureRejection::UnknownPermaflow(signal_flow::Address {
+            "ConfigureRefused.UnknownPermaflow.{ Mind atomicTrialGamma Luna }",
+            meta_signal_flow::ConfigureRefusal::UnknownPermaflow(signal_flow::Address {
                 aspect: meta_signal_flow::Aspect::Mind,
                 topic: meta_signal_flow::Topic("atomicTrialGamma".to_string()),
                 model: meta_signal_flow::Model::Luna,
             }),
         ),
         (
-            "ConfigureRejected.UnknownModule.vision:absent:0",
-            meta_signal_flow::ConfigureRejection::UnknownModule(signal_flow::ModuleIdentity(
+            "ConfigureRefused.UnknownModule.vision:absent:0",
+            meta_signal_flow::ConfigureRefusal::UnknownModule(signal_flow::ModuleIdentity(
                 "vision:absent:0".to_string(),
             )),
         ),
         (
-            "ConfigureRejected.CurriculumUnavailable",
-            meta_signal_flow::ConfigureRejection::CurriculumUnavailable,
+            "ConfigureRefused.CurriculumUnavailable",
+            meta_signal_flow::ConfigureRefusal::CurriculumUnavailable,
         ),
     ] {
         let response = Potential::<Response>::from(text)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{text}: {error:?}"));
-        assert_eq!(response, Response::ConfigureRejected(rejection));
+        assert_eq!(response, Response::ConfigureRefused(rejection));
         assert_eq!(response.datomize(vec![]).protosize().compact(), text);
     }
 }
@@ -755,13 +774,13 @@ fn amend_changes_one_value_of_one_permaflow() {
 /// carrying the topic as written.
 #[test]
 fn configure_topic_refusal_round_trips() {
-    let text = "ConfigureRejected.TopicRefused.Flow_Repair";
+    let text = "ConfigureRefused.TopicRefused.Flow_Repair";
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(
         response,
-        Response::ConfigureRejected(meta_signal_flow::ConfigureRejection::TopicRefused(
+        Response::ConfigureRefused(meta_signal_flow::ConfigureRefusal::TopicRefused(
             meta_signal_flow::Topic("Flow_Repair".to_string())
         ))
     );
@@ -771,7 +790,7 @@ fn configure_topic_refusal_round_trips() {
 /// The default Minutes is a configuration family of its own: one whole
 /// number of minutes, declared whole over Configure and read back as the
 /// snapshot's last field. A declaration the Minutes rule refuses answers
-/// ConfigureRejected.MinutesRefused and changes nothing.
+/// ConfigureRefused.MinutesRefused and changes nothing.
 #[test]
 fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
     let text = "Configure.DefaultMinutes.45";
@@ -785,9 +804,9 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
         query
     );
     for reply in [
-        "ConfigureRejected.MinutesRefused.Zero",
-        "ConfigureRejected.MinutesRefused.Negative",
-        "ConfigureRejected.MinutesRefused.Unreachable",
+        "ConfigureRefused.MinutesRefused.Zero",
+        "ConfigureRefused.MinutesRefused.Negative",
+        "ConfigureRefused.MinutesRefused.Unreachable",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 1 3 1 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
@@ -833,7 +852,7 @@ fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
 /// the snapshot's last field. A declaration on a store that has recorded
 /// any of them, one lower than a counter now stands, or one sent to a
 /// Nexus opened for configuration only answers
-/// ConfigureRejected.CountersRefused and changes nothing; Lowered carries
+/// ConfigureRefused.CountersRefused and changes nothing; Lowered carries
 /// the counters as they stand.
 #[test]
 fn configure_declares_the_counters_and_the_snapshot_carries_them() {
@@ -848,9 +867,9 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         query
     );
     for reply in [
-        "ConfigureRejected.CountersRefused.NotEmpty",
-        "ConfigureRejected.CountersRefused.Lowered.{ 121 46 301 }",
-        "ConfigureRejected.CountersRefused.NotRunning",
+        "ConfigureRefused.CountersRefused.NotEmpty",
+        "ConfigureRefused.CountersRefused.Lowered.{ 121 46 301 }",
+        "ConfigureRefused.CountersRefused.NotRunning",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 120 45 300 } 64 3 Unconfigured }",
     ] {
         let response = Potential::<Response>::from(reply)
@@ -931,7 +950,7 @@ fn handover_configuration_round_trips_zero_count_policy_and_archive_path() {
         "Configure.PublicationDeadline.60000",
         "Configure.HandoverArchive./srv/handover-archive",
         "Configure.HandoverPolicies.[ { claude-opus-5-5 15 «Continue every five minutes.» 5 } ]",
-        "Configured.Replaced",
+        "Configured.HandoverCount.0",
     ] {
         if text.starts_with("Configure.") {
             let query = Potential::<Query>::from(text)

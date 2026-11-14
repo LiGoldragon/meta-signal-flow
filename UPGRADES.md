@@ -1,9 +1,24 @@
 # Upgrades
 
-## 78.0.0: a permaflow carries its leave-outs; one value of one permaflow changed alone
+## 78.0.0: a permaflow carries its leave-outs; one value of one permaflow changed alone; a Configure answers its change
 
-Built on 77.0.0 (e72f555), for Flow 0.55.0, on signal-flow 61.0.0
-(`4871bb8`) and flow-ethos 0.54.3 (`062ef9e1`).
+Built on 77.0.0 (e72f555), for Flow 0.55.0, on signal-flow 62.0.0
+(`37e99d3`) and flow-ethos 0.54.3 (`062ef9e1`).
+
+- signal-flow 62.0.0: the permaflow's first-prompt modules are
+  `PromptModules` (renamed from `UserModules`), so `ConfigureMetaflow`'s
+  field is `prompt_modules`; the import list names `PromptModules`.
+- A Configure answers `Configured.ConfigurationChange`: the change it was
+  given, echoed whole, whether or not anything was written.
+  `ConfigureOutcome.[ Replaced Unchanged ]` goes; a change that changes
+  nothing still writes nothing and still answers the echo:
+  `Configured.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }`.
+- `ConfigureRejected.ConfigureRejection` becomes
+  `ConfigureRefused.ConfigureRefusal`, with the same variants:
+  `ConfigureRefused.UnknownPermaflow.{ Mind atomicTrialGamma Luna }`.
+- A Remove answers `Removed.Removal`, a Response appended last: the
+  Removal it was given, echoed whole, whether or not an entry of that key
+  was held: `Removed.Harness.Codex`.
 
 - `ConfigureMetaflow` gains `LeaveOuts` right after `Option<Root>`: a
   permaflow is one definition and carries the leave-outs its flows start
@@ -17,10 +32,10 @@ Built on 77.0.0 (e72f555), for Flow 0.55.0, on signal-flow 61.0.0
   Kind.FlowKind Continuity Add.Element Remove.Element ]`, and
   `Element.[ SystemModule.ModuleIdentity PromptModule.ModuleIdentity LeaveOut ]`:
   `Configure.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }`.
-  It answers `Configured.Replaced` or `Configured.Unchanged` as every
-  Configure does. A Change naming the harness is held back, pending a
+  It answers `Configured` with the Amend echoed, as every Configure
+  does. A Change naming the harness is held back, pending a
   ruling on whether a permaflow names its harness.
-- `ConfigureRejection` loses `LeaveOutNotForHarness` and gains, last,
+- `ConfigureRefusal` (formerly `ConfigureRejection`) loses `LeaveOutNotForHarness` and gains, last,
   `UnknownPermaflow.Address`, `UnknownFeature.LeaveOut`,
   `UnknownModule.ModuleIdentity` and `CurriculumUnavailable`: a leave-out of
   another harness than the permaflow's is now `UnknownFeature`, naming it.

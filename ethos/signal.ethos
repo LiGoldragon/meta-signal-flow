@@ -61,10 +61,12 @@
 ; declaration alone, keyed by its name: one permaflow by its Address, one
 ; HarnessProfile by its HarnessKind, one model's refresh threshold by its
 ; ModelName. It is added or replaced in one atomic commit, the rest of its
-; family kept. Remove takes one away by the same key. Each answers
-; Configured.Replaced, or Configured.Unchanged when the committed value
-; already is the declaration, or holds no entry of that key; a Harness
-; while no Nexus is declared answers Unconfigured. The names are tentative.
+; family kept. Each answers Configured with the change it was given,
+; echoed whole, also when the committed value already is the declaration
+; and nothing is written; a Harness while no Nexus is declared answers
+; Unconfigured. Remove takes one away by the same key and answers Removed
+; with the Removal it was given, echoed whole, also when no entry of that
+; key is held and nothing is written. The names are tentative.
 ;
 ; Configure.Amend changes one value of one permaflow alone: it names the
 ; permaflow's Address and the Change. Workspace, Purpose, Kind and
@@ -73,10 +75,11 @@
 ; Remove takes it out of its list. The permaflow is read by its Address
 ; and written back with that one value changed in one atomic commit, under
 ; the same single-entry commit Permaflow takes, so every other permaflow and
-; every other family is kept as it was. It answers Configured.Replaced, or
-; Configured.Unchanged when the permaflow already holds the value, already
-; holds the element added, or does not hold the element removed, and then
-; nothing is written. ConfigureRejected changes nothing: UnknownPermaflow
+; every other family is kept as it was. It answers Configured with the
+; Amend it was given, echoed whole; when the permaflow already holds the
+; value, already holds the element added, or does not hold the element
+; removed, nothing is written and the answer is the same echo.
+; ConfigureRefused changes nothing: UnknownPermaflow
 ; when no permaflow is declared at the Address; UnknownModule when the
 ; module added is not an identity of the form type:subject:version or the
 ; Curriculum Nexus at the configured CurriculumNexusPath does not hold it;
@@ -103,11 +106,11 @@
 ; ProtectedAddresses, Counters or HarnessHook. The declared value replaces that family's committed
 ; value in one atomic commit, so the family's effective value is always its
 ; last declaration; an entry absent from the declaration is removed. It
-; answers Configured.Replaced, or Configured.Unchanged when the committed
-; value already equals the declaration and nothing is written. Each family
+; answers Configured with the declaration it was given, echoed whole, also
+; when the committed value already equals it and nothing is written. Each family
 ; holds one entry per key: Models one per Model, Thresholds one
 ; per ModelName, SendServers one per CodexAppServerBinary, Metaflows one per
-; Address: the declaration an ordinary Launch of that Address starts from. ConfigureRejected changes
+; Address: the declaration an ordinary Launch of that Address starts from. ConfigureRefused changes
 ; nothing: DuplicateEntry when a declaration names one key twice,
 ; TopicRefused when an entry's Address, or an Amend's, has a topic that is
 ; not an uncapitalized camelCase identifier,
@@ -302,7 +305,7 @@
 ; metaflow's queue holds no request of that id.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules UserModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ReapPending HandoverPending ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ReapPending HandoverPending ]
   flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -330,12 +333,12 @@ Signal
   Withdraw.{ Address LogicalDeliveryId }        ; one queued delivery leaves the queue
   ObserveConfiguration                          ; the configuration, then each change
   Remove.Removal ]                              ; one declaration leaves its family
-[ Configured.ConfigureOutcome
+[ Configured.ConfigurationChange                ; the change given, echoed whole
   Configuration.ConfigurationSnapshot
   Unconfigured
   ResetConsumed.ResetOutcome
   FlowRegistered.FlowNode
-  ConfigureRejected.ConfigureRejection
+  ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
   BoundExisting
@@ -376,7 +379,8 @@ Signal
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RefreshQueued
   RestartQueued.FlowId
-  ReapPending ]
+  ReapPending
+  Removed.Removal ]                             ; the Removal given, echoed whole
 [ ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>
@@ -444,7 +448,7 @@ Signal
   ; context modules a Launch of its Address composes into the system prompt
   ; and into the first user message, its kind and tool set, how it
   ; continues, its purpose and the records it rests on.
-  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules UserModules FlowKind ToolSet Continuity Purpose Records }
+  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity Purpose Records }
   ; One value of one permaflow, changed alone by Configure.Amend. Workspace,
   ; Purpose, Kind and Continuity replace that value; Add appends one
   ; element to the end of its list, Remove takes it out.
@@ -455,7 +459,7 @@ Signal
            Add.Element
            Remove.Element ]
   ; One element of a permaflow's lists: a module of its system prompt, a
-  ; module of its first prompt (its UserModules), or a leave-out.
+  ; module of its first prompt (its PromptModules), or a leave-out.
   Element.[ SystemModule.ModuleIdentity
             PromptModule.ModuleIdentity
             LeaveOut ]
@@ -498,7 +502,6 @@ Signal
   Removal.[ Permaflow.Address
             Harness.HarnessKind
             Refresh.ModelName ]
-  ConfigureOutcome.[ Replaced Unchanged ]
   ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration }
   IdempotencyKey.String
   CreditId.String
@@ -507,7 +510,7 @@ Signal
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   HandoverConfigurationRefusal.[ InvalidWarningShareLeft InvalidEveryMinutes InvalidHandoverCount NegativeHandoverCount InvalidPublicationDeadline DuplicatePolicy DuplicateArchive StoreRefused ]
-  ConfigureRejection.[ HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused UnknownPermaflow.Address UnknownFeature.LeaveOut UnknownModule.ModuleIdentity CurriculumUnavailable ]
+  ConfigureRefusal.[ HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused UnknownPermaflow.Address UnknownFeature.LeaveOut UnknownModule.ModuleIdentity CurriculumUnavailable ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

@@ -191,7 +191,7 @@ pub struct ConfigureMetaflow {
     pub root_option: std::option::Option<Root>,
     pub leave_outs: signal_flow::LeaveOuts,
     pub system_modules: signal_flow::SystemModules,
-    pub user_modules: signal_flow::UserModules,
+    pub prompt_modules: signal_flow::PromptModules,
     pub flow_kind: signal_flow::FlowKind,
     pub tool_set: signal_flow::ToolSet,
     pub continuity: Continuity,
@@ -320,13 +320,6 @@ pub enum Removal {
     Permaflow(flow_ethos::Address),
     Harness(signal_flow::HarnessKind),
     Refresh(signal_flow::ModelName),
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ConfigureOutcome {
-    Replaced,
-    Unchanged,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -470,7 +463,7 @@ pub enum HandoverConfigurationRefusal {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ConfigureRejection {
+pub enum ConfigureRefusal {
     HandoverConfigurationRefused(HandoverConfigurationRefusal),
     StoreRefused,
     DuplicateEntry,
@@ -1315,12 +1308,12 @@ pub enum WithdrawRejected_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Response {
-    Configured(ConfigureOutcome),
+    Configured(ConfigurationChange),
     Configuration(ConfigurationSnapshot),
     Unconfigured,
     ResetConsumed(ResetOutcome),
     FlowRegistered(signal_flow::FlowNode),
-    ConfigureRejected(ConfigureRejection),
+    ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
     BoundExisting(BoundExisting),
@@ -1362,4 +1355,5 @@ pub enum Response {
     RefreshQueued(signal_flow::RefreshQueued),
     RestartQueued(signal_flow::FlowId),
     ReapPending(signal_flow::ReapPending),
+    Removed(Removal),
 }
