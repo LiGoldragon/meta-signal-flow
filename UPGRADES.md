@@ -1,5 +1,25 @@
 # Upgrades
 
+## 83.0.0: ended-turn retention is configuration; signal-flow 64
+
+Built on 82.0.0 (`570b173`, recovery text), on signal-flow 64.0.0
+(`83c04fe`) and the same ethos-zero 29.0.0 (`f23eacf`), for bead
+primary-k7jy.
+
+- `TurnRetentionBound.Integer` is the ended Codex turn ids one thread's
+  turn ledger keeps. `Configure.EndedTurnRetention.TurnRetentionBound` sets
+  it and `Configured` echoes the change whole; `ConfigurationSnapshot`
+  carries it as its final position, `ConfiguredEndedTurnRetention`; a
+  negative bound is refused `EndedTurnRetentionRefused`. A new Memory seeds
+  64. Every bound is correct: a turn at or below a ledger's watermark that
+  it does not hold leaves it unreconciled, never at rest.
+- signal-flow 64.0.0 is re-exported: `RefreshRejection` gains
+  `CallerNotCurrent.{ FlowId Option<FlowId> }`, `CompositionRefusal` gains
+  `RecoveryUnavailable` and `RecoveryPredecessorMismatch`, and the archived
+  rejection widens (see signal-flow's UPGRADES).
+- The contract digest changes: an 82 peer is refused with 83's digest
+  (tests/fixtures/meta-signal-flow-82.ethos). Consumers repin together.
+
 ## 82.0.0: configured emergency successor recovery text
 
 Built on published 81.0.0 (`cf65bbd7a3829d0f18438b8538128ca7242f659f`).

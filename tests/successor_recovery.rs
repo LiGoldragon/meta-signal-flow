@@ -25,11 +25,6 @@ fn recovery_text_is_one_scalar_configuration_value_on_the_binary_wire() {
     }
 }
 
-#[test]
-fn recovery_configuration_is_the_reserved_breaking_release() {
-    assert_eq!(meta_signal_flow::WIRE_VERSION, "82.0.0");
-}
-
 #[cfg(feature = "datom")]
 mod textual {
     use super::*;
@@ -81,7 +76,7 @@ mod textual {
             "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [] {{ 1 1 1 }} 32 3 Unconfigured [] []"
         );
         for current in ["initial-guidance", "changed-guidance"] {
-            let text = format!("{{ {preceding} {current} }}");
+            let text = format!("{{ {preceding} {current} 64 }}");
             let snapshot = Potential::<ConfigurationSnapshot>::from(text)
                 .actualize(&mut budget())
                 .unwrap();

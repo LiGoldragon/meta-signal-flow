@@ -68,6 +68,16 @@
 ; with the Removal it was given, echoed whole, also when no entry of that
 ; key is held and nothing is written. The names are tentative.
 ;
+; Configure.EndedTurnRetention sets how many ended Codex turn ids each
+; thread's turn ledger keeps, to know a turn's start or end that reaches Flow
+; again after the turn ended. Past the bound a ledger lets its least ended
+; turn go and keeps the greatest it let go as its watermark: a turn at or
+; below it that the ledger does not hold leaves the ledger unreconciled
+; until Flow reads the thread again, never at rest. Every bound is correct;
+; a larger one keeps more and rereads less. A new Memory seeds 64; a
+; negative bound is refused EndedTurnRetentionRefused. A change applies to
+; every ledger at once.
+;
 ; Configure.Amend changes one value of one permaflow alone: it names the
 ; permaflow's Address and the Change. Workspace, Purpose, Kind and
 ; Continuity replace that one value; Add appends one Element, a system
@@ -500,6 +510,9 @@ Signal
   ConfigureCounters.{ LogicalDelivery.Integer QueueAttempt.Integer SendOutcome.Integer }
   DrawBound.Integer
   TryBound.Integer
+  ; The ended Codex turn ids one thread's turn ledger keeps, 0 or more; a
+  ; new Memory seeds 64.
+  TurnRetentionBound.Integer
   HeartbeatPeriodSeconds.Integer
   HeartbeatRecipients.Vector<Address>
   HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
@@ -529,13 +542,14 @@ Signal
                          Harness.HarnessProfile
                          Refresh.ConfigureThreshold
                          Amend.{ Address Change }          ; one value of one permaflow
-                         SuccessorRecoveryText ]            ; emergency successor guidance, one value
+                         SuccessorRecoveryText              ; emergency successor guidance, one value
+                         EndedTurnRetention.TurnRetentionBound ]   ; one value, replaces the committed one
   ; One declaration taken away, by its key.
   Removal.[ Permaflow.Address
             Harness.HarnessKind
             Refresh.ModelName
             ContextWarning.ModelName ]
-  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> SuccessorRecoveryText }
+  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> SuccessorRecoveryText ConfiguredEndedTurnRetention.TurnRetentionBound }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
@@ -543,7 +557,7 @@ Signal
   ResetRequest.{ IdempotencyKey CreditSelection }
   ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
   HandoverConfigurationRefusal.[ InvalidWarningShareLeft InvalidEveryMinutes InvalidHandoverCount NegativeHandoverCount InvalidPublicationDeadline DuplicatePolicy DuplicateArchive StoreRefused ]
-  ConfigureRefusal.[ ContextWarningConfigurationRefused.ContextWarningConfigurationRefusal HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused UnknownPermaflow.Address UnknownFeature.LeaveOut UnknownModule.ModuleIdentity CurriculumUnavailable ]
+  ConfigureRefusal.[ ContextWarningConfigurationRefused.ContextWarningConfigurationRefusal HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused UnknownPermaflow.Address UnknownFeature.LeaveOut UnknownModule.ModuleIdentity CurriculumUnavailable EndedTurnRetentionRefused ]
   ResetRejection.[ AdapterUnavailable ProtocolRefused ]
   FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
   ProcessId.Integer

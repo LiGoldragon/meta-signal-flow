@@ -375,6 +375,10 @@ pub struct TryBound(pub i64);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct TurnRetentionBound(pub i64);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct HeartbeatPeriodSeconds(pub i64);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -431,6 +435,7 @@ pub enum ConfigurationChange {
     Refresh(ConfigureThreshold),
     Amend(Amend_Data),
     SuccessorRecoveryText(SuccessorRecoveryText),
+    EndedTurnRetention(TurnRetentionBound),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -522,6 +527,10 @@ pub struct ConfiguredContextWarningPolicies(pub std::vec::Vec<ContextWarningPoli
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfiguredHarnessHookEvents(pub std::vec::Vec<HarnessHookEvent>);
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfiguredEndedTurnRetention(pub TurnRetentionBound);
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -546,6 +555,7 @@ pub struct ConfigurationSnapshot {
     pub configured_context_warning_policies: ConfiguredContextWarningPolicies,
     pub configured_harness_hook_events: ConfiguredHarnessHookEvents,
     pub successor_recovery_text: SuccessorRecoveryText,
+    pub configured_ended_turn_retention: ConfiguredEndedTurnRetention,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -609,6 +619,7 @@ pub enum ConfigureRefusal {
     UnknownFeature(signal_flow::LeaveOut),
     UnknownModule(signal_flow::ModuleIdentity),
     CurriculumUnavailable,
+    EndedTurnRetentionRefused,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
