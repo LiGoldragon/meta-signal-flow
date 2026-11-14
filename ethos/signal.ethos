@@ -375,11 +375,11 @@ Signal
   DeliveryRejected.DeliveryRejection
   CommandRejected.CommandRejection
   PeerResolutionRejected.CallerResolutionRejection
-  Refused.StoreRefusal
+  Refused.StoreFailure
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
   ReadSendOutcomesRejected
-  ObserveLegacyArchiveRejected.StoreRefusal
+  ObserveLegacyArchiveRejected.StoreFailure
   ResolveQueueDeliveryRejected.VisibleResolveQueueDeliveryRejected
   InspectRejected
   RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
@@ -616,7 +616,7 @@ Signal
   ContextBelowThreshold.{ ContextTokens RefreshTokens }
   CompactionRefusal.[ BelowThreshold.ContextBelowThreshold Unmeasured NoThreshold ]
   CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited CompactionRefused.CompactionRefusal Superseded.FlowId Unconfirmed ]
-  StoreRefusal.String
+  StoreFailure.String
   QueueAttemptId.String
   Undecided.[ HistoryUnreadable HistoryReplaced PendingInHarness Ambiguous SeatNotResting AbsenceUnprovable ]
   AbsenceProof.[ HandOverRefused HistoryAbsent ]

@@ -432,7 +432,7 @@ fn a_refusal_of_one_variant_is_that_variant() {
         Potential::<Output>::from("Refused.«no space»")
             .actualize(&mut budget())
             .unwrap(),
-        Output::Refused(meta_signal_flow::StoreRefusal("no space".into()))
+        Output::Refused(meta_signal_flow::StoreFailure("no space".into()))
     );
 }
 
