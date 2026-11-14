@@ -2,10 +2,10 @@
 
 ## 81.0.0: typed per-model context warnings with limit provenance and hook events; an enum of one variant is that variant
 
-Built on 79.0.0 (`cdb4e7d`) with the context-warnings commit (`1c7597e`,
-branch `context-warnings-7cd167`) and the warning-provenance commit
-(`8930ed7`, branch `warning-provenance-6be617`), 80.0.0 never having been
-published, for Flow on ethos-zero 29.0.0
+Built on the accepted, immutable 80.0.0 (`1c7597e`, the context-warnings
+commit, published, registered and consumed) with the warning-provenance
+commit (`8930ed7`, branch `warning-provenance-6be617`), retaining the 79.0.0
+(`cdb4e7d`) migration fixture, for Flow on ethos-zero 29.0.0
 (`f23eacf`), on signal-flow 63.0.0 (`4982eeb`) and flow-ethos 0.54.3
 (`062ef9e1`).
 
