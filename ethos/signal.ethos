@@ -413,6 +413,8 @@ Signal
   ConfigureThreshold.{ ModelName RefreshThreshold.Integer }
   ; The model policy governing handover warning and reminder behavior.
   HandoverPolicy.{ ModelName WarningShareLeft.Integer ReminderText.String EveryMinutes.Integer }
+  ; The configured guidance for an emergency successor without a handover.
+  SuccessorRecoveryText.String
   ; One model's event-driven warning policy, with denominator and usage provenance.
   ContextWarningPolicy.{ ModelName ContextWarningLimit ContextUsageProjection Vector<WarningBoundary> }
   ; A source-established native limit or an explicitly provisional policy choice.
@@ -526,13 +528,14 @@ Signal
                          Permaflow.ConfigureMetaflow
                          Harness.HarnessProfile
                          Refresh.ConfigureThreshold
-                         Amend.{ Address Change } ]          ; one value of one permaflow
+                         Amend.{ Address Change }
+                         SuccessorRecoveryText ]          ; one value of one permaflow
   ; One declaration taken away, by its key.
   Removal.[ Permaflow.Address
             Harness.HarnessKind
             Refresh.ModelName
             ContextWarning.ModelName ]
-  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> }
+  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> SuccessorRecoveryText }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next

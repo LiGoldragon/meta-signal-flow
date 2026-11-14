@@ -18,6 +18,7 @@ fn privileged_requests_have_concrete_datoms() {
     for text in [
         "Configure.Nexus.{ /home/li/primary { /etc/profiles/per-user/li/bin/codex-stable-flow-client /home/li/.codex /home/li/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra gpt-5.6-sol gpt-5.6-luna ] } { /etc/profiles/per-user/li/bin/codex-next-flow-client /home/li/.codex-next /home/li/.codex-next/app-server-control/app-server-control.sock [ gpt-6-sol gpt-6-luna gpt-6-astra ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } { Codex [ / ! ] [ esc ] [] } ] [ Psyche ] Some./run/user/1001/message-nexus.sock None /run/user/1001/curriculum/curriculum.sock 60 None main }",
         "Configuration",
+        "Configure.SuccessorRecoveryText.«Recover the predecessor transcript.»",
         "ConsumeReset.{ attempt-1 Next }",
         "ConsumeReset.{ attempt-2 Specific.credit-7 }",
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable Unbound Pending }",

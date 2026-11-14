@@ -1,5 +1,20 @@
 # Upgrades
 
+## 82.0.0: configured emergency successor recovery text
+
+Built on published 81.0.0 (`cf65bbd7a3829d0f18438b8538128ca7242f659f`).
+
+- `SuccessorRecoveryText.String` is one scalar newtype. The meta input
+  `Configure.SuccessorRecoveryText` sets it and `Configured` echoes that
+  same change. `ConfigurationSnapshot` carries its current value as the
+  final `SuccessorRecoveryText` position. This added snapshot position and
+  configuration variant change the binary wire contract.
+- Empty text is representable; this vocabulary applies no runtime policy.
+  The approved new initial wording, store migrations and emergency-cause
+  provenance belong to the Flow consumer release, not this wire library.
+- Existing configuration variants and their payloads are preserved.
+  Consumers must update alongside this incompatible contract release.
+
 ## 81.0.0: typed per-model context warnings with limit provenance and hook events; an enum of one variant is that variant
 
 Built on the accepted, immutable 80.0.0 (`1c7597e`, the context-warnings

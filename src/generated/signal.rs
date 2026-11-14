@@ -82,6 +82,10 @@ pub struct HandoverPolicy {
     pub every_minutes: EveryMinutes,
 }
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct SuccessorRecoveryText(pub String);
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ContextWarningPolicy {
@@ -426,6 +430,7 @@ pub enum ConfigurationChange {
     Harness(flow_ethos::HarnessProfile),
     Refresh(ConfigureThreshold),
     Amend(Amend_Data),
+    SuccessorRecoveryText(SuccessorRecoveryText),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -540,6 +545,7 @@ pub struct ConfigurationSnapshot {
     pub configured_harness_hook: ConfiguredHarnessHook,
     pub configured_context_warning_policies: ConfiguredContextWarningPolicies,
     pub configured_harness_hook_events: ConfiguredHarnessHookEvents,
+    pub successor_recovery_text: SuccessorRecoveryText,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
