@@ -1,9 +1,11 @@
 # Upgrades
 
-## 80.0.0: typed per-model context warnings and hook events; an enum of one variant is that variant
+## 81.0.0: typed per-model context warnings with limit provenance and hook events; an enum of one variant is that variant
 
 Built on 79.0.0 (`cdb4e7d`) with the context-warnings commit (`1c7597e`,
-branch `context-warnings-7cd167`), for Flow on ethos-zero 29.0.0
+branch `context-warnings-7cd167`) and the warning-provenance commit
+(`8930ed7`, branch `warning-provenance-6be617`), 80.0.0 never having been
+published, for Flow on ethos-zero 29.0.0
 (`f23eacf`), on signal-flow 63.0.0 (`4982eeb`) and flow-ethos 0.54.3
 (`062ef9e1`).
 
@@ -12,6 +14,13 @@ branch `context-warnings-7cd167`), for Flow on ethos-zero 29.0.0
   installed hook events; `ConfigurationSnapshot` carries
   `ConfiguredContextWarningPolicies` and `ConfiguredHarnessHookEvents`;
   `ConfigureRefusal.ContextWarningConfigurationRefused` refuses a bad policy.
+- Warning provenance (`8930ed7`): `ContextWarningPolicy` carries
+  `ContextWarningLimit` (`NativeEffectiveLimit` or `ProvisionalPolicy`, each
+  with `WarningTokens` and `ContextBoundaryEvidence`) and
+  `ContextUsageProjection` (`CodexLastTotal` or
+  `ClaudeCompletedInputWithCache`) in place of `NativeCompactionMeasurement`;
+  `ContextWarningConfigurationRefusal.InvalidCompactionTokens` is
+  `InvalidWarningTokens`.
 - ethos-zero 29.0.0 refuses an enum of one variant, so each Output that was
   one carries what its one variant carried:
   - `ReadSendOutcomesRejected` and `InspectRejected` carried nothing, so
@@ -26,7 +35,7 @@ branch `context-warnings-7cd167`), for Flow on ethos-zero 29.0.0
     `Refused.Store.«text»`.
 - Output positions are unchanged. Both ends of the meta socket repin
   together: the datom and the rkyv bytes of these three Outputs change, and
-  the contract digest changes, so a 79 peer is refused with 80's digest
+  the contract digest changes, so a 79 peer is refused with 81's digest
   (tests/fixtures/meta-signal-flow-79.ethos).
 - Consumers: `Output::InspectRejected(InspectRejected_Data::UnknownAddress)`
   becomes `Output::InspectRejected`; `Output::ReadSendOutcomesRejected(..)`

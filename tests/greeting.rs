@@ -11,7 +11,7 @@ fn a_peer_built_from_this_source_is_greeted() {
 }
 
 /// A peer built on meta-signal-flow 79.0.0 greets with 79's digest and is
-/// refused with 80's, before any of its inputs is read.
+/// refused with 81's, before any of its inputs is read.
 #[test]
 fn a_meta_79_peer_is_refused_with_this_digest() {
     let older = include_str!("fixtures/meta-signal-flow-79.ethos");
