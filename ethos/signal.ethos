@@ -528,8 +528,8 @@ Signal
                          Permaflow.ConfigureMetaflow
                          Harness.HarnessProfile
                          Refresh.ConfigureThreshold
-                         Amend.{ Address Change }
-                         SuccessorRecoveryText ]          ; one value of one permaflow
+                         Amend.{ Address Change }          ; one value of one permaflow
+                         SuccessorRecoveryText ]            ; emergency successor guidance, one value
   ; One declaration taken away, by its key.
   Removal.[ Permaflow.Address
             Harness.HarnessKind
