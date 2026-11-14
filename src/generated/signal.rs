@@ -86,13 +86,42 @@ pub struct HandoverPolicy {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ContextWarningPolicy {
     pub model_name: signal_flow::ModelName,
-    pub native_compaction_measurement: NativeCompactionMeasurement,
+    pub context_warning_limit: ContextWarningLimit,
+    pub context_usage_projection: ContextUsageProjection,
     pub warning_boundary_vector: std::vec::Vec<WarningBoundary>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct NativeEffectiveLimit_Data {
+    pub warning_tokens: WarningTokens,
+    pub context_boundary_evidence: ContextBoundaryEvidence,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ProvisionalPolicy_Data {
+    pub warning_tokens: WarningTokens,
+    pub context_boundary_evidence: ContextBoundaryEvidence,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ContextWarningLimit {
+    NativeEffectiveLimit(NativeEffectiveLimit_Data),
+    ProvisionalPolicy(ProvisionalPolicy_Data),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct CompactionTokens(pub i64);
+pub struct WarningTokens(pub i64);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ContextUsageProjection {
+    CodexLastTotal,
+    ClaudeCompletedInputWithCache,
+}
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
@@ -102,14 +131,18 @@ pub struct HarnessVersion(pub String);
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct BoundaryIdentity(pub String);
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct CoverageGap(pub String);
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct NativeCompactionMeasurement {
-    pub compaction_tokens: CompactionTokens,
+pub struct ContextBoundaryEvidence {
     pub harness_kind: signal_flow::HarnessKind,
     pub harness_version: HarnessVersion,
     pub transcript_path: signal_flow::TranscriptPath,
     pub boundary_identity: BoundaryIdentity,
+    pub coverage_gap: CoverageGap,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -158,7 +191,7 @@ pub enum HarnessHookEvent {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ContextWarningConfigurationRefusal {
-    InvalidCompactionTokens,
+    InvalidWarningTokens,
     InvalidRemainingPercent,
     DuplicateStage,
     MissingStage,
