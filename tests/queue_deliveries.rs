@@ -4,10 +4,10 @@
 
 use flow_ethos::{Address, Aspect, Model, Topic};
 use meta_signal_flow::{
-    AbsenceProof, ProcessId, ProcessIdentity, ProcessStartToken, ProcessUserId, Query,
+    AbsenceProof, Input, Output, ProcessId, ProcessIdentity, ProcessStartToken, ProcessUserId,
     QueueAttemptId, QueueDeliveriesRead_Data, QueueDeliveryResolution, QueueDeliveryResolved_Data,
-    QueueResolutionOutcome, QueueResolutionReason, ReadQueueDeliveriesRejected_Data, Response,
-    Undecided, UnixSeconds, VisibleQueueDelivery, VisibleQueueDeliveryResolution,
+    QueueResolutionOutcome, QueueResolutionReason, ReadQueueDeliveriesRejected_Data, Undecided,
+    UnixSeconds, VisibleQueueDelivery, VisibleQueueDeliveryResolution,
     VisibleQueueDeliveryStanding, VisibleQueueEvidence, VisibleQueueEvidence_Legacy_Data,
     VisibleQueueResolutionRecord, VisibleResolveQueueDeliveryRejected,
 };
@@ -37,8 +37,8 @@ fn delivery(standing: VisibleQueueDeliveryStanding) -> VisibleQueueDelivery {
     }
 }
 
-fn read() -> Response {
-    Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
+fn read() -> Output {
+    Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
         address: address(),
         visible_queue_delivery_vector: vec![
             delivery(VisibleQueueDeliveryStanding::Prepared),
@@ -58,19 +58,19 @@ fn read() -> Response {
 fn read_queue_deliveries_round_trips_as_an_archive() {
     for reply in [
         read(),
-        Response::ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data::UnknownAddress),
-        Response::ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data::StoreRefused),
+        Output::ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data::UnknownAddress),
+        Output::ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data::StoreRefused),
     ] {
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             reply
         );
     }
-    let query = Query::ReadQueueDeliveries(address());
+    let query = Input::ReadQueueDeliveries(address());
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
         query
     );
 }
@@ -99,30 +99,30 @@ fn record() -> VisibleQueueResolutionRecord {
 #[test]
 fn resolve_queue_delivery_round_trips_as_an_archive() {
     let queries = [
-        Query::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Delivered)),
-        Query::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Absent)),
+        Input::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Delivered)),
+        Input::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Absent)),
     ];
     for query in queries {
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
             query
         );
     }
     let replies = [
-        Response::QueueDeliveryResolved(QueueDeliveryResolved_Data {
+        Output::QueueDeliveryResolved(QueueDeliveryResolved_Data {
             address: address(),
             visible_queue_delivery_resolution: VisibleQueueDeliveryResolution {
                 queue_resolution_outcome: QueueResolutionOutcome::Absent,
                 queue_resolution_reason: QueueResolutionReason("seen in the pane".to_string()),
             },
         }),
-        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::UnknownAttempt),
-        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::NotUncertain),
-        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::NotOldest),
-        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::EmptyReason),
-        Response::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::StoreRefused),
-        Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
+        Output::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::UnknownAttempt),
+        Output::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::NotUncertain),
+        Output::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::NotOldest),
+        Output::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::EmptyReason),
+        Output::ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected::StoreRefused),
+        Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
             address: address(),
             visible_queue_delivery_vector: vec![delivery(VisibleQueueDeliveryStanding::Resolved(
                 record(),
@@ -132,7 +132,7 @@ fn resolve_queue_delivery_round_trips_as_an_archive() {
     for reply in replies {
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             reply
         );
     }
@@ -156,12 +156,12 @@ mod datom {
     #[test]
     fn read_queue_deliveries_has_concrete_datoms() {
         assert_eq!(
-            Potential::<Query>::from("ReadQueueDeliveries.{ Mind flow Sol }")
+            Potential::<Input>::from("ReadQueueDeliveries.{ Mind flow Sol }")
                 .actualize(&mut budget())
                 .unwrap(),
-            Query::ReadQueueDeliveries(address())
+            Input::ReadQueueDeliveries(address())
         );
-        let one = Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
+        let one = Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
             address: address(),
             visible_queue_delivery_vector: vec![delivery(VisibleQueueDeliveryStanding::Uncertain(
                 Some(Undecided::PendingInHarness),
@@ -170,13 +170,13 @@ mod datom {
         let text = "QueueDeliveriesRead.{ { Mind flow Sol } [ { s1 Claude Legacy.{ Sender.{ Psyche core Opus } Order.go } Uncertain.Some.PendingInHarness } ] }";
         assert_eq!(one.datomize(vec![]).protosize().compact(), text);
         assert_eq!(
-            Potential::<Response>::from(text)
+            Potential::<Output>::from(text)
                 .actualize(&mut budget())
                 .unwrap(),
             one
         );
         assert_eq!(
-            Response::ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data::UnknownAddress)
+            Output::ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data::UnknownAddress)
                 .datomize(vec![])
                 .protosize()
                 .compact(),
@@ -186,16 +186,16 @@ mod datom {
 
     #[test]
     fn resolve_queue_delivery_has_concrete_datoms() {
-        let query = Query::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Absent));
+        let query = Input::ResolveQueueDelivery(resolution(QueueResolutionOutcome::Absent));
         let text = "ResolveQueueDelivery.{ queue-attempt-3 Absent «seen in the pane» }";
         assert_eq!(query.datomize(vec![]).protosize().compact(), text);
         assert_eq!(
-            Potential::<Query>::from(text)
+            Potential::<Input>::from(text)
                 .actualize(&mut budget())
                 .unwrap(),
             query
         );
-        let one = Response::QueueDeliveriesRead(QueueDeliveriesRead_Data {
+        let one = Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
             address: address(),
             visible_queue_delivery_vector: vec![delivery(VisibleQueueDeliveryStanding::Resolved(
                 record(),
@@ -204,7 +204,7 @@ mod datom {
         let text = "QueueDeliveriesRead.{ { Mind flow Sol } [ { s1 Claude Legacy.{ Sender.{ Psyche core Opus } Order.go } Resolved.{ Absent { 7 1001 99 } «seen in the pane» 1790000000 } } ] }";
         assert_eq!(one.datomize(vec![]).protosize().compact(), text);
         assert_eq!(
-            Potential::<Response>::from(text)
+            Potential::<Output>::from(text)
                 .actualize(&mut budget())
                 .unwrap(),
             one

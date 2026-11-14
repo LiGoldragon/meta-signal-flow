@@ -1,7 +1,7 @@
 #![cfg(feature = "datom")]
 
 use datom_codec::{Actualizing, Budget, Datomizable, Potential};
-use meta_signal_flow::{Query, Response};
+use meta_signal_flow::{Input, Output};
 use protos::{Compactable, Protosizable, ReaderBudget};
 
 fn budget() -> Budget {
@@ -23,16 +23,16 @@ fn privileged_requests_have_concrete_datoms() {
         "RegisterFlow.{ da1e3f claude-session Claude Unavailable Unavailable Unbound Pending }",
         "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Astra } { mind-flow Mind gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }",
     ] {
-        let query = Potential::<Query>::from(text)
+        let query = Potential::<Input>::from(text)
             .actualize(&mut budget())
-            .unwrap_or_else(|_| panic!("not a Query Datom: {text}"));
+            .unwrap_or_else(|_| panic!("not an Input Datom: {text}"));
         if text == "Configuration" {
-            assert_eq!(query, Query::Configuration, "wrong unit query variant");
+            assert_eq!(query, Input::Configuration, "wrong unit query variant");
         }
         assert_eq!(
             query.datomize(vec![]).protosize().compact(),
             text,
-            "Query Datom did not round-trip: {text}"
+            "Input Datom did not round-trip: {text}"
         );
     }
 }
@@ -43,13 +43,13 @@ fn privileged_requests_have_concrete_datoms() {
 fn a_flow_binding_carries_no_power() {
     let powered = "MetaBindExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } { Mind message Astra } { mind-flow Mind High gpt-6 Codex mind-native workspace w12:p1 w12:t1 mind-terminal mind-agent { 4300 1001 mind-token } /home/li/primary } }";
     assert!(
-        Potential::<Query>::from(powered)
+        Potential::<Input>::from(powered)
             .actualize(&mut budget())
             .is_err(),
         "a binding carrying a power is refused"
     );
     assert!(
-        Potential::<Response>::from("PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }")
+        Potential::<Output>::from("PeerResolved.{ e167d8 Psyche High claude-opus-5-5 }")
             .actualize(&mut budget())
             .is_err(),
         "a resolved peer carries no power"
@@ -59,7 +59,7 @@ fn a_flow_binding_carries_no_power() {
 #[test]
 fn bind_existing_result_preserves_each_explicit_outcome() {
     let text = "BoundExisting.{ { messaging-build /run/user/1001/herdr.sock { 4100 1001 server-token } owner-flow } Bound.{ psyche-flow RegisteredUnconfirmed } }";
-    let response = Potential::<Response>::from(text)
+    let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
@@ -67,14 +67,14 @@ fn bind_existing_result_preserves_each_explicit_outcome() {
 
 #[test]
 fn reset_outcome_round_trips_over_signal_and_datom() {
-    let reply = Response::ResetConsumed(meta_signal_flow::ResetOutcome::Reset);
+    let reply = Output::ResetConsumed(meta_signal_flow::ResetOutcome::Reset);
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
         reply
     );
     let text = reply.datomize(vec![]).protosize().compact();
-    let restored = Potential::<Response>::from(text)
+    let restored = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(restored, reply);
@@ -86,7 +86,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
     for (text, expected) in [
         (
             "Configured.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }",
-            Response::Configured(meta_signal_flow::ConfigurationChange::Amend(
+            Output::Configured(meta_signal_flow::ConfigurationChange::Amend(
                 meta_signal_flow::Amend_Data {
                     address: signal_flow::Address {
                         aspect: meta_signal_flow::Aspect::Psyche,
@@ -101,35 +101,35 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
         ),
         (
             "Configured.DefaultMinutes.30",
-            Response::Configured(meta_signal_flow::ConfigurationChange::DefaultMinutes(
+            Output::Configured(meta_signal_flow::ConfigurationChange::DefaultMinutes(
                 flow_ethos::Minutes(30),
             )),
         ),
         (
             "Removed.Harness.Codex",
-            Response::Removed(meta_signal_flow::Removal::Harness(
+            Output::Removed(meta_signal_flow::Removal::Harness(
                 meta_signal_flow::HarnessKind::Codex,
             )),
         ),
     ] {
-        let configured = Potential::<Response>::from(text)
+        let configured = Potential::<Output>::from(text)
             .actualize(&mut budget())
             .unwrap();
         assert_eq!(configured, expected);
         assert_eq!(configured.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&configured).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             configured
         );
     }
 
     let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook }";
 
-    let response = Potential::<Response>::from(text)
+    let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
-    let Response::Configuration(configuration) = &response else {
+    let Output::Configuration(configuration) = &response else {
         panic!("expected Configuration snapshot");
     };
     let nexus = &configuration.configured_nexus.0;
@@ -214,7 +214,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
     );
     // A layer and an aspect no longer name a model.
     assert!(
-        Potential::<Query>::from("Configure.Models.[ { Secondary Psyche claude-opus-5-5 } ]")
+        Potential::<Input>::from("Configure.Models.[ { Secondary Psyche claude-opus-5-5 } ]")
             .actualize(&mut budget())
             .is_err()
     );
@@ -309,22 +309,22 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
         response
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
 
-    let unconfigured = Potential::<Response>::from("Unconfigured")
+    let unconfigured = Potential::<Output>::from("Unconfigured")
         .actualize(&mut budget())
         .unwrap();
-    assert_eq!(unconfigured, Response::Unconfigured);
+    assert_eq!(unconfigured, Output::Unconfigured);
     assert_eq!(
         unconfigured.datomize(vec![]).protosize().compact(),
         "Unconfigured"
     );
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&unconfigured).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
         unconfigured
     );
 }
@@ -335,10 +335,10 @@ fn presentation_prompt_round_trip_preserves_multiline_boundary_whitespace() {
     let text = format!(
         "Configure.Nexus.{{ /srv/source {{ stable-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] }} {{ next-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [] }} [] [ Psyche ] None None /srv/curriculum/curriculum.sock 60 Some.«{prompt}» main }}"
     );
-    let query = Potential::<Query>::from(text.as_str())
+    let query = Potential::<Input>::from(text.as_str())
         .actualize(&mut budget())
         .unwrap();
-    let Query::Configure(meta_signal_flow::ConfigurationChange::Nexus(nexus)) = &query else {
+    let Input::Configure(meta_signal_flow::ConfigurationChange::Nexus(nexus)) = &query else {
         panic!("expected Nexus configuration");
     };
     assert_eq!(
@@ -350,11 +350,11 @@ fn presentation_prompt_round_trip_preserves_multiline_boundary_whitespace() {
     );
 
     let encoded = query.datomize(vec![]).protosize().compact();
-    let restored = Potential::<Query>::from(encoded.as_str())
+    let restored = Potential::<Input>::from(encoded.as_str())
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(restored, query);
-    let Query::Configure(meta_signal_flow::ConfigurationChange::Nexus(restored_nexus)) = restored
+    let Input::Configure(meta_signal_flow::ConfigurationChange::Nexus(restored_nexus)) = restored
     else {
         panic!("expected restored Nexus configuration");
     };
@@ -368,7 +368,7 @@ fn presentation_prompt_round_trip_preserves_multiline_boundary_whitespace() {
 
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
         query
     );
 }
@@ -377,7 +377,7 @@ fn presentation_prompt_round_trip_preserves_multiline_boundary_whitespace() {
 fn configure_missing_a_required_nexus_field_is_refused_by_the_reader() {
     let text = "Configure.Nexus.{ /srv/source { stable-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { next-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock }";
     assert!(
-        Potential::<Query>::from(text)
+        Potential::<Input>::from(text)
             .actualize(&mut budget())
             .is_err()
     );
@@ -387,7 +387,7 @@ fn configure_missing_a_required_nexus_field_is_refused_by_the_reader() {
 fn configure_nexus_without_its_herdr_session_is_refused_by_the_reader() {
     let text = "Configure.Nexus.{ /srv/source { stable-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { next-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [] } [] [ Psyche ] None None /srv/curriculum/curriculum.sock 60 None }";
     assert!(
-        Potential::<Query>::from(text)
+        Potential::<Input>::from(text)
             .actualize(&mut budget())
             .is_err()
     );
@@ -396,14 +396,14 @@ fn configure_nexus_without_its_herdr_session_is_refused_by_the_reader() {
 #[test]
 fn store_refusal_preserves_its_error_text() {
     let text = "Refused.Store.«database rejected configuration»";
-    let response = Potential::<Response>::from(text)
+    let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
 
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
         response
     );
 }
@@ -414,10 +414,10 @@ fn store_refusal_preserves_its_error_text() {
 #[test]
 fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
     let request = "Retire.d8df70";
-    let query = Potential::<Query>::from(request)
+    let query = Potential::<Input>::from(request)
         .actualize(&mut budget())
         .unwrap();
-    assert!(matches!(&query, Query::Retire(flow_id) if flow_id.0 == "d8df70"));
+    assert!(matches!(&query, Input::Retire(flow_id) if flow_id.0 == "d8df70"));
     assert_eq!(query.datomize(vec![]).protosize().compact(), request);
 
     for text in [
@@ -428,13 +428,13 @@ fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
         "RetireRejected.CloseRefused",
         "RetireRejected.Maintained",
     ] {
-        let response = Potential::<Response>::from(text)
+        let response = Potential::<Output>::from(text)
             .actualize(&mut budget())
             .unwrap();
         assert_eq!(response.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             response
         );
     }
@@ -451,7 +451,7 @@ fn delivery_requests_have_concrete_datoms() {
         "Command.{ 7d41e0 Interrupt }",
         "ResolvePeer.{ 48211 1001 8841220 }",
     ] {
-        let query = Potential::<Query>::from(text)
+        let query = Potential::<Input>::from(text)
             .actualize(&mut budget())
             .unwrap();
         assert_eq!(query.datomize(vec![]).protosize().compact(), text);
@@ -489,12 +489,12 @@ fn delivery_replies_have_concrete_datoms() {
         "PeerResolved.{ e167d8 Psyche claude-opus-5-5 }",
         "PeerResolutionRejected.CallerUnknown",
     ] {
-        let response = Potential::<Response>::from(text)
+        let response = Potential::<Output>::from(text)
             .actualize(&mut budget())
             .unwrap();
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             response
         );
         assert_eq!(response.datomize(vec![]).protosize().compact(), text);
@@ -526,18 +526,18 @@ fn configure_declares_one_whole_family() {
         "Configure.HarnessHook./home/li/.local/bin/flow-hook",
         "ObserveConfiguration",
     ] {
-        let query = Potential::<Query>::from(text)
+        let query = Potential::<Input>::from(text)
             .actualize(&mut budget())
-            .unwrap_or_else(|_| panic!("not a Query Datom: {text}"));
+            .unwrap_or_else(|_| panic!("not an Input Datom: {text}"));
         assert_eq!(query.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
             query
         );
     }
-    let Query::Configure(meta_signal_flow::Configuration::Models(models)) =
-        Potential::<Query>::from("Configure.Models.[ { Haiku claude-haiku-5-5 } ]")
+    let Input::Configure(meta_signal_flow::Configuration::Models(models)) =
+        Potential::<Input>::from("Configure.Models.[ { Haiku claude-haiku-5-5 } ]")
             .actualize(&mut budget())
             .unwrap()
     else {
@@ -546,19 +546,19 @@ fn configure_declares_one_whole_family() {
     assert_eq!(models.len(), 1);
     // One entry is not a family: a declaration is always the whole vector.
     assert!(
-        Potential::<Query>::from("Configure.Models.{ Haiku claude-haiku-5-5 }")
+        Potential::<Input>::from("Configure.Models.{ Haiku claude-haiku-5-5 }")
             .actualize(&mut budget())
             .is_err()
     );
     // A threshold belongs to a native model, never to a Model, and has no handover.
     assert!(
-        Potential::<Query>::from("Configure.Thresholds.[ { Fable 600000 700000 } ]")
+        Potential::<Input>::from("Configure.Thresholds.[ { Fable 600000 700000 } ]")
             .actualize(&mut budget())
             .is_err()
     );
     // Configure.Nexus is the one way to set or replace the Nexus.
     assert!(
-        Potential::<Query>::from("Reconfigure.{ /srv }")
+        Potential::<Input>::from("Reconfigure.{ /srv }")
             .actualize(&mut budget())
             .is_err()
     );
@@ -567,13 +567,13 @@ fn configure_declares_one_whole_family() {
         "ConfigureRefused.CodexModelsOverlap",
         "ConfigureRefused.StoreRefused",
     ] {
-        let response = Potential::<Response>::from(reply)
+        let response = Potential::<Output>::from(reply)
             .actualize(&mut budget())
-            .unwrap_or_else(|_| panic!("not a Response Datom: {reply}"));
+            .unwrap_or_else(|_| panic!("not an Output Datom: {reply}"));
         assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             response
         );
     }
@@ -584,12 +584,12 @@ fn configure_declares_one_whole_family() {
 #[test]
 fn configure_send_servers_has_a_concrete_datom() {
     let text = "Configure.SendServers.[ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ]";
-    let query = Potential::<meta_signal_flow::Query>::from(text)
+    let query = Potential::<meta_signal_flow::Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(
         query,
-        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::SendServers(
+        meta_signal_flow::Input::Configure(meta_signal_flow::ConfigurationChange::SendServers(
             vec![meta_signal_flow::ConfigureSendServer {
                 codex_app_server_binary: meta_signal_flow::CodexAppServerBinary(
                     "/nix/store/codex/bin/codex".to_string()
@@ -607,12 +607,12 @@ fn configure_send_servers_has_a_concrete_datom() {
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
     let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OnDemand «» [] } ]";
-    let query = Potential::<meta_signal_flow::Query>::from(text)
+    let query = Potential::<meta_signal_flow::Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert!(matches!(
         &query,
-        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::Metaflows(declared))
+        meta_signal_flow::Input::Configure(meta_signal_flow::ConfigurationChange::Metaflows(declared))
             if declared.len() == 1 && declared[0].system_modules.0.len() == 2
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
@@ -631,13 +631,13 @@ fn one_declaration_is_configured_and_removed_alone() {
         "Remove.Harness.Codex",
         "Remove.Refresh.claude-fable-5-2",
     ] {
-        let query = Potential::<meta_signal_flow::Query>::from(text)
+        let query = Potential::<meta_signal_flow::Input>::from(text)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{text}: {error:?}"));
         assert_eq!(query.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<meta_signal_flow::Query, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<meta_signal_flow::Input, rkyv::rancor::Error>(&archive).unwrap(),
             query
         );
     }
@@ -647,12 +647,12 @@ fn one_declaration_is_configured_and_removed_alone() {
 fn configure_harness_flags_has_a_concrete_datom() {
     let text =
         "Configure.HarnessFlags.[ { { Psyche core Fable } «--disallowedTools 'Artifact*'» } ]";
-    let query = Potential::<meta_signal_flow::Query>::from(text)
+    let query = Potential::<meta_signal_flow::Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert!(matches!(
         &query,
-        meta_signal_flow::Query::Configure(meta_signal_flow::ConfigurationChange::HarnessFlags(flags))
+        meta_signal_flow::Input::Configure(meta_signal_flow::ConfigurationChange::HarnessFlags(flags))
             if flags.len() == 1 && flags[0].harness_flag_text.0 == "--disallowedTools 'Artifact*'"
     ));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
@@ -664,7 +664,7 @@ fn configure_harness_flags_has_a_concrete_datom() {
 #[test]
 fn leave_outs_are_the_permaflow_s_and_a_foreign_one_is_an_unknown_feature() {
     assert!(
-        Potential::<Query>::from(
+        Potential::<Input>::from(
             "Configure.LeaveOuts.[ { { Psyche flow Opus } Claude [ SkillTool ClaudeMd ] } ]"
         )
         .actualize(&mut budget())
@@ -672,26 +672,26 @@ fn leave_outs_are_the_permaflow_s_and_a_foreign_one_is_an_unknown_feature() {
     );
     // A permaflow without its leave-outs is no longer a ConfigureMetaflow.
     assert!(
-        Potential::<Query>::from(
+        Potential::<Input>::from(
             "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OnDemand «» [] }"
         )
         .actualize(&mut budget())
         .is_err()
     );
     let text = "ConfigureRefused.UnknownFeature.CodexAgentsMd";
-    let response = Potential::<Response>::from(text)
+    let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(
         response,
-        Response::ConfigureRefused(meta_signal_flow::ConfigureRefusal::UnknownFeature(
+        Output::ConfigureRefused(meta_signal_flow::ConfigureRefusal::UnknownFeature(
             signal_flow::LeaveOut::CodexAgentsMd
         ))
     );
     assert_eq!(response.datomize(vec![]).protosize().compact(), text);
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
         response
     );
 }
@@ -712,22 +712,22 @@ fn amend_changes_one_value_of_one_permaflow() {
         "Configure.Amend.{ { Psyche core Fable } Add.LeaveOut.ClaudeMd }",
         "Configure.Amend.{ { Psyche core Fable } Remove.LeaveOut.ClaudeMd }",
     ] {
-        let query = Potential::<Query>::from(text)
+        let query = Potential::<Input>::from(text)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{text}: {error:?}"));
         assert!(matches!(
             &query,
-            Query::Configure(meta_signal_flow::ConfigurationChange::Amend(_))
+            Input::Configure(meta_signal_flow::ConfigurationChange::Amend(_))
         ));
         assert_eq!(query.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
             query
         );
     }
-    let Query::Configure(meta_signal_flow::ConfigurationChange::Amend(amend)) =
-        Potential::<Query>::from(
+    let Input::Configure(meta_signal_flow::ConfigurationChange::Amend(amend)) =
+        Potential::<Input>::from(
             "Configure.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }",
         )
         .actualize(&mut budget())
@@ -762,10 +762,10 @@ fn amend_changes_one_value_of_one_permaflow() {
             meta_signal_flow::ConfigureRefusal::CurriculumUnavailable,
         ),
     ] {
-        let response = Potential::<Response>::from(text)
+        let response = Potential::<Output>::from(text)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{text}: {error:?}"));
-        assert_eq!(response, Response::ConfigureRefused(rejection));
+        assert_eq!(response, Output::ConfigureRefused(rejection));
         assert_eq!(response.datomize(vec![]).protosize().compact(), text);
     }
 }
@@ -775,12 +775,12 @@ fn amend_changes_one_value_of_one_permaflow() {
 #[test]
 fn configure_topic_refusal_round_trips() {
     let text = "ConfigureRefused.TopicRefused.Flow_Repair";
-    let response = Potential::<Response>::from(text)
+    let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
     assert_eq!(
         response,
-        Response::ConfigureRefused(meta_signal_flow::ConfigureRefusal::TopicRefused(
+        Output::ConfigureRefused(meta_signal_flow::ConfigureRefusal::TopicRefused(
             meta_signal_flow::Topic("Flow_Repair".to_string())
         ))
     );
@@ -794,13 +794,13 @@ fn configure_topic_refusal_round_trips() {
 #[test]
 fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
     let text = "Configure.DefaultMinutes.45";
-    let query = Potential::<Query>::from(text)
+    let query = Potential::<Input>::from(text)
         .actualize(&mut budget())
         .unwrap_or_else(|error| panic!("{text}: {error:?}"));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
         query
     );
     for reply in [
@@ -809,13 +809,13 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
         "ConfigureRefused.MinutesRefused.Unreachable",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 1 3 1 } 64 3 Unconfigured }",
     ] {
-        let response = Potential::<Response>::from(reply)
+        let response = Potential::<Output>::from(reply)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{reply}: {error:?}"));
         assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             response
         );
     }
@@ -827,18 +827,18 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
 #[test]
 fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
     let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ Notification Waking.[ { Sender.{ Psyche flow Fable } MiddleAbrupt.Task.{ t001 30 «Draft the proposal.» } } { Notification Soft.Notice.{ n001 «Reminder 1 of 4: task has no Done.» } } { Sender.{ Mind flow Sol } Soft.Done.{ t001 «Proposal drafted.» } } ] } }";
-    let query = Potential::<Query>::from(text)
+    let query = Potential::<Input>::from(text)
         .actualize(&mut budget())
         .unwrap_or_else(|error| panic!("{text}: {error:?}"));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
         query
     );
     // One input alone is a Waking of one; the single-input form is gone.
     assert!(
-        Potential::<Query>::from(
+        Potential::<Input>::from(
             "Deliver.{ attempt-8 7d41e0 Soft.{ Notification NativeInput.{ Notification Soft.Notice.«One alone.» } } }"
         )
         .actualize(&mut budget())
@@ -857,13 +857,13 @@ fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
 #[test]
 fn configure_declares_the_counters_and_the_snapshot_carries_them() {
     let text = "Configure.Counters.{ 120 45 300 }";
-    let query = Potential::<Query>::from(text)
+    let query = Potential::<Input>::from(text)
         .actualize(&mut budget())
         .unwrap_or_else(|error| panic!("{text}: {error:?}"));
     assert_eq!(query.datomize(vec![]).protosize().compact(), text);
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
         query
     );
     for reply in [
@@ -872,13 +872,13 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         "ConfigureRefused.CountersRefused.NotRunning",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 45 None [] { 120 45 300 } 64 3 Unconfigured }",
     ] {
-        let response = Potential::<Response>::from(reply)
+        let response = Potential::<Output>::from(reply)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{reply}: {error:?}"));
         assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             response
         );
     }
@@ -890,11 +890,11 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
 #[test]
 fn a_send_outcome_refused_unidentified_carries_its_seat_evidence() {
     let text = "SendOutcomesRead.[ { Some.{ 4242 987654 } Unbound None digest-1 Refused.Unidentified.{ Some.{ herdr-1 w1-2 } Some.«Claude research» Some.01a0fdcc-c1a1 1761800000 { 4242 987654 } } } ]";
-    let value = Potential::<Response>::from(text)
+    let value = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&value).unwrap();
-    let read = rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap();
+    let read = rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap();
     assert_eq!(read, value);
     assert_eq!(read.datomize(vec![]).protosize().compact(), text);
 }
@@ -911,13 +911,13 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "Restart.c1a0de",
         "Refresh.{ Psyche core Fable }",
     ] {
-        let query = Potential::<Query>::from(text)
+        let query = Potential::<Input>::from(text)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{text}: {error:?}"));
         assert_eq!(query.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
             query
         );
     }
@@ -931,13 +931,13 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured }",
     ] {
-        let response = Potential::<Response>::from(reply)
+        let response = Potential::<Output>::from(reply)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{reply}: {error:?}"));
         assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             response
         );
     }
@@ -953,23 +953,23 @@ fn handover_configuration_round_trips_zero_count_policy_and_archive_path() {
         "Configured.HandoverCount.0",
     ] {
         if text.starts_with("Configure.") {
-            let query = Potential::<Query>::from(text)
+            let query = Potential::<Input>::from(text)
                 .actualize(&mut budget())
                 .unwrap_or_else(|error| panic!("{text}: {error:?}"));
             assert_eq!(query.datomize(vec![]).protosize().compact(), text);
             let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
             assert_eq!(
-                rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+                rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
                 query
             );
         } else {
-            let response = Potential::<Response>::from(text)
+            let response = Potential::<Output>::from(text)
                 .actualize(&mut budget())
                 .unwrap_or_else(|error| panic!("{text}: {error:?}"));
             assert_eq!(response.datomize(vec![]).protosize().compact(), text);
             let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
             assert_eq!(
-                rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+                rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
                 response
             );
         }

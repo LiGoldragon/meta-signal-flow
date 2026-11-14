@@ -1,25 +1,25 @@
-use meta_signal_flow::{Contracted, ETHOS, Handshake, HandshakeReceipt, HandshakeRejection, Query};
+use meta_signal_flow::{Contracted, ETHOS, Handshake, HandshakeReceipt, HandshakeRejection, Input};
 
 #[test]
 fn a_peer_built_from_this_source_is_greeted() {
-    let digest = Query::contract_digest();
+    let digest = Input::contract_digest();
     assert_eq!(digest, Handshake::of_source(ETHOS).contract_digest);
     assert_eq!(
-        Query::receipt(&Handshake::of_source(ETHOS)),
+        Input::receipt(&Handshake::of_source(ETHOS)),
         HandshakeReceipt::Greeted(digest)
     );
 }
 
-/// A peer built on meta-signal-flow 77.0.0 greets with 77's digest and is
-/// refused with 78's, before any of its queries is read.
+/// A peer built on meta-signal-flow 78.0.0 greets with 78's digest and is
+/// refused with 79's, before any of its inputs is read.
 #[test]
-fn a_meta_77_peer_is_refused_with_this_digest() {
-    let older = include_str!("fixtures/meta-signal-flow-77.ethos");
-    assert_ne!(Handshake::of_source(older), Query::greeting());
+fn a_meta_78_peer_is_refused_with_this_digest() {
+    let older = include_str!("fixtures/meta-signal-flow-78.ethos");
+    assert_ne!(Handshake::of_source(older), Input::greeting());
     assert_eq!(
-        Query::receipt(&Handshake::of_source(older)),
+        Input::receipt(&Handshake::of_source(older)),
         HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
-            Query::contract_digest()
+            Input::contract_digest()
         ))
     );
 }
@@ -27,9 +27,9 @@ fn a_meta_77_peer_is_refused_with_this_digest() {
 #[test]
 fn the_ordinary_contract_is_refused_on_the_meta_socket() {
     assert_eq!(
-        Query::receipt(&<signal_flow::Query as Contracted>::greeting()),
+        Input::receipt(&<signal_flow::Input as Contracted>::greeting()),
         HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
-            Query::contract_digest()
+            Input::contract_digest()
         ))
     );
 }

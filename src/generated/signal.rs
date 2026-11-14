@@ -1180,7 +1180,7 @@ pub struct Withdraw_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Query {
+pub enum Input {
     Configuration,
     Configure(ConfigurationChange),
     ConsumeReset(ResetRequest),
@@ -1216,29 +1216,9 @@ pub struct EventsRead_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ReadEventsRejected_Data {
-    UnknownFlow,
-    StoreRefused,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct QueueDeliveriesRead_Data {
     pub address: flow_ethos::Address,
     pub visible_queue_delivery_vector: std::vec::Vec<VisibleQueueDelivery>,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ReadQueueDeliveriesRejected_Data {
-    UnknownAddress,
-    StoreRefused,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum ReadSendOutcomesRejected_Data {
-    StoreRefused,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1260,6 +1240,42 @@ pub struct Inspected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Receipt(pub std::option::Option<signal_flow::NativeReceipt>);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ReadBy(pub std::option::Option<flow_ethos::LogicalDeliveryId>);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DeliveryDebugged_Data {
+    pub delivery_snapshot: signal_flow::DeliverySnapshot,
+    pub receipt: Receipt,
+    pub read_by: ReadBy,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadEventsRejected_Data {
+    UnknownFlow,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadQueueDeliveriesRejected_Data {
+    UnknownAddress,
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ReadSendOutcomesRejected_Data {
+    StoreRefused,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum InspectRejected_Data {
     UnknownAddress,
 }
@@ -1273,22 +1289,6 @@ pub enum RebindRejected_Data {
     NotAwake,
     HerdrUnavailable,
     FlowTaken(flow_ethos::Address),
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct Receipt(pub std::option::Option<signal_flow::NativeReceipt>);
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ReadBy(pub std::option::Option<flow_ethos::LogicalDeliveryId>);
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct DeliveryDebugged_Data {
-    pub delivery_snapshot: signal_flow::DeliverySnapshot,
-    pub receipt: Receipt,
-    pub read_by: ReadBy,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1307,53 +1307,247 @@ pub enum WithdrawRejected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum Response {
-    Configured(ConfigurationChange),
+pub enum Output {
     Configuration(ConfigurationSnapshot),
-    Unconfigured,
+    Configured(ConfigurationChange),
     ResetConsumed(ResetOutcome),
     FlowRegistered(signal_flow::FlowNode),
+    BoundExisting(BoundExisting),
+    FlowRetired(signal_flow::FlowNode),
+    Restarted(signal_flow::FlowId),
+    Refreshed(signal_flow::Refreshed),
+    Delivered(VisibleDelivery),
+    Vetted,
+    Commanded(CommandOutcome),
+    PeerResolved(signal_flow::CallerIdentity),
+    EventsRead(EventsRead_Data),
+    QueueDeliveriesRead(QueueDeliveriesRead_Data),
+    SendOutcomesRead(std::vec::Vec<VisibleSendOutcomeRecord>),
+    LegacyArchiveObserved(std::vec::Vec<VisibleLegacyArchiveEntry>),
+    Debugged(DebugSnapshot),
+    QueueDeliveryResolved(QueueDeliveryResolved_Data),
+    Inspected(Inspected_Data),
+    DeliveryDebugged(DeliveryDebugged_Data),
+    Rebound(flow_ethos::Address),
+    Withdrawn,
+    Unconfigured,
+    Removed(Removal),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
-    BoundExisting(BoundExisting),
     BindExistingRejected(BindExistingRejection),
-    FlowRetired(signal_flow::FlowNode),
     RetireRejected(RetireRejection),
-    Restarted(signal_flow::FlowId),
     RestartRefused(signal_flow::RestartRefusal),
-    Refreshed(signal_flow::Refreshed),
     RefreshRejected(signal_flow::RefreshRejection),
     OrdinaryRefused(signal_flow::Refusal),
-    Delivered(VisibleDelivery),
     DeliveryRejected(DeliveryRejection),
-    Vetted,
-    Commanded(CommandOutcome),
     CommandRejected(CommandRejection),
-    PeerResolved(signal_flow::CallerIdentity),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
     Refused(StoreRefusal),
-    EventsRead(EventsRead_Data),
     ReadEventsRejected(ReadEventsRejected_Data),
-    QueueDeliveriesRead(QueueDeliveriesRead_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
-    SendOutcomesRead(std::vec::Vec<VisibleSendOutcomeRecord>),
     ReadSendOutcomesRejected(ReadSendOutcomesRejected_Data),
-    LegacyArchiveObserved(std::vec::Vec<VisibleLegacyArchiveEntry>),
     ObserveLegacyArchiveRejected(StoreRefusal),
-    QueueDeliveryResolved(QueueDeliveryResolved_Data),
     ResolveQueueDeliveryRejected(VisibleResolveQueueDeliveryRejected),
-    Inspected(Inspected_Data),
     InspectRejected(InspectRejected_Data),
-    Rebound(flow_ethos::Address),
     RebindRejected(RebindRejected_Data),
-    Withdrawn,
-    DeliveryDebugged(DeliveryDebugged_Data),
     DebugDeliveryRejected(DebugDeliveryRejected_Data),
-    Debugged(DebugSnapshot),
     WithdrawRejected(WithdrawRejected_Data),
     RefreshQueued(signal_flow::RefreshQueued),
     RestartQueued(signal_flow::FlowId),
     ReapPending(signal_flow::ReapPending),
-    Removed(Removal),
+}
+#[rustfmt::skip]
+#[allow(clippy::result_large_err, clippy::ptr_arg, clippy::borrowed_box)]
+pub trait Answering {
+    fn configuration(&self) -> std::result::Result<ConfigurationSnapshot, Output>;
+    fn configure(
+        &self,
+        configuration_change: &ConfigurationChange,
+    ) -> std::result::Result<ConfigurationChange, Output>;
+    fn consume_reset(
+        &self,
+        reset_request: &ResetRequest,
+    ) -> std::result::Result<ResetOutcome, Output>;
+    fn register_flow(
+        &self,
+        flow_node: &signal_flow::FlowNode,
+    ) -> std::result::Result<signal_flow::FlowNode, Output>;
+    fn meta_bind_existing(
+        &self,
+        meta_bind_existing: &MetaBindExisting,
+    ) -> std::result::Result<BoundExisting, Output>;
+    fn retire(
+        &self,
+        flow_id: &signal_flow::FlowId,
+    ) -> std::result::Result<signal_flow::FlowNode, Output>;
+    fn restart(
+        &self,
+        flow_id: &signal_flow::FlowId,
+    ) -> std::result::Result<signal_flow::FlowId, Output>;
+    fn refresh(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<signal_flow::Refreshed, Output>;
+    fn deliver(
+        &self,
+        delivery_request: &DeliveryRequest,
+    ) -> std::result::Result<VisibleDelivery, Output>;
+    fn vet(&self, delivery_request: &DeliveryRequest) -> std::result::Result<(), Output>;
+    fn command(
+        &self,
+        command_request: &CommandRequest,
+    ) -> std::result::Result<CommandOutcome, Output>;
+    fn resolve_peer(
+        &self,
+        process_identity: &ProcessIdentity,
+    ) -> std::result::Result<signal_flow::CallerIdentity, Output>;
+    fn read_events(
+        &self,
+        flow_id: &signal_flow::FlowId,
+    ) -> std::result::Result<EventsRead_Data, Output>;
+    fn read_queue_deliveries(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<QueueDeliveriesRead_Data, Output>;
+    fn read_send_outcomes(
+        &self,
+    ) -> std::result::Result<std::vec::Vec<VisibleSendOutcomeRecord>, Output>;
+    fn observe_legacy_archive(
+        &self,
+    ) -> std::result::Result<std::vec::Vec<VisibleLegacyArchiveEntry>, Output>;
+    fn debug(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<DebugSnapshot, Output>;
+    fn resolve_queue_delivery(
+        &self,
+        queue_delivery_resolution: &QueueDeliveryResolution,
+    ) -> std::result::Result<QueueDeliveryResolved_Data, Output>;
+    fn inspect(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<Inspected_Data, Output>;
+    fn debug_delivery(
+        &self,
+        request_id: &flow_ethos::RequestId,
+    ) -> std::result::Result<DeliveryDebugged_Data, Output>;
+    fn rebind(
+        &self,
+        rebind: &Rebind_Data,
+    ) -> std::result::Result<flow_ethos::Address, Output>;
+    fn withdraw(&self, withdraw: &Withdraw_Data) -> std::result::Result<(), Output>;
+    fn observe_configuration(&self) -> std::result::Result<(), Output>;
+    fn remove(&self, removal: &Removal) -> std::result::Result<Removal, Output>;
+}
+#[rustfmt::skip]
+pub trait Answerable {
+    fn answer<Nexus: Answering>(&self, nexus: &Nexus) -> Output;
+}
+#[rustfmt::skip]
+impl Answerable for Input {
+    fn answer<Nexus: Answering>(&self, nexus: &Nexus) -> Output {
+        match self {
+            Input::Configuration => {
+                nexus
+                    .configuration()
+                    .map_or_else(|refusal| refusal, Output::Configuration)
+            }
+            Input::Configure(carried) => {
+                nexus
+                    .configure(carried)
+                    .map_or_else(|refusal| refusal, Output::Configured)
+            }
+            Input::ConsumeReset(carried) => {
+                nexus
+                    .consume_reset(carried)
+                    .map_or_else(|refusal| refusal, Output::ResetConsumed)
+            }
+            Input::RegisterFlow(carried) => {
+                nexus
+                    .register_flow(carried)
+                    .map_or_else(|refusal| refusal, Output::FlowRegistered)
+            }
+            Input::MetaBindExisting(carried) => {
+                nexus
+                    .meta_bind_existing(carried)
+                    .map_or_else(|refusal| refusal, Output::BoundExisting)
+            }
+            Input::Retire(carried) => {
+                nexus.retire(carried).map_or_else(|refusal| refusal, Output::FlowRetired)
+            }
+            Input::Restart(carried) => {
+                nexus.restart(carried).map_or_else(|refusal| refusal, Output::Restarted)
+            }
+            Input::Refresh(carried) => {
+                nexus.refresh(carried).map_or_else(|refusal| refusal, Output::Refreshed)
+            }
+            Input::Deliver(carried) => {
+                nexus.deliver(carried).map_or_else(|refusal| refusal, Output::Delivered)
+            }
+            Input::Vet(carried) => {
+                nexus.vet(carried).map_or_else(|refusal| refusal, |()| Output::Vetted)
+            }
+            Input::Command(carried) => {
+                nexus.command(carried).map_or_else(|refusal| refusal, Output::Commanded)
+            }
+            Input::ResolvePeer(carried) => {
+                nexus
+                    .resolve_peer(carried)
+                    .map_or_else(|refusal| refusal, Output::PeerResolved)
+            }
+            Input::ReadEvents(carried) => {
+                nexus
+                    .read_events(carried)
+                    .map_or_else(|refusal| refusal, Output::EventsRead)
+            }
+            Input::ReadQueueDeliveries(carried) => {
+                nexus
+                    .read_queue_deliveries(carried)
+                    .map_or_else(|refusal| refusal, Output::QueueDeliveriesRead)
+            }
+            Input::ReadSendOutcomes => {
+                nexus
+                    .read_send_outcomes()
+                    .map_or_else(|refusal| refusal, Output::SendOutcomesRead)
+            }
+            Input::ObserveLegacyArchive => {
+                nexus
+                    .observe_legacy_archive()
+                    .map_or_else(|refusal| refusal, Output::LegacyArchiveObserved)
+            }
+            Input::Debug(carried) => {
+                nexus.debug(carried).map_or_else(|refusal| refusal, Output::Debugged)
+            }
+            Input::ResolveQueueDelivery(carried) => {
+                nexus
+                    .resolve_queue_delivery(carried)
+                    .map_or_else(|refusal| refusal, Output::QueueDeliveryResolved)
+            }
+            Input::Inspect(carried) => {
+                nexus.inspect(carried).map_or_else(|refusal| refusal, Output::Inspected)
+            }
+            Input::DebugDelivery(carried) => {
+                nexus
+                    .debug_delivery(carried)
+                    .map_or_else(|refusal| refusal, Output::DeliveryDebugged)
+            }
+            Input::Rebind(carried) => {
+                nexus.rebind(carried).map_or_else(|refusal| refusal, Output::Rebound)
+            }
+            Input::Withdraw(carried) => {
+                nexus
+                    .withdraw(carried)
+                    .map_or_else(|refusal| refusal, |()| Output::Withdrawn)
+            }
+            Input::ObserveConfiguration => {
+                nexus
+                    .observe_configuration()
+                    .map_or_else(|refusal| refusal, |()| Output::Unconfigured)
+            }
+            Input::Remove(carried) => {
+                nexus.remove(carried).map_or_else(|refusal| refusal, Output::Removed)
+            }
+        }
+    }
 }

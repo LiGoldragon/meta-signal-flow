@@ -2,15 +2,15 @@
 //! The expected texts are written out here, not computed through the codec.
 
 use meta_signal_flow::{
-    EventsRead_Data, HarnessEventMetadata, Query, ReadEventsRejected_Data, Response, StopMetadata,
+    EventsRead_Data, HarnessEventMetadata, Input, Output, ReadEventsRejected_Data, StopMetadata,
 };
 use signal_flow::{
     BackgroundTask, BackgroundTaskId, BackgroundTaskKind, BackgroundTaskStatus, BackgroundWork,
     Description, FlowId, NativePrompt, NativeSessionId, PromptId, PromptSha256, TranscriptPath,
 };
 
-fn events_read() -> Response {
-    Response::EventsRead(EventsRead_Data {
+fn events_read() -> Output {
+    Output::EventsRead(EventsRead_Data {
         flow_id: FlowId("f1c841".to_string()),
         harness_event_metadata_vector: vec![
             HarnessEventMetadata::Started(Some(NativeSessionId("s1".to_string()))),
@@ -41,19 +41,19 @@ fn events_read() -> Response {
 fn read_events_round_trips_as_an_archive() {
     for reply in [
         events_read(),
-        Response::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow),
-        Response::ReadEventsRejected(ReadEventsRejected_Data::StoreRefused),
+        Output::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow),
+        Output::ReadEventsRejected(ReadEventsRejected_Data::StoreRefused),
     ] {
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             reply
         );
     }
-    let query = Query::ReadEvents(FlowId("f1c841".to_string()));
+    let query = Input::ReadEvents(FlowId("f1c841".to_string()));
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
         query
     );
 }
@@ -103,23 +103,23 @@ mod datom {
 
     #[test]
     fn read_events_has_concrete_datoms() {
-        let query = Potential::<Query>::from("ReadEvents.f1c841")
+        let query = Potential::<Input>::from("ReadEvents.f1c841")
             .actualize(&mut budget())
             .unwrap();
-        assert_eq!(query, Query::ReadEvents(FlowId("f1c841".to_string())));
+        assert_eq!(query, Input::ReadEvents(FlowId("f1c841".to_string())));
         assert_eq!(
             events_read().datomize(vec![]).protosize().compact(),
             "EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 Some./tmp/transcript [ { job1 Shell running build } ] } PromptSubmitted.{ Some.s1 Some.p1 digest } Ended.None Cleared.Some.s1 Started.Some.s2 ] }"
         );
         assert_eq!(
-            Response::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow)
+            Output::ReadEventsRejected(ReadEventsRejected_Data::UnknownFlow)
                 .datomize(vec![])
                 .protosize()
                 .compact(),
             "ReadEventsRejected.UnknownFlow"
         );
         let read =
-            Potential::<Response>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 Some./tmp/transcript [ { job1 Shell running build } ] } PromptSubmitted.{ Some.s1 Some.p1 digest } Ended.None Cleared.Some.s1 Started.Some.s2 ] }")
+            Potential::<Output>::from("EventsRead.{ f1c841 [ Started.Some.s1 ToolUsed.Bash Stopped.{ Some.s1 Some./tmp/transcript [ { job1 Shell running build } ] } PromptSubmitted.{ Some.s1 Some.p1 digest } Ended.None Cleared.Some.s1 Started.Some.s2 ] }")
                 .actualize(&mut budget())
                 .unwrap();
         assert_eq!(read, events_read());

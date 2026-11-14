@@ -6,8 +6,8 @@ use flow_ethos::{
     Address, Aspect, Lock, LogicalDeliveryId, Model, Pid, Started, State, Topic, Until,
 };
 use meta_signal_flow::{
-    Attempt, Attempts, Binding, InspectRejected_Data, Inspected_Data, OldSeat, Query, Rebind_Data,
-    RebindRejected_Data, Rebinding, Response, RestartFailure, RestartPhase, RestartRecord,
+    Attempt, Attempts, Binding, Input, InspectRejected_Data, Inspected_Data, OldSeat, Output,
+    Rebind_Data, RebindRejected_Data, Rebinding, RestartFailure, RestartPhase, RestartRecord,
     VisibleAttempt, VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
     VisibleQueueEvidence, Withdraw_Data, WithdrawRejected_Data,
 };
@@ -76,8 +76,8 @@ fn attempt() -> VisibleAttempt {
     })
 }
 
-fn inspected() -> Response {
-    Response::Inspected(Inspected_Data {
+fn inspected() -> Output {
+    Output::Inspected(Inspected_Data {
         visible_metaflow: VisibleMetaflow {
             address: address(),
             state: State::Awake(FlowId("f1c841".to_string())),
@@ -125,28 +125,28 @@ fn restart_record() -> RestartRecord {
     }
 }
 
-fn queries() -> Vec<Query> {
+fn queries() -> Vec<Input> {
     vec![
-        Query::Inspect(address()),
-        Query::Rebind(Rebind_Data {
+        Input::Inspect(address()),
+        Input::Rebind(Rebind_Data {
             address: address(),
             rebinding: Rebinding::Pane(HerdrPaneId("w7B".to_string())),
         }),
-        Query::Rebind(Rebind_Data {
+        Input::Rebind(Rebind_Data {
             address: address(),
             rebinding: Rebinding::Flow(FlowId("f1c841".to_string())),
         }),
-        Query::Withdraw(Withdraw_Data {
+        Input::Withdraw(Withdraw_Data {
             address: address(),
             logical_delivery_id: LogicalDeliveryId("logical-7".to_string()),
         }),
     ]
 }
 
-fn replies() -> Vec<Response> {
+fn replies() -> Vec<Output> {
     vec![
         inspected(),
-        Response::Inspected(Inspected_Data {
+        Output::Inspected(Inspected_Data {
             visible_metaflow: VisibleMetaflow {
                 address: address(),
                 state: State::Asleep,
@@ -161,17 +161,17 @@ fn replies() -> Vec<Response> {
             visible_attempt_vector: vec![],
             restart_record_option: None,
         }),
-        Response::InspectRejected(InspectRejected_Data::UnknownAddress),
-        Response::Rebound(address()),
-        Response::RebindRejected(RebindRejected_Data::UnknownAddress),
-        Response::RebindRejected(RebindRejected_Data::PaneAbsent),
-        Response::RebindRejected(RebindRejected_Data::FlowUnknown),
-        Response::RebindRejected(RebindRejected_Data::NotAwake),
-        Response::RebindRejected(RebindRejected_Data::HerdrUnavailable),
-        Response::RebindRejected(RebindRejected_Data::FlowTaken(address())),
-        Response::Withdrawn,
-        Response::WithdrawRejected(WithdrawRejected_Data::UnknownAddress),
-        Response::WithdrawRejected(WithdrawRejected_Data::NotQueued),
+        Output::InspectRejected(InspectRejected_Data::UnknownAddress),
+        Output::Rebound(address()),
+        Output::RebindRejected(RebindRejected_Data::UnknownAddress),
+        Output::RebindRejected(RebindRejected_Data::PaneAbsent),
+        Output::RebindRejected(RebindRejected_Data::FlowUnknown),
+        Output::RebindRejected(RebindRejected_Data::NotAwake),
+        Output::RebindRejected(RebindRejected_Data::HerdrUnavailable),
+        Output::RebindRejected(RebindRejected_Data::FlowTaken(address())),
+        Output::Withdrawn,
+        Output::WithdrawRejected(WithdrawRejected_Data::UnknownAddress),
+        Output::WithdrawRejected(WithdrawRejected_Data::NotQueued),
     ]
 }
 
@@ -180,14 +180,14 @@ fn repairs_round_trip_as_an_archive() {
     for query in queries() {
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
             query
         );
     }
     for reply in replies() {
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
         assert_eq!(
-            rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             reply
         );
     }
@@ -248,12 +248,12 @@ fn obligations() -> Vec<VisibleAttempt> {
     reaps.chain(handovers).collect()
 }
 
-fn inspected_with_obligations() -> Response {
-    let Response::Inspected(mut data) = inspected() else {
+fn inspected_with_obligations() -> Output {
+    let Output::Inspected(mut data) = inspected() else {
         unreachable!()
     };
     data.visible_attempt_vector.extend(obligations());
-    Response::Inspected(data)
+    Output::Inspected(data)
 }
 
 #[test]
@@ -261,7 +261,7 @@ fn inspect_lists_pending_reaps_and_handovers_as_an_archive() {
     let reply = inspected_with_obligations();
     let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&reply).unwrap();
     assert_eq!(
-        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
         reply
     );
     let private = Attempt::Reap(ReapPending {
@@ -303,7 +303,7 @@ mod datom {
         for (query, text) in queries().into_iter().zip(texts) {
             assert_eq!(query.datomize(vec![]).protosize().compact(), text);
             assert_eq!(
-                Potential::<Query>::from(text)
+                Potential::<Input>::from(text)
                     .actualize(&mut budget())
                     .unwrap(),
                 query
@@ -331,7 +331,7 @@ mod datom {
         for (reply, text) in replies().into_iter().zip(texts) {
             assert_eq!(reply.datomize(vec![]).protosize().compact(), text);
             assert_eq!(
-                Potential::<Response>::from(text)
+                Potential::<Output>::from(text)
                     .actualize(&mut budget())
                     .unwrap(),
                 reply
@@ -381,7 +381,7 @@ mod datom {
         let reply = inspected_with_obligations();
         let text = reply.datomize(vec![]).protosize().compact();
         assert_eq!(
-            Potential::<Response>::from(text.as_str())
+            Potential::<Output>::from(text.as_str())
                 .actualize(&mut budget())
                 .unwrap(),
             reply
