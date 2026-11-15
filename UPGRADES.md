@@ -1,5 +1,17 @@
 # Upgrades
 
+## 84.0.0: heartbeat configuration leaves the current wire
+
+Built on 83.0.0 (`06fff39`), retaining ethos-zero 29.0.0 (`f23eacf`).
+
+- Remove `Configure.Heartbeat`, its current-wire payload types and the
+  `ConfiguredHeartbeat` snapshot position. Other inputs, including
+  `ConsumeReset`, retain their vocabulary.
+- The source digest changes; frozen 83 peers are refused before input
+  decoding. Every current meta producer and consumer moves together.
+- Dormant Memory payloads and historical heartbeat tags belong to the
+  Flow consumer, independently of this current-wire vocabulary.
+
 ## 83.0.0: ended-turn retention is configuration; signal-flow 64
 
 Built on 82.0.0 (`570b173`, recovery text), on signal-flow 64.0.0

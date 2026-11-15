@@ -47,3 +47,15 @@ fn the_ordinary_contract_is_refused_on_the_meta_socket() {
         ))
     );
 }
+
+#[test]
+fn a_meta_83_peer_is_refused_with_this_digest() {
+    let older = include_str!("fixtures/meta-signal-flow-83.ethos");
+    assert_ne!(Handshake::of_source(older), Input::greeting());
+    assert_eq!(
+        Input::receipt(&Handshake::of_source(older)),
+        HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
+            Input::contract_digest()
+        ))
+    );
+}

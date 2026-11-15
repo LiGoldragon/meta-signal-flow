@@ -513,9 +513,6 @@ Signal
   ; The ended Codex turn ids one thread's turn ledger keeps, 0 or more; a
   ; new Memory seeds 64.
   TurnRetentionBound.Integer
-  HeartbeatPeriodSeconds.Integer
-  HeartbeatRecipients.Vector<Address>
-  HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
   CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
   ; Keep the payload type distinct from the unit Input.Configuration variant.
   ConfigurationChange.[ Models.Vector<ConfigureModel>
@@ -530,7 +527,6 @@ Signal
                          HarnessFlags.Vector<ConfigureHarnessFlags>
                          Investigation.Address
                          DefaultMinutes.Minutes
-                         Heartbeat.Option<HeartbeatConfig>
                          ProtectedAddresses.Vector<Address>
                          Counters.ConfigureCounters
                          RequestIdDraws.DrawBound
@@ -549,7 +545,7 @@ Signal
             Harness.HarnessKind
             Refresh.ModelName
             ContextWarning.ModelName ]
-  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> SuccessorRecoveryText ConfiguredEndedTurnRetention.TurnRetentionBound }
+  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> SuccessorRecoveryText ConfiguredEndedTurnRetention.TurnRetentionBound }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next

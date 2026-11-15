@@ -377,21 +377,6 @@ pub struct TryBound(pub i64);
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct TurnRetentionBound(pub i64);
 #[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct HeartbeatPeriodSeconds(pub i64);
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct HeartbeatRecipients(pub std::vec::Vec<flow_ethos::Address>);
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct HeartbeatConfig {
-    pub heartbeat_period_seconds: HeartbeatPeriodSeconds,
-    pub heartbeat_recipients: HeartbeatRecipients,
-}
-#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum CountersRefusal {
@@ -422,7 +407,6 @@ pub enum ConfigurationChange {
     HarnessFlags(std::vec::Vec<ConfigureHarnessFlags>),
     Investigation(flow_ethos::Address),
     DefaultMinutes(flow_ethos::Minutes),
-    Heartbeat(std::option::Option<HeartbeatConfig>),
     ProtectedAddresses(std::vec::Vec<flow_ethos::Address>),
     Counters(ConfigureCounters),
     RequestIdDraws(DrawBound),
@@ -497,10 +481,6 @@ pub struct ConfiguredDefaultMinutes(pub flow_ethos::Minutes);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub struct ConfiguredHeartbeat(pub std::option::Option<HeartbeatConfig>);
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfiguredProtectedAddresses(pub std::vec::Vec<flow_ethos::Address>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -546,7 +526,6 @@ pub struct ConfigurationSnapshot {
     pub configured_harness_flags: ConfiguredHarnessFlags,
     pub configured_investigation: ConfiguredInvestigation,
     pub configured_default_minutes: ConfiguredDefaultMinutes,
-    pub configured_heartbeat: ConfiguredHeartbeat,
     pub configured_protected_addresses: ConfiguredProtectedAddresses,
     pub configured_counters: ConfiguredCounters,
     pub configured_request_id_draws: ConfiguredRequestIdDraws,

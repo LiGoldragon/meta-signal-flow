@@ -73,7 +73,7 @@ mod textual {
     fn snapshot_carries_the_current_text_as_its_final_typed_position() {
         let nexus = "{ /home/li/primary { /bin/stable /tmp/stable /tmp/stable.sock [ stable-model ] } { /bin/next /tmp/next /tmp/next.sock [ next-model ] } [] [] None None /tmp/curriculum.sock 60 None main }";
         let preceding = format!(
-            "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [] {{ 1 1 1 }} 32 3 Unconfigured [] []"
+            "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 [] {{ 1 1 1 }} 32 3 Unconfigured [] []"
         );
         for current in ["initial-guidance", "changed-guidance"] {
             let text = format!("{{ {preceding} {current} 64 }}");

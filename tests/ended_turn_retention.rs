@@ -30,8 +30,8 @@ fn retention_is_one_configuration_value_on_the_binary_wire() {
 }
 
 #[test]
-fn retention_is_the_reserved_breaking_release() {
-    assert_eq!(meta_signal_flow::WIRE_VERSION, "83.0.0");
+fn retention_remains_in_the_current_breaking_release() {
+    assert_eq!(meta_signal_flow::WIRE_VERSION, "84.0.0");
 }
 
 #[cfg(feature = "datom")]
@@ -89,7 +89,7 @@ mod textual {
     fn snapshot_carries_the_retention_as_its_final_position() {
         let nexus = "{ /home/li/primary { /bin/stable /tmp/stable /tmp/stable.sock [ stable-model ] } { /bin/next /tmp/next /tmp/next.sock [ next-model ] } [] [] None None /tmp/curriculum.sock 60 None main }";
         let preceding = format!(
-            "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [] {{ 1 1 1 }} 32 3 Unconfigured [] [] guidance"
+            "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 [] {{ 1 1 1 }} 32 3 Unconfigured [] [] guidance"
         );
         for bound in [0, 64] {
             let text = format!("{{ {preceding} {bound} }}");
@@ -114,7 +114,7 @@ mod textual {
                 output
             );
         }
-        // The 82.0.0 snapshot shape is incomplete under 83.0.0.
+        // A snapshot without the retention position is incomplete.
         assert!(
             Potential::<ConfigurationSnapshot>::from(format!("{{ {preceding} }}"))
                 .actualize(&mut budget())
