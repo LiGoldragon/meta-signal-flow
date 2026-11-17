@@ -397,7 +397,7 @@ fn configure_nexus_without_its_herdr_session_is_refused_by_the_reader() {
 
 #[test]
 fn store_refusal_preserves_its_error_text() {
-    let text = "Refused.«database rejected configuration»";
+    let text = "Refused.StoreRefused.«database rejected configuration»";
     let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -431,32 +431,49 @@ fn a_refusal_of_one_variant_is_that_variant() {
         );
     }
     assert_eq!(
-        Potential::<Output>::from("Refused.«no space»")
+        Potential::<Output>::from("Refused.StoreRefused.«no space»")
             .actualize(&mut budget())
             .unwrap(),
-        Output::Refused(meta_signal_flow::StoreFailure("no space".into()))
+        Output::Refused(meta_signal_flow::Refused_Data::StoreRefused(
+            meta_signal_flow::StoreFailure("no space".into())
+        ))
     );
 }
 
-/// The override panel rides the meta socket as Override, each override
-/// answered Overridden with the panel's own answer. Close takes the place
-/// of Retire and Renew the place of Refresh.
+/// The override panel stands at the root of the meta Signal, each input
+/// answered at its own position: SetState, CrystallizeNow, Renew, Close,
+/// Deliver, Unlock, Forget, Hold and Resume, answered StateSet, Asked,
+/// Renewed, Closed, Delivered, Unlocked, Forgotten, Held and Resumed. The
+/// Override wrapper is gone, as are Retire and Refresh.
 #[test]
-fn every_override_and_its_answer_round_trip() {
-    for text in [
-        "Override.SetState.{ d8df70 Resting }",
-        "Override.CrystallizeNow.d8df70",
-        "Override.Renew.{ Psyche core Fable }",
-        "Override.Close.d8df70",
-        "Override.Deliver.{ Mind core Sol }",
-        "Override.Unlock.{ Mind core Sol }",
-        "Override.Forget.d8df70",
-        "Override.Hold",
-        "Override.Resume",
+fn every_override_stands_at_the_root_and_its_answer_round_trips() {
+    let flow = || signal_flow::FlowId("d8df70".into());
+    let sol = || signal_flow::Address {
+        aspect: meta_signal_flow::Aspect::Mind,
+        topic: meta_signal_flow::Topic("core".into()),
+        model: meta_signal_flow::Model::Sol,
+    };
+    for (text, expected) in [
+        (
+            "SetState.{ d8df70 Resting }",
+            Input::SetState(meta_signal_flow::SetState_Data {
+                flow_id: flow(),
+                state: meta_signal_flow::State::Resting,
+            }),
+        ),
+        ("CrystallizeNow.d8df70", Input::CrystallizeNow(flow())),
+        ("Renew.{ Mind core Sol }", Input::Renew(sol())),
+        ("Close.d8df70", Input::Close(flow())),
+        ("Deliver.{ Mind core Sol }", Input::Deliver(sol())),
+        ("Unlock.{ Mind core Sol }", Input::Unlock(sol())),
+        ("Forget.d8df70", Input::Forget(flow())),
+        ("Hold", Input::Hold),
+        ("Resume", Input::Resume),
     ] {
         let query = Potential::<Input>::from(text)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        assert_eq!(query, expected, "{text}");
         assert_eq!(query.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
         assert_eq!(
@@ -464,34 +481,30 @@ fn every_override_and_its_answer_round_trip() {
             query
         );
     }
-    assert_eq!(
-        Potential::<Input>::from("Override.Hold")
-            .actualize(&mut budget())
-            .unwrap(),
-        Input::Override(meta_signal_flow::panel::Input::Hold)
-    );
-    for text in [
-        "Overridden.StateSet.{ d8df70 Crystallizing }",
-        "Overridden.Asked.d8df70",
-        "Overridden.Renewed.c1a0de",
-        "Overridden.Closed.d8df70",
-        "Overridden.Delivered.{ Mind core Sol }",
-        "Overridden.Unlocked.{ Mind core Sol }",
-        "Overridden.Forgotten.d8df70",
-        "Overridden.Held",
-        "Overridden.Resumed",
-        "Overridden.Refused.UnknownFlow.d8df70",
-        "Overridden.Refused.UnknownAddress.{ Mind core Sol }",
-        "Overridden.Refused.Harnessed.d8df70",
-        "Overridden.Refused.Unharnessed.d8df70",
-        "Overridden.Refused.Restarting.d8df70",
-        "Overridden.Refused.HerdrRefused.d8df70",
-        "Overridden.Refused.Unrenewed.NotAwake",
-        "Overridden.Refused.StoreRefused",
+    for (text, expected) in [
+        (
+            "StateSet.{ d8df70 Crystallizing }",
+            Output::StateSet(meta_signal_flow::StateSet_Data {
+                flow_id: flow(),
+                state: meta_signal_flow::State::Crystallizing,
+            }),
+        ),
+        ("Asked.d8df70", Output::Asked(flow())),
+        (
+            "Renewed.c1a0de",
+            Output::Renewed(signal_flow::FlowId("c1a0de".into())),
+        ),
+        ("Closed.d8df70", Output::Closed(flow())),
+        ("Delivered.{ Mind core Sol }", Output::Delivered(sol())),
+        ("Unlocked.{ Mind core Sol }", Output::Unlocked(sol())),
+        ("Forgotten.d8df70", Output::Forgotten(flow())),
+        ("Held", Output::Held),
+        ("Resumed", Output::Resumed),
     ] {
         let response = Potential::<Output>::from(text)
             .actualize(&mut budget())
             .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        assert_eq!(response, expected, "{text}");
         assert_eq!(response.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
@@ -499,22 +512,122 @@ fn every_override_and_its_answer_round_trip() {
             response
         );
     }
-    for retired in ["Retire.d8df70", "Refresh.{ Psyche core Fable }"] {
+    for gone in [
+        "Override.Hold",
+        "Override.Close.d8df70",
+        "Retire.d8df70",
+        "Refresh.{ Psyche core Fable }",
+    ] {
         assert!(
-            Potential::<Input>::from(retired)
+            Potential::<Input>::from(gone)
                 .actualize(&mut budget())
                 .is_err(),
-            "{retired} is no meta input; the panel takes its place"
+            "{gone} is no meta input; the panel stands at the root"
         );
     }
+    assert!(
+        Potential::<Output>::from("Overridden.Held")
+            .actualize(&mut budget())
+            .is_err(),
+        "Overridden is no meta output"
+    );
+}
+
+/// Refused is one enum on the meta Signal: the panel's refusals and the
+/// store's, merged. HerdrRefused is CapsuleRefused, and the store's
+/// refusal carries Memory's words.
+#[test]
+fn refused_is_one_enum_carrying_every_refusal() {
+    use meta_signal_flow::Refused_Data;
+    let flow = || signal_flow::FlowId("d8df70".into());
+    for (text, expected) in [
+        (
+            "Refused.UnknownFlow.d8df70",
+            Refused_Data::UnknownFlow(flow()),
+        ),
+        (
+            "Refused.UnknownAddress.{ Mind core Sol }",
+            Refused_Data::UnknownAddress(signal_flow::Address {
+                aspect: meta_signal_flow::Aspect::Mind,
+                topic: meta_signal_flow::Topic("core".into()),
+                model: meta_signal_flow::Model::Sol,
+            }),
+        ),
+        ("Refused.Harnessed.d8df70", Refused_Data::Harnessed(flow())),
+        (
+            "Refused.Unharnessed.d8df70",
+            Refused_Data::Unharnessed(flow()),
+        ),
+        (
+            "Refused.Restarting.d8df70",
+            Refused_Data::Restarting(flow()),
+        ),
+        (
+            "Refused.CapsuleRefused.d8df70",
+            Refused_Data::CapsuleRefused(flow()),
+        ),
+        (
+            "Refused.Unrenewed.NotAwake",
+            Refused_Data::Unrenewed(signal_flow::RefreshRejection::NotAwake),
+        ),
+        (
+            "Refused.StoreRefused.«no space»",
+            Refused_Data::StoreRefused(meta_signal_flow::StoreFailure("no space".into())),
+        ),
+    ] {
+        let response = Potential::<Output>::from(text)
+            .actualize(&mut budget())
+            .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        assert_eq!(response, Output::Refused(expected), "{text}");
+        assert_eq!(response.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
+            response
+        );
+    }
+    for gone in ["Refused.HerdrRefused.d8df70", "Refused.«no space»"] {
+        assert!(
+            Potential::<Output>::from(gone)
+                .actualize(&mut budget())
+                .is_err(),
+            "{gone} is no refusal of this Signal"
+        );
+    }
+}
+
+/// The old meta Deliver, which types one Message into a flow's pane, is
+/// TypeMessage, answered MessageTyped: Deliver now hands a permaflow its
+/// queue.
+#[test]
+fn typing_a_message_into_a_pane_is_type_message() {
+    let text = "TypeMessage.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Opus } Text.«Stage 1 is deployed.» } }";
+    let query = Potential::<Input>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert!(matches!(query, Input::TypeMessage(_)), "{query:?}");
+    assert!(
+        Potential::<Input>::from(
+            "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Opus } Text.«Stage 1 is deployed.» } }"
+        )
+        .actualize(&mut budget())
+        .is_err(),
+        "Deliver takes an Address now"
+    );
+    assert!(
+        Potential::<Output>::from("Delivered.{ NotRequested Presented }")
+            .actualize(&mut budget())
+            .is_err(),
+        "Delivered names an Address now"
+    );
 }
 
 #[test]
 fn delivery_requests_have_concrete_datoms() {
     for text in [
-        "Deliver.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Opus } Text.«Stage 1 is deployed; run the tier tests.» } }",
-        "Deliver.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Notification Text.«Stop the ouranos build now.» } }",
-        "Deliver.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Sender.{ Field core Astra } Living.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
+        "TypeMessage.{ m-7f3a2c:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Opus } Text.«Stage 1 is deployed; run the tier tests.» } }",
+        "TypeMessage.{ m-81b0e4:7d41e0:0 7d41e0 HardAbrupt.{ Notification Text.«Stop the ouranos build now.» } }",
+        "TypeMessage.{ m-90c1aa:7d41e0:0 7d41e0 MiddleAbrupt.{ Sender.{ Field core Astra } Living.{ «on build hosts» «Prometheus should be doing the builds.» } } }",
         "Vet.{ m-a2d913:7d41e0:0 7d41e0 Soft.{ Sender.{ Psyche flow Opus } Text./compact } }",
         "Command.{ 7d41e0 Compact }",
         "Command.{ 7d41e0 Interrupt }",
@@ -530,9 +643,9 @@ fn delivery_requests_have_concrete_datoms() {
 #[test]
 fn delivery_replies_have_concrete_datoms() {
     for text in [
-        "Delivered.{ NotRequested Presented }",
-        "Delivered.{ Observed Transported }",
-        "Delivered.{ Unobserved Uncertain }",
+        "MessageTyped.{ NotRequested Presented }",
+        "MessageTyped.{ Observed Transported }",
+        "MessageTyped.{ Unobserved Uncertain }",
         "DeliveryRejected.RecipientBlocked",
         "DeliveryRejected.RecipientWorking",
         "DeliveryRejected.ComposerOccupied",
@@ -895,7 +1008,7 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
 /// keys never enter the prompt.
 #[test]
 fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
-    let text = "Deliver.{ attempt-7 7d41e0 MiddleAbrupt.{ Notification Waking.[ { Sender.{ Psyche flow Fable } MiddleAbrupt.Task.{ t001 30 «Draft the proposal.» } } { Notification Soft.Notice.{ n001 «Reminder 1 of 4: task has no Done.» } } { Sender.{ Mind flow Sol } Soft.Done.{ t001 «Proposal drafted.» } } ] } }";
+    let text = "TypeMessage.{ attempt-7 7d41e0 MiddleAbrupt.{ Notification Waking.[ { Sender.{ Psyche flow Fable } MiddleAbrupt.Task.{ t001 30 «Draft the proposal.» } } { Notification Soft.Notice.{ n001 «Reminder 1 of 4: task has no Done.» } } { Sender.{ Mind flow Sol } Soft.Done.{ t001 «Proposal drafted.» } } ] } }";
     let query = Potential::<Input>::from(text)
         .actualize(&mut budget())
         .unwrap_or_else(|error| panic!("{text}: {error:?}"));
@@ -908,7 +1021,7 @@ fn a_letter_carries_a_waking_of_native_inputs_each_naming_its_sender() {
     // One input alone is a Waking of one; the single-input form is gone.
     assert!(
         Potential::<Input>::from(
-            "Deliver.{ attempt-8 7d41e0 Soft.{ Notification NativeInput.{ Notification Soft.Notice.«One alone.» } } }"
+            "TypeMessage.{ attempt-8 7d41e0 Soft.{ Notification NativeInput.{ Notification Soft.Notice.«One alone.» } } }"
         )
         .actualize(&mut budget())
         .is_err()

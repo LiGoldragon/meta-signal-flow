@@ -1,11 +1,12 @@
 ; Flow privileged Signal.
 ;
-; Flow is the only pane writer. Deliver and Command are the only ways
+; Flow is the only pane writer. TypeMessage and Command are the only ways
 ; anything is typed into a flow's pane, and both run under Flow's own
 ; per-pane lease: an exclusive hold over the whole key sequence, never
 ; handed out on the wire.
 ;
-; Deliver carries a typed Message addressed by FlowId; Flow renders it.
+; TypeMessage carries a typed Message addressed by FlowId; Flow renders it
+; and types it into the flow's pane, answered MessageTyped.
 ; A Letter whose Content is a Waking is typed as that Waking alone: one
 ; top-level vector of its inputs, oldest first, each naming its logical
 ; id, its sender and its own priority, so the recipient can tell each
@@ -18,12 +19,12 @@
 ; pane text), and a first line that is a harness command (a sigil of the
 ; recipient's HarnessProfile, then a command word) is refused as
 ; HarnessCommand: harness commands go through Command. Vet answers what
-; Deliver would refuse and types nothing. A flow its Address no longer
+; TypeMessage would refuse and types nothing. A flow its Address no longer
 ; receives as is refused Superseded, naming the flow the Address receives
 ; as; a flow whose launch holds its Address unconfirmed is refused
 ; Unconfirmed. Which flow an Address receives as is read from the record
 ; its launch writes at confirmation, never from a reap or a handover still
-; pending, and Command refuses the same two. Deliver is idempotent on its
+; pending, and Command refuses the same two. TypeMessage is idempotent on its
 ; DeliveryId: a repeat answers the stored Delivery and types nothing. A
 ; delivery a crash left under the lease settles Uncertain and is never
 ; retried.
@@ -235,7 +236,7 @@
 ; NoThreshold says no refresh threshold applies, its model having none
 ; configured.
 ;
-; Deliver is refused PastThreshold, before anything reaches the pane, when
+; TypeMessage is refused PastThreshold, before anything reaches the pane, when
 ; the flow's last measured context is at or past its model's refresh
 ; threshold: a flow past its threshold is given no new message.
 
@@ -289,10 +290,30 @@
 ; answers RestartQueued, as the ordinary one does; what the ordinary one
 ; answers Refused is OrdinaryRefused here.
 ;
-; Override carries the override panel (panel.ethos): the owner's hand on
-; what the Flow Nexus holds and does, each override answered Overridden
-; with the panel's own answer. Its Close takes the place of Retire and its
-; Renew the place of Refresh.
+; The override panel is the owner's hand on what the Flow Nexus holds and
+; does, its inputs standing at the root of this Signal. Each override is
+; recorded in the Flow Nexus's Memory as a transition of the flow it acts
+; on, with the cause Overridden. SetState corrects the state the Nexus
+; holds for a flow. CrystallizeNow asks a flow for its crystallization
+; whatever its state; it is Asked, and a flow with no harness running is
+; Unharnessed. Renew starts a fresh flow of a permaflow from its
+; crystallization and closes the old one: when the fresh flow reports
+; Started, the old flow's running turn is interrupted and its harness
+; closed; Renewed names the fresh flow. Close closes a flow's harness.
+; Deliver hands a permaflow its queue now. Unlock releases a permaflow's
+; lock. Forget removes the record of a flow that has no harness; a flow
+; with one is Harnessed. Hold is the shutdown switch: the Flow Nexus stops
+; acting on its own, its clocks, its deliveries and its launches, and still
+; answers. Resume lets it act again. A flow is Acting while its turn runs,
+; Resting between turns, Crystallizing while it writes its
+; crystallization, and Asleep once it has no harness; MetaflowState is the
+; metaflow's, Awake as a flow or Asleep.
+;
+; Refused is the refusal every input may answer, and changes nothing:
+; UnknownFlow and UnknownAddress name what Flow does not hold, Restarting a
+; flow a restart holds, CapsuleRefused a flow whose place the Capsule did
+; not close, Unrenewed why a fresh flow did not start, and StoreRefused
+; why Memory refused.
 
 ; Rebind repairs where a metaflow's flow lives, with no harness action.
 ; Rebinding.Pane: the flow the metaflow is Awake as now lives in this pane
@@ -324,16 +345,15 @@
 ; of its own.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending ]
-  :meta_signal_flow:panel:[ PanelInput.Input PanelOutput.Output ]
-  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
+  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting
   Restart.FlowId                                ; as the ordinary Restart, a protected Address's included
-  Deliver.DeliveryRequest
+  TypeMessage.DeliveryRequest
   Vet.DeliveryRequest
   Command.CommandRequest
   ResolvePeer.ProcessIdentity
@@ -351,14 +371,22 @@ Signal
   Withdraw.{ Address LogicalDeliveryId }        ; one queued delivery leaves the queue
   ObserveConfiguration                          ; the configuration, then each change
   Remove.Removal                                ; one declaration leaves its family
-  Override.PanelInput ]                         ; one override, the owner's hand on the Nexus
+  SetState.{ FlowId State }                     ; the override panel: the owner's hand on the Nexus
+  CrystallizeNow.FlowId
+  Renew.Address
+  Close.FlowId
+  Deliver.Address
+  Unlock.Address
+  Forget.FlowId
+  Hold
+  Resume ]
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
   FlowRegistered.FlowNode
   BoundExisting
   Restarted.FlowId
-  Delivered.VisibleDelivery
+  MessageTyped.VisibleDelivery
   Vetted
   Commanded.CommandOutcome
   PeerResolved.CallerIdentity
@@ -374,7 +402,15 @@ Signal
   Withdrawn
   Unconfigured                                  ; ObserveConfiguration's; its frames are Configuration
   Removed.Removal                               ; the Removal given, echoed whole
-  Overridden.PanelOutput                        ; the panel's answer to the override
+  StateSet.{ FlowId State }                     ; the override panel's answers
+  Asked.FlowId
+  Renewed.FlowId                                ;   the fresh flow
+  Closed.FlowId
+  Delivered.Address
+  Unlocked.Address
+  Forgotten.FlowId
+  Held
+  Resumed
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -384,7 +420,14 @@ Signal
   DeliveryRejected.DeliveryRejection
   CommandRejected.CommandRejection
   PeerResolutionRejected.CallerResolutionRejection
-  Refused.StoreFailure
+  Refused.[ UnknownFlow.FlowId                  ; a refusal changes nothing
+            UnknownAddress.Address
+            Harnessed.FlowId                    ;   the flow still has a harness
+            Unharnessed.FlowId                  ;   the flow has no harness to ask
+            Restarting.FlowId                   ;   a restart holds the flow
+            CapsuleRefused.FlowId               ;   the Capsule did not close the flow's place
+            Unrenewed.RefreshRejection          ;   the fresh flow did not start, and why
+            StoreRefused.StoreFailure ]         ;   Memory refused, and why
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
   ReadSendOutcomesRejected
@@ -395,7 +438,8 @@ Signal
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RestartQueued.FlowId ]
-[ ; The meta contract owns this read projection; Memory owns its stored form.
+[ State.[ Acting Resting Crystallizing Asleep ]  ; a flow's state, as the override panel sets it
+  ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>
      Option<TranscriptPath>
@@ -670,7 +714,7 @@ Signal
                    Launch.LaunchAttempt
                    Reap.ReapPending
                    Handover.HandoverPending ]
-  VisibleMetaflow.{ Address State Vector<FlowId> Vector<VisibleNativeInput> }
+  VisibleMetaflow.{ Address MetaflowState Vector<FlowId> Vector<VisibleNativeInput> }
   ; Operational meta replies project private routing and ledger keys away.
   ; Debug is the one explicit interface that exposes them.
   VisibleDelivery.{ InterruptWitness DeliveryGrade }

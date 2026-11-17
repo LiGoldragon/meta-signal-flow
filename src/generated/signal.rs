@@ -7,6 +7,15 @@
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum State {
+    Acting,
+    Resting,
+    Crystallizing,
+    Asleep,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct StopMetadata {
     pub native_session_id_option: std::option::Option<signal_flow::NativeSessionId>,
     pub transcript_path_option: std::option::Option<signal_flow::TranscriptPath>,
@@ -1176,7 +1185,7 @@ pub enum VisibleAttempt {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct VisibleMetaflow {
     pub address: flow_ethos::Address,
-    pub state: flow_ethos::State,
+    pub metaflow_state: flow_ethos::State,
     pub flow_id_vector: std::vec::Vec<signal_flow::FlowId>,
     pub visible_native_input_vector: std::vec::Vec<signal_flow::VisibleNativeInput>,
 }
@@ -1310,6 +1319,13 @@ pub struct Withdraw_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct SetState_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub state: State,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Input {
     Configuration,
     Configure(ConfigurationChange),
@@ -1317,7 +1333,7 @@ pub enum Input {
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
     Restart(signal_flow::FlowId),
-    Deliver(DeliveryRequest),
+    TypeMessage(DeliveryRequest),
     Vet(DeliveryRequest),
     Command(CommandRequest),
     ResolvePeer(ProcessIdentity),
@@ -1333,7 +1349,15 @@ pub enum Input {
     Withdraw(Withdraw_Data),
     ObserveConfiguration,
     Remove(Removal),
-    Override(meta_signal_flow::panel::Input),
+    SetState(SetState_Data),
+    CrystallizeNow(signal_flow::FlowId),
+    Renew(flow_ethos::Address),
+    Close(signal_flow::FlowId),
+    Deliver(flow_ethos::Address),
+    Unlock(flow_ethos::Address),
+    Forget(signal_flow::FlowId),
+    Hold,
+    Resume,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1385,6 +1409,26 @@ pub struct DeliveryDebugged_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct StateSet_Data {
+    pub flow_id: signal_flow::FlowId,
+    pub state: State,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Refused_Data {
+    UnknownFlow(signal_flow::FlowId),
+    UnknownAddress(flow_ethos::Address),
+    Harnessed(signal_flow::FlowId),
+    Unharnessed(signal_flow::FlowId),
+    Restarting(signal_flow::FlowId),
+    CapsuleRefused(signal_flow::FlowId),
+    Unrenewed(signal_flow::RefreshRejection),
+    StoreRefused(StoreFailure),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ReadEventsRejected_Data {
     UnknownFlow,
     StoreRefused,
@@ -1431,7 +1475,7 @@ pub enum Output {
     FlowRegistered(signal_flow::FlowNode),
     BoundExisting(BoundExisting),
     Restarted(signal_flow::FlowId),
-    Delivered(VisibleDelivery),
+    MessageTyped(VisibleDelivery),
     Vetted,
     Commanded(CommandOutcome),
     PeerResolved(signal_flow::CallerIdentity),
@@ -1447,7 +1491,15 @@ pub enum Output {
     Withdrawn,
     Unconfigured,
     Removed(Removal),
-    Overridden(meta_signal_flow::panel::Output),
+    StateSet(StateSet_Data),
+    Asked(signal_flow::FlowId),
+    Renewed(signal_flow::FlowId),
+    Closed(signal_flow::FlowId),
+    Delivered(flow_ethos::Address),
+    Unlocked(flow_ethos::Address),
+    Forgotten(signal_flow::FlowId),
+    Held,
+    Resumed,
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1457,7 +1509,7 @@ pub enum Output {
     DeliveryRejected(DeliveryRejection),
     CommandRejected(CommandRejection),
     PeerResolutionRejected(signal_flow::CallerResolutionRejection),
-    Refused(StoreFailure),
+    Refused(Refused_Data),
     ReadEventsRejected(ReadEventsRejected_Data),
     ReadQueueDeliveriesRejected(ReadQueueDeliveriesRejected_Data),
     ReadSendOutcomesRejected,
@@ -1493,7 +1545,7 @@ pub trait Answering {
         &self,
         flow_id: &signal_flow::FlowId,
     ) -> std::result::Result<signal_flow::FlowId, Output>;
-    fn deliver(
+    fn type_message(
         &self,
         delivery_request: &DeliveryRequest,
     ) -> std::result::Result<VisibleDelivery, Output>;
@@ -1543,10 +1595,36 @@ pub trait Answering {
     fn withdraw(&self, withdraw: &Withdraw_Data) -> std::result::Result<(), Output>;
     fn observe_configuration(&self) -> std::result::Result<(), Output>;
     fn remove(&self, removal: &Removal) -> std::result::Result<Removal, Output>;
-    fn r#override(
+    fn set_state(
         &self,
-        panel_input: &meta_signal_flow::panel::Input,
-    ) -> std::result::Result<meta_signal_flow::panel::Output, Output>;
+        set_state: &SetState_Data,
+    ) -> std::result::Result<StateSet_Data, Output>;
+    fn crystallize_now(
+        &self,
+        flow_id: &signal_flow::FlowId,
+    ) -> std::result::Result<signal_flow::FlowId, Output>;
+    fn renew(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<signal_flow::FlowId, Output>;
+    fn close(
+        &self,
+        flow_id: &signal_flow::FlowId,
+    ) -> std::result::Result<signal_flow::FlowId, Output>;
+    fn deliver(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<flow_ethos::Address, Output>;
+    fn unlock(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<flow_ethos::Address, Output>;
+    fn forget(
+        &self,
+        flow_id: &signal_flow::FlowId,
+    ) -> std::result::Result<signal_flow::FlowId, Output>;
+    fn hold(&self) -> std::result::Result<(), Output>;
+    fn resume(&self) -> std::result::Result<(), Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1584,8 +1662,10 @@ impl Answerable for Input {
             Input::Restart(carried) => {
                 nexus.restart(carried).map_or_else(|refusal| refusal, Output::Restarted)
             }
-            Input::Deliver(carried) => {
-                nexus.deliver(carried).map_or_else(|refusal| refusal, Output::Delivered)
+            Input::TypeMessage(carried) => {
+                nexus
+                    .type_message(carried)
+                    .map_or_else(|refusal| refusal, Output::MessageTyped)
             }
             Input::Vet(carried) => {
                 nexus.vet(carried).map_or_else(|refusal| refusal, |()| Output::Vetted)
@@ -1650,10 +1730,32 @@ impl Answerable for Input {
             Input::Remove(carried) => {
                 nexus.remove(carried).map_or_else(|refusal| refusal, Output::Removed)
             }
-            Input::Override(carried) => {
+            Input::SetState(carried) => {
+                nexus.set_state(carried).map_or_else(|refusal| refusal, Output::StateSet)
+            }
+            Input::CrystallizeNow(carried) => {
                 nexus
-                    .r#override(carried)
-                    .map_or_else(|refusal| refusal, Output::Overridden)
+                    .crystallize_now(carried)
+                    .map_or_else(|refusal| refusal, Output::Asked)
+            }
+            Input::Renew(carried) => {
+                nexus.renew(carried).map_or_else(|refusal| refusal, Output::Renewed)
+            }
+            Input::Close(carried) => {
+                nexus.close(carried).map_or_else(|refusal| refusal, Output::Closed)
+            }
+            Input::Deliver(carried) => {
+                nexus.deliver(carried).map_or_else(|refusal| refusal, Output::Delivered)
+            }
+            Input::Unlock(carried) => {
+                nexus.unlock(carried).map_or_else(|refusal| refusal, Output::Unlocked)
+            }
+            Input::Forget(carried) => {
+                nexus.forget(carried).map_or_else(|refusal| refusal, Output::Forgotten)
+            }
+            Input::Hold => nexus.hold().map_or_else(|refusal| refusal, |()| Output::Held),
+            Input::Resume => {
+                nexus.resume().map_or_else(|refusal| refusal, |()| Output::Resumed)
             }
         }
     }

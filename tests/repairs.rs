@@ -80,7 +80,7 @@ fn inspected() -> Output {
     Output::Inspected(Inspected_Data {
         visible_metaflow: VisibleMetaflow {
             address: address(),
-            state: State::Awake(FlowId("f1c841".to_string())),
+            metaflow_state: State::Awake(FlowId("f1c841".to_string())),
             flow_id_vector: vec![FlowId("9a83ec".to_string())],
             visible_native_input_vector: vec![visible_entry()],
         },
@@ -149,7 +149,7 @@ fn replies() -> Vec<Output> {
         Output::Inspected(Inspected_Data {
             visible_metaflow: VisibleMetaflow {
                 address: address(),
-                state: State::Asleep,
+                metaflow_state: State::Asleep,
                 flow_id_vector: vec![],
                 visible_native_input_vector: vec![],
             },

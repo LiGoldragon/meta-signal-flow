@@ -1,5 +1,36 @@
 # Upgrades
 
+## 87.0.0: the override panel stands at the root of the meta Signal
+
+Built on 86.0.0 (`37e370c`), on signal-flow 64.0.0 (`83c04fe`) and the same
+ethos-zero 29.0.0 (`f23eacf`), for the Flow Nexus version 0 subversion 0-1,
+release 2 of the panel.
+
+- **The Override wrapper goes.** `ethos/panel.ethos` and
+  `meta_signal_flow::panel` are gone; the panel's inputs and outputs are
+  meta inputs and outputs, as the vision writes them: `SetState.{ FlowId
+  State }`, `CrystallizeNow.FlowId`, `Renew.Address`, `Close.FlowId`,
+  `Deliver.Address`, `Unlock.Address`, `Forget.FlowId`, `Hold`, `Resume`,
+  answered `StateSet`, `Asked`, `Renewed`, `Closed`, `Delivered`,
+  `Unlocked`, `Forgotten`, `Held`, `Resumed`. `flow-meta 'Override.Hold'`
+  is now `flow-meta 'Hold'`, answered `Held`. `State.[ Acting Resting
+  Crystallizing Asleep ]` is `meta_signal_flow::State`.
+- **The old meta `Deliver` is `TypeMessage`**, answered `MessageTyped`
+  (was `Delivered.VisibleDelivery`): it types one Message into a flow's
+  pane, where `Deliver` now hands a permaflow its queue.
+  `DeliveryRejected`, `Vet` and the delivery types keep their names.
+- **`Refused` is one enum**: `Refused.[ UnknownFlow.FlowId
+  UnknownAddress.Address Harnessed.FlowId Unharnessed.FlowId
+  Restarting.FlowId CapsuleRefused.FlowId Unrenewed.RefreshRejection
+  StoreRefused.StoreFailure ]`. The old `Refused.StoreFailure` is
+  `Refused.StoreRefused.StoreFailure`; the panel's `HerdrRefused` is
+  `CapsuleRefused`; the panel's bare `StoreRefused` carries Memory's words.
+- flow_ethos's `State`, a metaflow's, is imported as `MetaflowState`:
+  `VisibleMetaflow`'s field is `metaflow_state`. Its wire form is unchanged.
+- The contract digest is taken over `signal.ethos` alone (`CONTRACT`); an 86
+  peer is refused (tests/fixtures/meta-signal-flow-86.ethos). Every output
+  after `Removed` moves eight discriminants; consumers repin together.
+
 ## 86.0.0: the override panel; Close and Renew take the place of Retire and Refresh
 
 Built on 83.0.0 (`06fff39`), on signal-flow 64.0.0 (`83c04fe`) and the same
