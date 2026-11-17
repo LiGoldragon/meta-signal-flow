@@ -438,34 +438,73 @@ fn a_refusal_of_one_variant_is_that_variant() {
     );
 }
 
-/// Retire is the privileged way to take a seat out of Flow without pretending
-/// Flow closed it. The reply carries the whole row, so the caller sees the
-/// history that was kept rather than an acknowledgement that it is gone.
+/// The override panel rides the meta socket as Override, each override
+/// answered Overridden with the panel's own answer. Close takes the place
+/// of Retire and Renew the place of Refresh.
 #[test]
-fn retire_names_one_flow_and_answers_with_the_row_it_kept() {
-    let request = "Retire.d8df70";
-    let query = Potential::<Input>::from(request)
-        .actualize(&mut budget())
-        .unwrap();
-    assert!(matches!(&query, Input::Retire(flow_id) if flow_id.0 == "d8df70"));
-    assert_eq!(query.datomize(vec![]).protosize().compact(), request);
-
+fn every_override_and_its_answer_round_trip() {
     for text in [
-        "FlowRetired.{ d8df70 claude-session Claude Unavailable Unavailable Flow.{ 88475f field-session } Retired }",
-        "RetireRejected.UnknownFlow",
-        "RetireRejected.AlreadyGone",
-        "RetireRejected.StoreRefused",
-        "RetireRejected.CloseRefused",
-        "RetireRejected.Maintained",
+        "Override.SetState.{ d8df70 Resting }",
+        "Override.CrystallizeNow.d8df70",
+        "Override.Renew.{ Psyche core Fable }",
+        "Override.Close.d8df70",
+        "Override.Deliver.{ Mind core Sol }",
+        "Override.Unlock.{ Mind core Sol }",
+        "Override.Forget.d8df70",
+        "Override.Hold",
+        "Override.Resume",
+    ] {
+        let query = Potential::<Input>::from(text)
+            .actualize(&mut budget())
+            .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
+            query
+        );
+    }
+    assert_eq!(
+        Potential::<Input>::from("Override.Hold")
+            .actualize(&mut budget())
+            .unwrap(),
+        Input::Override(meta_signal_flow::panel::Input::Hold)
+    );
+    for text in [
+        "Overridden.StateSet.{ d8df70 Crystallizing }",
+        "Overridden.Asked.d8df70",
+        "Overridden.Renewed.c1a0de",
+        "Overridden.Closed.d8df70",
+        "Overridden.Delivered.{ Mind core Sol }",
+        "Overridden.Unlocked.{ Mind core Sol }",
+        "Overridden.Forgotten.d8df70",
+        "Overridden.Held",
+        "Overridden.Resumed",
+        "Overridden.Refused.UnknownFlow.d8df70",
+        "Overridden.Refused.UnknownAddress.{ Mind core Sol }",
+        "Overridden.Refused.Harnessed.d8df70",
+        "Overridden.Refused.Unharnessed.d8df70",
+        "Overridden.Refused.Restarting.d8df70",
+        "Overridden.Refused.HerdrRefused.d8df70",
+        "Overridden.Refused.Unrenewed.NotAwake",
+        "Overridden.Refused.StoreRefused",
     ] {
         let response = Potential::<Output>::from(text)
             .actualize(&mut budget())
-            .unwrap();
+            .unwrap_or_else(|error| panic!("{text}: {error:?}"));
         assert_eq!(response.datomize(vec![]).protosize().compact(), text);
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
         assert_eq!(
             rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archive).unwrap(),
             response
+        );
+    }
+    for retired in ["Retire.d8df70", "Refresh.{ Psyche core Fable }"] {
+        assert!(
+            Potential::<Input>::from(retired)
+                .actualize(&mut budget())
+                .is_err(),
+            "{retired} is no meta input; the panel takes its place"
         );
     }
 }
@@ -931,15 +970,14 @@ fn a_send_outcome_refused_unidentified_carries_its_seat_evidence() {
 
 /// ProtectedAddresses is a configuration family of its own: the Addresses
 /// whose flows Flow keeps, declared whole over Configure and read back in
-/// the snapshot before the counters. Restart and Refresh are taken here as
-/// on the ordinary socket, with their answers.
+/// the snapshot before the counters. Restart is taken here as on the
+/// ordinary socket, with its answers.
 #[test]
-fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
+fn protected_addresses_and_the_meta_restart_round_trip() {
     for text in [
         "Configure.ProtectedAddresses.[ { Psyche core Fable } ]",
         "Configure.ProtectedAddresses.[]",
         "Restart.c1a0de",
-        "Refresh.{ Psyche core Fable }",
     ] {
         let query = Potential::<Input>::from(text)
             .actualize(&mut budget())
@@ -954,10 +992,6 @@ fn protected_addresses_and_the_meta_restart_and_refresh_round_trip() {
     for reply in [
         "Restarted.c1a0de",
         "RestartRefused.Unsupported.c1a0de",
-        "Refreshed.{ { Psyche core Fable } c1a0de }",
-        "RefreshQueued.{ { Psyche core Fable } c1a0de }",
-        "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } Owed }",
-        "ReapPending.{ { Psyche core Fable } c1a0de { 908786 session-2 Unavailable Unbound } CloseRefused }",
         "OrdinaryRefused.Unknown.Address.{ Psyche core Fable }",
         "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [ { Psyche core Fable } ] { 1 3 1 } 64 3 Unconfigured [] [] recovery-guidance 64 }",
     ] {

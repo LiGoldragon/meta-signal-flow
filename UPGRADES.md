@@ -1,5 +1,34 @@
 # Upgrades
 
+## 86.0.0: the override panel; Close and Renew take the place of Retire and Refresh
+
+Built on 83.0.0 (`06fff39`), on signal-flow 64.0.0 (`83c04fe`) and the same
+ethos-zero 29.0.0 (`f23eacf`), for the Flow Nexus version 0 subversion 0-1,
+release 1. 84.0.0 and 85.0.0 are parallel candidates on other branches;
+this release does not carry them.
+
+- `ethos/panel.ethos` is the override panel, its own Signal, generated into
+  `meta_signal_flow::panel`: `SetState.{ FlowId State }`,
+  `CrystallizeNow.FlowId`, `Renew.Address`, `Close.FlowId`,
+  `Deliver.Address`, `Unlock.Address`, `Forget.FlowId`, `Hold` and
+  `Resume`, answered `StateSet`, `Asked`, `Renewed`, `Closed`,
+  `Delivered`, `Unlocked`, `Forgotten`, `Held`, `Resumed`, or
+  `Refused.[ UnknownFlow UnknownAddress Harnessed Unharnessed Restarting
+  HerdrRefused Unrenewed.RefreshRejection StoreRefused ]`. `State.[ Acting
+  Resting Crystallizing Asleep ]` is a flow's state.
+- The meta Signal carries the panel as its last input,
+  `Override.PanelInput`, answered `Overridden.PanelOutput`:
+  `flow-meta 'Override.Hold'` answers `Overridden.Held`.
+- **Retire and Refresh leave the meta Signal**, with `FlowRetired`,
+  `RetireRejected`, `RetireRejection`, `Refreshed`, `RefreshRejected`,
+  `RefreshQueued` and `ReapPending` as meta outputs: `Override.Close` takes
+  the place of Retire and `Override.Renew` the place of Refresh. The
+  ordinary Refresh (signal-flow) is unchanged.
+- The contract digest is taken over `signal.ethos` then `panel.ethos`
+  (`CONTRACT`); an 83 peer is refused (tests/fixtures/meta-signal-flow-83.ethos).
+  Every output after `Removed` moves one discriminant. Consumers repin
+  together.
+
 ## 83.0.0: ended-turn retention is configuration; signal-flow 64
 
 Built on 82.0.0 (`570b173`, recovery text), on signal-flow 64.0.0

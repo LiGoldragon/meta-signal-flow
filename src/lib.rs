@@ -1,4 +1,10 @@
+// The generated meta Signal names the override panel it carries by its
+// crate path, `meta_signal_flow::panel::Input`.
+extern crate self as meta_signal_flow;
+
 pub mod generated;
+/// The override panel, the Signal the meta input Override carries.
+pub use generated::panel;
 pub use generated::signal::ConfigurationChange as Configuration;
 pub use generated::signal::*;
 
@@ -20,10 +26,19 @@ pub use signal::{ByteViewable, Restorable, Signal, Signalizable};
 pub use signal::{ContractDigest, Contracted, Handshake, HandshakeReceipt, HandshakeRejection};
 
 pub const ETHOS: &str = include_str!("../ethos/signal.ethos");
+/// The override panel's Ethos, which the meta input Override carries.
+pub const PANEL_ETHOS: &str = include_str!("../ethos/panel.ethos");
+/// The whole contract this socket speaks: the meta Signal, then the panel
+/// it carries, so a change to either changes the greeting's digest.
+pub const CONTRACT: &str = concat!(
+    include_str!("../ethos/signal.ethos"),
+    include_str!("../ethos/panel.ethos")
+);
 pub const WIRE_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// The contract is identified on the wire by the digest of its authored
-/// Ethos source; the querying side greets with it.
+/// Ethos source, the meta Signal and its panel; the querying side greets
+/// with it.
 impl signal::Contracted for Input {
-    const CONTRACT_SOURCE: &'static str = ETHOS;
+    const CONTRACT_SOURCE: &'static str = CONTRACT;
 }

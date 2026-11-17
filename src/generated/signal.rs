@@ -771,17 +771,6 @@ pub enum BindExistingRejection {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum RetireRejection {
-    UnknownFlow,
-    AlreadyGone,
-    StoreRefused,
-    CloseRefused,
-    Maintained,
-    RestartUnresolved,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct OldSeat {
     pub herdr_route: signal_flow::HerdrRoute,
     pub process_option: std::option::Option<signal_flow::Process>,
@@ -1327,9 +1316,7 @@ pub enum Input {
     ConsumeReset(ResetRequest),
     RegisterFlow(signal_flow::FlowNode),
     MetaBindExisting(MetaBindExisting),
-    Retire(signal_flow::FlowId),
     Restart(signal_flow::FlowId),
-    Refresh(flow_ethos::Address),
     Deliver(DeliveryRequest),
     Vet(DeliveryRequest),
     Command(CommandRequest),
@@ -1346,6 +1333,7 @@ pub enum Input {
     Withdraw(Withdraw_Data),
     ObserveConfiguration,
     Remove(Removal),
+    Override(meta_signal_flow::panel::Input),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1442,9 +1430,7 @@ pub enum Output {
     ResetConsumed(ResetOutcome),
     FlowRegistered(signal_flow::FlowNode),
     BoundExisting(BoundExisting),
-    FlowRetired(signal_flow::FlowNode),
     Restarted(signal_flow::FlowId),
-    Refreshed(signal_flow::Refreshed),
     Delivered(VisibleDelivery),
     Vetted,
     Commanded(CommandOutcome),
@@ -1461,13 +1447,12 @@ pub enum Output {
     Withdrawn,
     Unconfigured,
     Removed(Removal),
+    Overridden(meta_signal_flow::panel::Output),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
     BindExistingRejected(BindExistingRejection),
-    RetireRejected(RetireRejection),
     RestartRefused(signal_flow::RestartRefusal),
-    RefreshRejected(signal_flow::RefreshRejection),
     OrdinaryRefused(signal_flow::Refusal),
     DeliveryRejected(DeliveryRejection),
     CommandRejected(CommandRejection),
@@ -1482,9 +1467,7 @@ pub enum Output {
     RebindRejected(RebindRejected_Data),
     DebugDeliveryRejected(DebugDeliveryRejected_Data),
     WithdrawRejected(WithdrawRejected_Data),
-    RefreshQueued(signal_flow::RefreshQueued),
     RestartQueued(signal_flow::FlowId),
-    ReapPending(signal_flow::ReapPending),
 }
 #[rustfmt::skip]
 #[allow(clippy::result_large_err, clippy::ptr_arg, clippy::borrowed_box)]
@@ -1506,18 +1489,10 @@ pub trait Answering {
         &self,
         meta_bind_existing: &MetaBindExisting,
     ) -> std::result::Result<BoundExisting, Output>;
-    fn retire(
-        &self,
-        flow_id: &signal_flow::FlowId,
-    ) -> std::result::Result<signal_flow::FlowNode, Output>;
     fn restart(
         &self,
         flow_id: &signal_flow::FlowId,
     ) -> std::result::Result<signal_flow::FlowId, Output>;
-    fn refresh(
-        &self,
-        address: &flow_ethos::Address,
-    ) -> std::result::Result<signal_flow::Refreshed, Output>;
     fn deliver(
         &self,
         delivery_request: &DeliveryRequest,
@@ -1568,6 +1543,10 @@ pub trait Answering {
     fn withdraw(&self, withdraw: &Withdraw_Data) -> std::result::Result<(), Output>;
     fn observe_configuration(&self) -> std::result::Result<(), Output>;
     fn remove(&self, removal: &Removal) -> std::result::Result<Removal, Output>;
+    fn r#override(
+        &self,
+        panel_input: &meta_signal_flow::panel::Input,
+    ) -> std::result::Result<meta_signal_flow::panel::Output, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1602,14 +1581,8 @@ impl Answerable for Input {
                     .meta_bind_existing(carried)
                     .map_or_else(|refusal| refusal, Output::BoundExisting)
             }
-            Input::Retire(carried) => {
-                nexus.retire(carried).map_or_else(|refusal| refusal, Output::FlowRetired)
-            }
             Input::Restart(carried) => {
                 nexus.restart(carried).map_or_else(|refusal| refusal, Output::Restarted)
-            }
-            Input::Refresh(carried) => {
-                nexus.refresh(carried).map_or_else(|refusal| refusal, Output::Refreshed)
             }
             Input::Deliver(carried) => {
                 nexus.deliver(carried).map_or_else(|refusal| refusal, Output::Delivered)
@@ -1676,6 +1649,11 @@ impl Answerable for Input {
             }
             Input::Remove(carried) => {
                 nexus.remove(carried).map_or_else(|refusal| refusal, Output::Removed)
+            }
+            Input::Override(carried) => {
+                nexus
+                    .r#override(carried)
+                    .map_or_else(|refusal| refusal, Output::Overridden)
             }
         }
     }

@@ -279,18 +279,20 @@
 ; it is never retried and only a Stop that proves the spawn quiesced clears
 ; it. OldSeat is the route the flow ran in and, when Herdr showed it, the
 ; birth of its harness process. Attempts counts the runs of the restart.
-; Retire is refused RestartUnresolved while the record is not Failed.
 
 ; ProtectedAddresses names the Addresses whose flows Flow keeps: one entry
 ; per Address, none by default. A protected Address's flow is never
 ; refreshed for its model's threshold; it is handed its messages past it,
 ; and a Compact of it is refused as below the threshold. Every other act on
-; it is answered as for any Address, to any peer. Restart and Refresh here
-; take a flow or an Address as the ordinary ones do, with their answers: a
-; Refresh of a working flow waits for its idle event and answers
-; RefreshQueued, and a Restart of one RestartQueued, as the ordinary ones do; what the ordinary one answers
-; Refused is OrdinaryRefused here. A Refresh whose successor started answers
-; ReapPending, as the ordinary one does.
+; it is answered as for any Address, to any peer. Restart here takes a flow
+; as the ordinary one does, with its answers: a Restart of a working flow
+; answers RestartQueued, as the ordinary one does; what the ordinary one
+; answers Refused is OrdinaryRefused here.
+;
+; Override carries the override panel (panel.ethos): the owner's hand on
+; what the Flow Nexus holds and does, each override answered Overridden
+; with the panel's own answer. Its Close takes the place of Retire and its
+; Renew the place of Refresh.
 
 ; Rebind repairs where a metaflow's flow lives, with no harness action.
 ; Rebinding.Pane: the flow the metaflow is Awake as now lives in this pane
@@ -322,16 +324,15 @@
 ; of its own.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal Refreshed RefreshQueued RefreshRejection ReapPending HandoverPending ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending ]
+  :meta_signal_flow:panel:[ PanelInput.Input PanelOutput.Output ]
   flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
   RegisterFlow.FlowNode
   MetaBindExisting
-  Retire.FlowId
   Restart.FlowId                                ; as the ordinary Restart, a protected Address's included
-  Refresh.Address                               ; as the ordinary Refresh, a protected Address's included
   Deliver.DeliveryRequest
   Vet.DeliveryRequest
   Command.CommandRequest
@@ -349,15 +350,14 @@ Signal
                        Flow.FlowId ] }          ; the metaflow's current flow is now this flow
   Withdraw.{ Address LogicalDeliveryId }        ; one queued delivery leaves the queue
   ObserveConfiguration                          ; the configuration, then each change
-  Remove.Removal ]                              ; one declaration leaves its family
+  Remove.Removal                                ; one declaration leaves its family
+  Override.PanelInput ]                         ; one override, the owner's hand on the Nexus
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
   FlowRegistered.FlowNode
   BoundExisting
-  FlowRetired.FlowNode
   Restarted.FlowId
-  Refreshed
   Delivered.VisibleDelivery
   Vetted
   Commanded.CommandOutcome
@@ -374,13 +374,12 @@ Signal
   Withdrawn
   Unconfigured                                  ; ObserveConfiguration's; its frames are Configuration
   Removed.Removal                               ; the Removal given, echoed whole
+  Overridden.PanelOutput                        ; the panel's answer to the override
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
   BindExistingRejected.BindExistingRejection
-  RetireRejected.RetireRejection
   RestartRefused.RestartRefusal
-  RefreshRejected.RefreshRejection
   OrdinaryRefused.Refusal
   DeliveryRejected.DeliveryRejection
   CommandRejected.CommandRejection
@@ -395,9 +394,7 @@ Signal
   RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   WithdrawRejected.[ UnknownAddress NotQueued ]
-  RefreshQueued
-  RestartQueued.FlowId
-  ReapPending ]
+  RestartQueued.FlowId ]
 [ ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>
@@ -579,11 +576,6 @@ Signal
                       Refused.RefusedFlowBinding ]
   BoundExisting.{ FlowContainer FlowBindingResult }
   BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch StoreRefused ]
-  ; CloseRefused: the retired flow's pane is still there and Herdr refused
-  ; to close it; nothing is recorded and the flow is not retired.
-  ; Maintained: the flow is the one a Maintained metaflow is Awake as;
-  ; nothing changes, and its declaration's continuity is changed first.
-  RetireRejection.[ UnknownFlow AlreadyGone StoreRefused CloseRefused Maintained RestartUnresolved ]
   OldSeat.{ HerdrRoute Option<Process> }
   RestartFailure.[ CloseRefused CloseUnproven ResumeRefused.String BindMismatch Stopped ]
   RestartPhase.[ Closing

@@ -1,11 +1,13 @@
-use meta_signal_flow::{Contracted, ETHOS, Handshake, HandshakeReceipt, HandshakeRejection, Input};
+use meta_signal_flow::{
+    CONTRACT, Contracted, Handshake, HandshakeReceipt, HandshakeRejection, Input,
+};
 
 #[test]
 fn a_peer_built_from_this_source_is_greeted() {
     let digest = Input::contract_digest();
-    assert_eq!(digest, Handshake::of_source(ETHOS).contract_digest);
+    assert_eq!(digest, Handshake::of_source(CONTRACT).contract_digest);
     assert_eq!(
-        Input::receipt(&Handshake::of_source(ETHOS)),
+        Input::receipt(&Handshake::of_source(CONTRACT)),
         HandshakeReceipt::Greeted(digest)
     );
 }
@@ -35,6 +37,31 @@ fn a_meta_82_peer_is_refused_with_this_digest() {
         HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
             Input::contract_digest()
         ))
+    );
+}
+
+/// A peer built on meta-signal-flow 83.0.0, whose Retire and Refresh the
+/// override panel replaces, greets with 83's digest and is refused with
+/// 86's, before any of its inputs is read.
+#[test]
+fn a_meta_83_peer_is_refused_with_this_digest() {
+    let older = include_str!("fixtures/meta-signal-flow-83.ethos");
+    assert_ne!(Handshake::of_source(older), Input::greeting());
+    assert_eq!(
+        Input::receipt(&Handshake::of_source(older)),
+        HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
+            Input::contract_digest()
+        ))
+    );
+}
+
+/// The panel is part of the contract: a peer that greets with the meta
+/// Signal alone is refused.
+#[test]
+fn a_peer_greeting_without_the_panel_is_refused() {
+    assert_ne!(
+        Handshake::of_source(meta_signal_flow::ETHOS),
+        Input::greeting()
     );
 }
 
