@@ -31,7 +31,7 @@ fn retention_is_one_configuration_value_on_the_binary_wire() {
 
 #[test]
 fn retention_is_the_reserved_breaking_release() {
-    assert_eq!(meta_signal_flow::WIRE_VERSION, "83.0.0");
+    assert_eq!(meta_signal_flow::WIRE_VERSION, "86.0.0");
 }
 
 #[cfg(feature = "datom")]
