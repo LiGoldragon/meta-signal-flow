@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1794888923,
-        "narHash": "sha256-Pewx0npV/2aTfFv3SCjFHws7V/DtYW7Z0eGH82aVOPk=",
+        "lastModified": 1794889178,
+        "narHash": "sha256-YLXbV64bUtheRaE8dHE+T9A3A8r7ZngSPsoac4nIF1c=",
         "owner": "LiGoldragon",
         "repo": "build-base",
-        "rev": "ad516532465314f3e853561bb899c9f10d3ffbe2",
+        "rev": "340655e4804580e08171e28efe6f312db358b121",
         "type": "github"
       },
       "original": {
