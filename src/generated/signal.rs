@@ -7,15 +7,6 @@
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
-pub enum State {
-    Acting,
-    Resting,
-    Crystallizing,
-    Asleep,
-}
-#[rustfmt::skip]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct StopMetadata {
     pub native_session_id_option: std::option::Option<signal_flow::NativeSessionId>,
     pub transcript_path_option: std::option::Option<signal_flow::TranscriptPath>,
@@ -1321,7 +1312,7 @@ pub struct Withdraw_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct SetState_Data {
     pub flow_id: signal_flow::FlowId,
-    pub state: State,
+    pub state: signal_flow::transition::State,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1411,7 +1402,7 @@ pub struct DeliveryDebugged_Data {
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct StateSet_Data {
     pub flow_id: signal_flow::FlowId,
-    pub state: State,
+    pub state: signal_flow::transition::State,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

@@ -1,5 +1,22 @@
 # Upgrades
 
+## 88.0.0: a flow's State is signal-flow's
+
+Built on 87.0.0 (`51008bc`), now on signal-flow 65.0.0 (`0bcf4ef`) and
+signal 11.2.0 (`4f5cbb9`), with the same ethos-zero 29.0.0 (`f23eacf`) and
+flow-ethos (`062ef9e1`), for the Flow Nexus's subscription of flow
+transitions.
+
+- **`State` is imported**, `:signal_flow:transition:[ State ]`: a flow's
+  `State.[ Acting Resting Crystallizing Asleep ]` is declared once, beside
+  the transitions the ordinary contract carries, and
+  `meta_signal_flow::State` is `signal_flow::transition::State`.
+  `SetState.{ FlowId State }` and `StateSet.{ FlowId State }` keep their
+  wire form.
+- The contract digest changes, so an 87 peer is refused with 88's digest
+  (tests/fixtures/meta-signal-flow-87.ethos). Repin flow-meta and the Flow
+  Nexus with signal-flow 65.0.0.
+
 ## 87.0.0: the override panel stands at the root of the meta Signal
 
 Built on 86.0.0 (`37e370c`), on signal-flow 64.0.0 (`83c04fe`) and the same

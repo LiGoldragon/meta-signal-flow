@@ -458,7 +458,7 @@ fn every_override_stands_at_the_root_and_its_answer_round_trips() {
             "SetState.{ d8df70 Resting }",
             Input::SetState(meta_signal_flow::SetState_Data {
                 flow_id: flow(),
-                state: meta_signal_flow::State::Resting,
+                state: signal_flow::transition::State::Resting,
             }),
         ),
         ("CrystallizeNow.d8df70", Input::CrystallizeNow(flow())),
@@ -486,7 +486,7 @@ fn every_override_stands_at_the_root_and_its_answer_round_trips() {
             "StateSet.{ d8df70 Crystallizing }",
             Output::StateSet(meta_signal_flow::StateSet_Data {
                 flow_id: flow(),
-                state: meta_signal_flow::State::Crystallizing,
+                state: signal_flow::transition::State::Crystallizing,
             }),
         ),
         ("Asked.d8df70", Output::Asked(flow())),

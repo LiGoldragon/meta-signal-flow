@@ -304,10 +304,11 @@
 ; lock. Forget removes the record of a flow that has no harness; a flow
 ; with one is Harnessed. Hold is the shutdown switch: the Flow Nexus stops
 ; acting on its own, its clocks, its deliveries and its launches, and still
-; answers. Resume lets it act again. A flow is Acting while its turn runs,
-; Resting between turns, Crystallizing while it writes its
-; crystallization, and Asleep once it has no harness; MetaflowState is the
-; metaflow's, Awake as a flow or Asleep.
+; answers. Resume lets it act again. State is a flow's, as signal-flow's
+; transitions declare it: Acting while its turn runs, Resting between
+; turns, Crystallizing while it writes its crystallization, and Asleep once
+; it has no harness; MetaflowState is the metaflow's, Awake as a flow or
+; Asleep.
 ;
 ; Refused is the refusal every input may answer, and changes nothing:
 ; UnknownFlow and UnknownAddress name what Flow does not hold, Restarting a
@@ -346,7 +347,8 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
-  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
+  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ]
+  :signal_flow:transition:[ State ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -438,8 +440,7 @@ Signal
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RestartQueued.FlowId ]
-[ State.[ Acting Resting Crystallizing Asleep ]  ; a flow's state, as the override panel sets it
-  ; The meta contract owns this read projection; Memory owns its stored form.
+[ ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>
      Option<TranscriptPath>
