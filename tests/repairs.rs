@@ -6,7 +6,7 @@ use flow_ethos::{
     Address, Aspect, Lock, LogicalDeliveryId, Model, Pid, Started, State, Topic, Until,
 };
 use meta_signal_flow::{
-    Attempt, Attempts, Binding, Input, Inspected_Data, OldSeat, Output, Rebind_Data,
+    Attempt, Attempts, Binding, Input, Inspected_Data, OldSeat, Output, PermaflowHold, Rebind_Data,
     RebindRejected_Data, Rebinding, RestartFailure, RestartPhase, RestartRecord, VisibleAttempt,
     VisibleMetaflow, VisibleQueueDelivery, VisibleQueueDeliveryStanding, VisibleQueueEvidence,
     Withdraw_Data, WithdrawRejected_Data,
