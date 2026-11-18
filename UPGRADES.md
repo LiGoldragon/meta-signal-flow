@@ -1,5 +1,13 @@
 # Upgrades
 
+## 89.0.1: signal-flow 68.0.0
+
+The imported signal-flow types are pinned at 68.0.0 (`163785f`), which
+appends CloseRequest to the ordinary Signal. No type this contract imports
+changed and its own source is unchanged, so its digest is the same and no
+meta-wire peer repins for it; Flow repins it with signal-flow 68.0.0 so
+the workspace holds one signal-flow. `WIRE_VERSION` reads 89.0.1.
+
 ## 87.0.0: the override panel stands at the root of the meta Signal
 
 Built on 86.0.0 (`37e370c`), on signal-flow 64.0.0 (`83c04fe`) and the same

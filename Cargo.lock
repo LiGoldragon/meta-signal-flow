@@ -175,7 +175,7 @@ dependencies = [
 
 [[package]]
 name = "meta-signal-flow"
-version = "89.0.0"
+version = "89.0.1"
 dependencies = [
  "datom-codec",
  "ethos-zero 29.0.0",
@@ -342,8 +342,8 @@ dependencies = [
 
 [[package]]
 name = "signal-flow"
-version = "67.0.0"
-source = "git+https://github.com/LiGoldragon/signal-flow?rev=a536862f00704f0ea2a805484d2a61f9e5dd382a#a536862f00704f0ea2a805484d2a61f9e5dd382a"
+version = "68.0.0"
+source = "git+https://github.com/LiGoldragon/signal-flow?rev=163785f1cb8e8a0575162e8ffb290d4642e6f40b#163785f1cb8e8a0575162e8ffb290d4642e6f40b"
 dependencies = [
  "datom-codec",
  "ethos-zero 27.0.0",
