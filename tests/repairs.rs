@@ -98,6 +98,7 @@ fn inspected() -> Output {
         }],
         visible_attempt_vector: vec![attempt()],
         restart_record_option: Some(restart_record()),
+        permaflow_hold: PermaflowHold::Held,
     })
 }
 
@@ -160,6 +161,7 @@ fn replies() -> Vec<Output> {
             lock_vector: vec![],
             visible_attempt_vector: vec![],
             restart_record_option: None,
+            permaflow_hold: PermaflowHold::Released,
         }),
         Output::InspectRejected,
         Output::Rebound(address()),
@@ -314,8 +316,8 @@ mod datom {
     #[test]
     fn repair_replies_have_concrete_datoms() {
         let texts = [
-            "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } Prepared } ] Some.{ f1c841 s1 { Mind flow Sol } { { default mind-flow w7B t1 } Some.{ 4242 17 } } Failed.BindMismatch 2 } }",
-            "Inspected.{ { { Mind flow Sol } Asleep [] [] } { None None } [] [] None }",
+            "Inspected.{ { { Mind flow Sol } Awake.f1c841 [ 9a83ec ] [ { Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } ] } { Some.{ f1c841 s1 Claude Unavailable Available.{ default mind-flow w7B t1 } Unbound Active } Some.{ 4242 17 } } [ { { Psyche core Opus } { Mind flow Sol } 1790000060 } ] [ Queued.{ s1 Claude Logical.{ Sender.{ Psyche core Opus } Soft.Order.{ req1 go } } Prepared } ] Some.{ f1c841 s1 { Mind flow Sol } { { default mind-flow w7B t1 } Some.{ 4242 17 } } Failed.BindMismatch 2 } Held }",
+            "Inspected.{ { { Mind flow Sol } Asleep [] [] } { None None } [] [] None Released }",
             "InspectRejected",
             "Rebound.{ Mind flow Sol }",
             "RebindRejected.UnknownAddress",
