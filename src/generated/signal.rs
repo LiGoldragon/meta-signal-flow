@@ -16,6 +16,13 @@ pub enum State {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum PermaflowHold {
+    Held,
+    Released,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct StopMetadata {
     pub native_session_id_option: std::option::Option<signal_flow::NativeSessionId>,
     pub transcript_path_option: std::option::Option<signal_flow::TranscriptPath>,
@@ -1358,6 +1365,8 @@ pub enum Input {
     Forget(signal_flow::FlowId),
     Hold,
     Resume,
+    HoldPermaflow(flow_ethos::Address),
+    ReleasePermaflow(flow_ethos::Address),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1389,6 +1398,7 @@ pub struct Inspected_Data {
     pub lock_vector: std::vec::Vec<flow_ethos::Lock>,
     pub visible_attempt_vector: std::vec::Vec<VisibleAttempt>,
     pub restart_record_option: std::option::Option<RestartRecord>,
+    pub permaflow_hold: PermaflowHold,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1425,6 +1435,7 @@ pub enum Refused_Data {
     CapsuleRefused(signal_flow::FlowId),
     Unrenewed(signal_flow::RefreshRejection),
     StoreRefused(StoreFailure),
+    PermaflowHeld(flow_ethos::Address),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1500,6 +1511,8 @@ pub enum Output {
     Forgotten(signal_flow::FlowId),
     Held,
     Resumed,
+    PermaflowHeld(flow_ethos::Address),
+    PermaflowReleased(flow_ethos::Address),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1625,6 +1638,14 @@ pub trait Answering {
     ) -> std::result::Result<signal_flow::FlowId, Output>;
     fn hold(&self) -> std::result::Result<(), Output>;
     fn resume(&self) -> std::result::Result<(), Output>;
+    fn hold_permaflow(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<flow_ethos::Address, Output>;
+    fn release_permaflow(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<flow_ethos::Address, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1756,6 +1777,16 @@ impl Answerable for Input {
             Input::Hold => nexus.hold().map_or_else(|refusal| refusal, |()| Output::Held),
             Input::Resume => {
                 nexus.resume().map_or_else(|refusal| refusal, |()| Output::Resumed)
+            }
+            Input::HoldPermaflow(carried) => {
+                nexus
+                    .hold_permaflow(carried)
+                    .map_or_else(|refusal| refusal, Output::PermaflowHeld)
+            }
+            Input::ReleasePermaflow(carried) => {
+                nexus
+                    .release_permaflow(carried)
+                    .map_or_else(|refusal| refusal, Output::PermaflowReleased)
             }
         }
     }

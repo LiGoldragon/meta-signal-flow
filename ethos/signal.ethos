@@ -379,7 +379,9 @@ Signal
   Unlock.Address
   Forget.FlowId
   Hold
-  Resume ]
+  Resume
+  HoldPermaflow.Address
+  ReleasePermaflow.Address ]
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -396,7 +398,7 @@ Signal
   LegacyArchiveObserved.Vector<VisibleLegacyArchiveEntry>
   Debugged.DebugSnapshot
   QueueDeliveryResolved.{ Address VisibleQueueDeliveryResolution }
-  Inspected.{ VisibleMetaflow Binding Vector<Lock> Vector<VisibleAttempt> Option<RestartRecord> }
+  Inspected.{ VisibleMetaflow Binding Vector<Lock> Vector<VisibleAttempt> Option<RestartRecord> PermaflowHold }
   DeliveryDebugged.{ DeliverySnapshot Receipt.Option<NativeReceipt> ReadBy.Option<LogicalDeliveryId> }
   Rebound.Address
   Withdrawn
@@ -411,6 +413,8 @@ Signal
   Forgotten.FlowId
   Held
   Resumed
+  PermaflowHeld.Address
+  PermaflowReleased.Address
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -427,7 +431,8 @@ Signal
             Restarting.FlowId                   ;   a restart holds the flow
             CapsuleRefused.FlowId               ;   the Capsule did not close the flow's place
             Unrenewed.RefreshRejection          ;   the fresh flow did not start, and why
-            StoreRefused.StoreFailure ]         ;   Memory refused, and why
+            StoreRefused.StoreFailure           ;   Memory refused, and why
+            PermaflowHeld.Address ]             ;   release this Address before a direct control
   ReadEventsRejected.[ UnknownFlow StoreRefused ]
   ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
   ReadSendOutcomesRejected
@@ -439,6 +444,7 @@ Signal
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RestartQueued.FlowId ]
 [ State.[ Acting Resting Crystallizing Asleep ]  ; a flow's state, as the override panel sets it
+  PermaflowHold.[ Held Released ]                ; independent of Continuity and expiring locks
   ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>
