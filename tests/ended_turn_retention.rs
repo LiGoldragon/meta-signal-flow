@@ -1,6 +1,6 @@
 //! Ended-turn retention is one Configure value: the ended Codex turn ids one
 //! thread's turn ledger keeps. It is set and echoed whole, the snapshot
-//! carries it last, and a negative bound is refused.
+//! carries it before cancel notices, and a negative bound is refused.
 
 use meta_signal_flow::{ConfigurationChange, ConfigureRefusal, Input, Output, TurnRetentionBound};
 
@@ -86,13 +86,13 @@ mod textual {
     }
 
     #[test]
-    fn snapshot_carries_the_retention_as_its_final_position() {
+    fn snapshot_carries_the_retention_before_cancel_notices() {
         let nexus = "{ /home/li/primary { /bin/stable /tmp/stable /tmp/stable.sock [ stable-model ] } { /bin/next /tmp/next /tmp/next.sock [ next-model ] } [] [] None None /tmp/curriculum.sock 60 None main }";
         let preceding = format!(
             "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [] {{ 1 1 1 }} 32 3 Unconfigured [] [] guidance"
         );
         for bound in [0, 64] {
-            let text = format!("{{ {preceding} {bound} }}");
+            let text = format!("{{ {preceding} {bound} {{ Untold Told }} }}");
             let snapshot = Potential::<ConfigurationSnapshot>::from(text)
                 .actualize(&mut budget())
                 .unwrap();
