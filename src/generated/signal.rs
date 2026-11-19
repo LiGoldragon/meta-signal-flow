@@ -418,6 +418,28 @@ pub enum CountersRefusal {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Telling {
+    Told,
+    Untold,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Sender(pub Telling);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Recipient(pub Telling);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct CancelNotices {
+    pub sender: Sender,
+    pub recipient: Recipient,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Amend_Data {
     pub address: flow_ethos::Address,
     pub change: Change,
@@ -452,6 +474,7 @@ pub enum ConfigurationChange {
     Amend(Amend_Data),
     SuccessorRecoveryText(SuccessorRecoveryText),
     EndedTurnRetention(TurnRetentionBound),
+    CancelNotices(CancelNotices),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -549,6 +572,10 @@ pub struct ConfiguredEndedTurnRetention(pub TurnRetentionBound);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfiguredCancelNotices(pub CancelNotices);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
     pub configured_nexus: ConfiguredNexus,
     pub configured_models: ConfiguredModels,
@@ -572,6 +599,7 @@ pub struct ConfigurationSnapshot {
     pub configured_harness_hook_events: ConfiguredHarnessHookEvents,
     pub successor_recovery_text: SuccessorRecoveryText,
     pub configured_ended_turn_retention: ConfiguredEndedTurnRetention,
+    pub configured_cancel_notices: ConfiguredCancelNotices,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
