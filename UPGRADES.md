@@ -1,3 +1,12 @@
+## 0.90.0: persistent configuration for Cancel notices
+
+The meta Signal adds `CancelNotices.{ Sender.Telling Recipient.Telling }`,
+with `Telling.[ Told Untold ]`. `ConfigurationChange.CancelNotices` changes
+the committed policy, and `ConfigurationSnapshot.ConfiguredCancelNotices`
+appends its persisted value to the snapshot. This changes the meta wire
+contract; older meta peers must repin together. The ordinary signal-flow
+0.68.0 contract is unchanged.
+
 # Upgrades
 
 ## 89.0.1: signal-flow 0.68.0
