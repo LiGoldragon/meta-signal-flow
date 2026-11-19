@@ -22,7 +22,7 @@ fn model_and_permaflow_efforts_have_concrete_datoms() {
     for effort in ["Default", "High", "Medium", "Low"] {
         for text in [
             format!("Configure.ModelEffort.{{ Astra {effort} }}"),
-            format!("Configure.Amend.{{ {{ Psyche core Fable }} {effort} }}"),
+            format!("Configure.Amend.{{ {{ Psyche core Fable }} Effort.{effort} }}"),
         ] {
             let mut budget = Budget {
                 remaining: 16384,
