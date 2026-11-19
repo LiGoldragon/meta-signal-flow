@@ -76,7 +76,7 @@ mod textual {
             "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [] {{ 1 1 1 }} 32 3 Unconfigured [] []"
         );
         for current in ["initial-guidance", "changed-guidance"] {
-            let text = format!("{{ {preceding} {current} 64 }}");
+            let text = format!("{{ {preceding} {current} 64 [] }}");
             let snapshot = Potential::<ConfigurationSnapshot>::from(text)
                 .actualize(&mut budget())
                 .unwrap();
