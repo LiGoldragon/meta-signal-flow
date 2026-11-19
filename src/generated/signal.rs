@@ -318,6 +318,22 @@ pub struct Records(pub std::vec::Vec<RecordPath>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Effort {
+    Default,
+    High,
+    Medium,
+    Low,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ModelEffort {
+    pub model: flow_ethos::Model,
+    pub effort: Effort,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
     pub root_option: std::option::Option<Root>,
@@ -329,6 +345,7 @@ pub struct ConfigureMetaflow {
     pub continuity: Continuity,
     pub purpose: Purpose,
     pub records: Records,
+    pub effort: Effort,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -338,6 +355,7 @@ pub enum Change {
     Purpose(Purpose),
     Kind(signal_flow::FlowKind),
     Continuity(Continuity),
+    Effort(Effort),
     Add(Element),
     Remove(Element),
 }
@@ -426,6 +444,7 @@ pub struct Amend_Data {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum ConfigurationChange {
+    ModelEffort(ModelEffort),
     Models(std::vec::Vec<ConfigureModel>),
     Thresholds(std::vec::Vec<ConfigureThreshold>),
     HandoverPolicies(std::vec::Vec<HandoverPolicy>),
@@ -549,6 +568,10 @@ pub struct ConfiguredEndedTurnRetention(pub TurnRetentionBound);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfiguredModelEfforts(pub std::vec::Vec<ModelEffort>);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
     pub configured_nexus: ConfiguredNexus,
     pub configured_models: ConfiguredModels,
@@ -572,6 +595,7 @@ pub struct ConfigurationSnapshot {
     pub configured_harness_hook_events: ConfiguredHarnessHookEvents,
     pub successor_recovery_text: SuccessorRecoveryText,
     pub configured_ended_turn_retention: ConfiguredEndedTurnRetention,
+    pub configured_model_efforts: ConfiguredModelEfforts,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]

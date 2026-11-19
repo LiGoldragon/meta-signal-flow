@@ -269,6 +269,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
     assert_eq!(
         configuration.configured_metaflows.0,
         vec![meta_signal_flow::ConfigureMetaflow {
+            effort: meta_signal_flow::Effort::Default,
             address: signal_flow::Address {
                 aspect: meta_signal_flow::Aspect::Mind,
                 topic: meta_signal_flow::Topic("core".to_string()),

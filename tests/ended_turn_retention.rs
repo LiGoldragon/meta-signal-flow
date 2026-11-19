@@ -86,13 +86,13 @@ mod textual {
     }
 
     #[test]
-    fn snapshot_carries_the_retention_as_its_final_position() {
+    fn snapshot_carries_retention_before_model_efforts() {
         let nexus = "{ /home/li/primary { /bin/stable /tmp/stable /tmp/stable.sock [ stable-model ] } { /bin/next /tmp/next /tmp/next.sock [ next-model ] } [] [] None None /tmp/curriculum.sock 60 None main }";
         let preceding = format!(
             "{nexus} [] [] Unconfigured Unconfigured Unconfigured 60000 [] [] [] None 30 None [] {{ 1 1 1 }} 32 3 Unconfigured [] [] guidance"
         );
         for bound in [0, 64] {
-            let text = format!("{{ {preceding} {bound} }}");
+            let text = format!("{{ {preceding} {bound} [] }}");
             let snapshot = Potential::<ConfigurationSnapshot>::from(text)
                 .actualize(&mut budget())
                 .unwrap();
