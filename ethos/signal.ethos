@@ -405,7 +405,8 @@ Signal
   Resume
   HoldPermaflow.Address
   ReleasePermaflow.Address
-  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason } ]
+  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason }
+  ReadDesignerNoticePolicy ]
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -440,6 +441,7 @@ Signal
   PermaflowHeld.Address
   PermaflowReleased.Address
   QueueDeliveryAbandoned.{ Address AbandonmentRecord }
+  DesignerNoticePolicy
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -597,6 +599,7 @@ Signal
   HeartbeatRecipients.Vector<Address>
   HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
   CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
+  DesignerNoticePolicy.Vector<Address>
   ; Keep the payload type distinct from the unit Input.Configuration variant.
   ConfigurationChange.[ ModelEffort
                          Models.Vector<ConfigureModel>
@@ -624,7 +627,8 @@ Signal
                          Refresh.ConfigureThreshold
                          Amend.{ Address Change }          ; one value of one permaflow
                          SuccessorRecoveryText              ; emergency successor guidance, one value
-                         EndedTurnRetention.TurnRetentionBound ]   ; one value, replaces the committed one
+                         EndedTurnRetention.TurnRetentionBound
+                         DesignerNoticePolicy ]
   ; One declaration taken away, by its key.
   Removal.[ Permaflow.Address
             Harness.HarnessKind

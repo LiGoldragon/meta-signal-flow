@@ -445,6 +445,10 @@ pub enum CountersRefusal {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DesignerNoticePolicy(pub std::vec::Vec<flow_ethos::Address>);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Amend_Data {
     pub address: flow_ethos::Address,
     pub change: Change,
@@ -480,6 +484,7 @@ pub enum ConfigurationChange {
     Amend(Amend_Data),
     SuccessorRecoveryText(SuccessorRecoveryText),
     EndedTurnRetention(TurnRetentionBound),
+    DesignerNoticePolicy(DesignerNoticePolicy),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1442,6 +1447,7 @@ pub enum Input {
     HoldPermaflow(flow_ethos::Address),
     ReleasePermaflow(flow_ethos::Address),
     AbandonQueueDelivery(AbandonQueueDelivery_Data),
+    ReadDesignerNoticePolicy,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1604,6 +1610,7 @@ pub enum Output {
     PermaflowHeld(flow_ethos::Address),
     PermaflowReleased(flow_ethos::Address),
     QueueDeliveryAbandoned(QueueDeliveryAbandoned_Data),
+    DesignerNoticePolicy(DesignerNoticePolicy),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1742,6 +1749,9 @@ pub trait Answering {
         &self,
         abandon_queue_delivery: &AbandonQueueDelivery_Data,
     ) -> std::result::Result<QueueDeliveryAbandoned_Data, Output>;
+    fn read_designer_notice_policy(
+        &self,
+    ) -> std::result::Result<DesignerNoticePolicy, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1888,6 +1898,11 @@ impl Answerable for Input {
                 nexus
                     .abandon_queue_delivery(carried)
                     .map_or_else(|refusal| refusal, Output::QueueDeliveryAbandoned)
+            }
+            Input::ReadDesignerNoticePolicy => {
+                nexus
+                    .read_designer_notice_policy()
+                    .map_or_else(|refusal| refusal, Output::DesignerNoticePolicy)
             }
         }
     }
