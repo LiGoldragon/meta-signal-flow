@@ -201,7 +201,9 @@
 ; Absent: native history proved the request never reached the seat, so a new
 ; attempt was authorised; AbsenceProof names the proof. Resolved: the owner
 ; resolved an Uncertain attempt through ResolveQueueDelivery; the record holds
-; the outcome, the requesting peer, the reason and the time. Settled
+; the outcome, the requesting peer, the reason and the time. Abandoned: the
+; attempt was given up with its receipt never seen, and its request is never
+; sent again; the AbandonmentRecord names who gave it up and why. Settled
 ; attempts are not listed. ReadQueueDeliveriesRejected: UnknownAddress, StoreRefused.
 
 ; ResolveQueueDelivery settles one Uncertain attempt by its QueueAttemptId
@@ -218,6 +220,26 @@
 ; (the attempt is Prepared, ReceiptRecorded, Absent, Settled or Resolved),
 ; NotOldest (the attempt is no longer the oldest request of its address),
 ; EmptyReason, StoreRefused.
+
+; AbandonQueueDelivery gives up one attempt by its QueueAttemptId, in any
+; unfinished phase (Prepared, Uncertain, ReceiptRecorded), parked or not:
+; the owner states why. The attempt is finished, Abandoned, and authorises
+; no new attempt; its request is never sent again, and its delivery ends
+; Abandoned, so the request may be archived and its sender reads that it
+; may not have arrived. The request itself stays open. An attempt still at
+; the head of its queue leaves the queue in the same commit. Flow records
+; who asked, as ResolveQueueDelivery records its resolver, with the reason
+; and the time. QueueDeliveryAbandoned answers with the attempt's Address
+; and the record. AbandonQueueDeliveryRejected changes nothing:
+; UnknownAttempt, AlreadyFinished (the attempt is Settled, Read, Absent,
+; Resolved or Abandoned), EmptyReason.
+;
+; AbandonmentCause names who gave an attempt up. Owner: a meta peer, through
+; AbandonQueueDelivery, named as ResolveQueueDelivery names its resolver.
+; FlowRetired: the Nexus itself, when the flow the attempt was handed to
+; left its Address before its receipt was seen, the FlowId that flow's.
+; RequestEnded: the Nexus itself, when a Cancel or a CloseRequest closed the
+; request, the RequestId its own.
 
 ; ReadSendOutcomes answers every completed ordinary Send invocation with the
 ; typed response, caller when known, its sender (an Address, Unbound for a
@@ -381,7 +403,8 @@ Signal
   Hold
   Resume
   HoldPermaflow.Address
-  ReleasePermaflow.Address ]
+  ReleasePermaflow.Address
+  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason } ]
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -415,6 +438,7 @@ Signal
   Resumed
   PermaflowHeld.Address
   PermaflowReleased.Address
+  QueueDeliveryAbandoned.{ Address AbandonmentRecord }
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -442,7 +466,8 @@ Signal
   RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   WithdrawRejected.[ UnknownAddress NotQueued ]
-  RestartQueued.FlowId ]
+  RestartQueued.FlowId
+  AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished EmptyReason ] ]
 [ State.[ Acting Resting Crystallizing Asleep ]  ; a flow's state, as the override panel sets it
   PermaflowHold.[ Held Released ]                ; independent of Continuity and expiring locks
   ; The meta contract owns this read projection; Memory owns its stored form.
@@ -689,7 +714,8 @@ Signal
                           Uncertain.Option<Undecided>
                           ReceiptRecorded
                           Absent.AbsenceProof
-                          Resolved.QueueResolutionRecord ]
+                          Resolved.QueueResolutionRecord
+                          Abandoned.AbandonmentRecord ]
   QueueResolutionReason.String
   UnixSeconds.Integer
   QueueResolutionOutcome.[ Delivered Absent ]
@@ -697,6 +723,10 @@ Signal
   ResolverIdentity.{ ProcessIdentity Option<FlowId> }
   QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
   ResolveQueueDeliveryRejection.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered AlreadyRead ]
+  AbandonmentCause.[ Owner.ResolverIdentity
+                     FlowRetired.FlowId
+                     RequestEnded.RequestId ]
+  AbandonmentRecord.{ AbandonmentCause QueueResolutionReason UnixSeconds }
   QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueueEvidence QueueDeliveryStanding }
   QueueRequestId.String
   LegacyArchiveEntry.{ QueueRequestId Address QueueEvidence Vector<QueueAttemptId> }
@@ -733,7 +763,8 @@ Signal
                                  Uncertain.Option<Undecided>
                                  ReceiptRecorded
                                  Absent.AbsenceProof
-                                 Resolved.VisibleQueueResolutionRecord ]
+                                 Resolved.VisibleQueueResolutionRecord
+                                 Abandoned.AbandonmentRecord ]
   VisibleQueueEvidence.[ Logical.VisibleNativeInput
                          Legacy.{ VisibleSender VisibleRequest } ]
   VisibleQueueDelivery.{ NativeSessionId HarnessKind VisibleQueueEvidence VisibleQueueDeliveryStanding }

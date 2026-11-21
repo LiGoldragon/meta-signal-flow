@@ -1,5 +1,33 @@
 # Upgrades
 
+## 0.91.0: AbandonQueueDelivery; an attempt may be Abandoned
+
+Built on 0.90.0 (`e613711`), on signal-flow 0.69.0 (`da01bb0`) and the same
+ethos-zero 29.0.0 (`f23eacf`). Flow Nexus 0.60.5, bead 76bv.
+
+- The meta Signal appends one input, `AbandonQueueDelivery.{ QueueAttemptId
+  QueueResolutionReason }`, answered at its position
+  `QueueDeliveryAbandoned.{ Address AbandonmentRecord }`, or
+  `AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished
+  EmptyReason ]`, appended last. It gives up one attempt in any unfinished
+  phase, parked or not: the attempt is finished and authorises no new
+  one, its delivery ends Abandoned, and its request stays open.
+- `AbandonmentRecord.{ AbandonmentCause QueueResolutionReason UnixSeconds }`
+  records who gave an attempt up and why: `AbandonmentCause.[
+  Owner.ResolverIdentity FlowRetired.FlowId RequestEnded.RequestId ]`, a
+  meta peer, or the Nexus itself when the attempt's flow left its Address
+  or a Cancel or CloseRequest closed its request.
+- `QueueDeliveryStanding` and `VisibleQueueDeliveryStanding` append
+  `Abandoned.AbandonmentRecord`.
+- **Output discriminants move.** `QueueDeliveryAbandoned` stands after
+  `PermaflowReleased`, so every output from `ConfigureRefused` on moves one
+  rkyv discriminant. Both ends of the meta socket repin together.
+- The generated `Answering` gains `abandon_queue_delivery`.
+- signal-flow 0.69.0 is imported: `RequestRejection.NotYet` names its
+  `ArchiveHold`, and `DeliveryState` appends `Abandoned`.
+- The contract digest changes: a 0.90 peer is refused with 0.91's digest
+  (tests/fixtures/meta-signal-flow-0.90.ethos). `WIRE_VERSION` reads 0.91.0.
+
 ## 89.0.1: signal-flow 0.68.0
 
 The imported signal-flow types are pinned at 0.68.0 (`319e3c3`), which

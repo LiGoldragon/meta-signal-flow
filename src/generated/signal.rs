@@ -1057,6 +1057,7 @@ pub enum QueueDeliveryStanding {
     ReceiptRecorded,
     Absent(AbsenceProof),
     Resolved(QueueResolutionRecord),
+    Abandoned(AbandonmentRecord),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1111,6 +1112,22 @@ pub enum ResolveQueueDeliveryRejection {
     AlreadyResolved(QueueResolutionRecord),
     AlreadyDelivered,
     AlreadyRead,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum AbandonmentCause {
+    Owner(ResolverIdentity),
+    FlowRetired(signal_flow::FlowId),
+    RequestEnded(flow_ethos::RequestId),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct AbandonmentRecord {
+    pub abandonment_cause: AbandonmentCause,
+    pub queue_resolution_reason: QueueResolutionReason,
+    pub unix_seconds: UnixSeconds,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1245,6 +1262,7 @@ pub enum VisibleQueueDeliveryStanding {
     ReceiptRecorded,
     Absent(AbsenceProof),
     Resolved(VisibleQueueResolutionRecord),
+    Abandoned(AbandonmentRecord),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1357,6 +1375,13 @@ pub struct SetState_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct AbandonQueueDelivery_Data {
+    pub queue_attempt_id: QueueAttemptId,
+    pub queue_resolution_reason: QueueResolutionReason,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Input {
     Configuration,
     Configure(ConfigurationChange),
@@ -1391,6 +1416,7 @@ pub enum Input {
     Resume,
     HoldPermaflow(flow_ethos::Address),
     ReleasePermaflow(flow_ethos::Address),
+    AbandonQueueDelivery(AbandonQueueDelivery_Data),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1450,6 +1476,13 @@ pub struct StateSet_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct QueueDeliveryAbandoned_Data {
+    pub address: flow_ethos::Address,
+    pub abandonment_record: AbandonmentRecord,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Refused_Data {
     UnknownFlow(signal_flow::FlowId),
     UnknownAddress(flow_ethos::Address),
@@ -1503,6 +1536,14 @@ pub enum WithdrawRejected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum AbandonQueueDeliveryRejected_Data {
+    UnknownAttempt,
+    AlreadyFinished,
+    EmptyReason,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Output {
     Configuration(ConfigurationSnapshot),
     Configured(ConfigurationChange),
@@ -1537,6 +1578,7 @@ pub enum Output {
     Resumed,
     PermaflowHeld(flow_ethos::Address),
     PermaflowReleased(flow_ethos::Address),
+    QueueDeliveryAbandoned(QueueDeliveryAbandoned_Data),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1557,6 +1599,7 @@ pub enum Output {
     DebugDeliveryRejected(DebugDeliveryRejected_Data),
     WithdrawRejected(WithdrawRejected_Data),
     RestartQueued(signal_flow::FlowId),
+    AbandonQueueDeliveryRejected(AbandonQueueDeliveryRejected_Data),
 }
 #[rustfmt::skip]
 #[allow(clippy::result_large_err, clippy::ptr_arg, clippy::borrowed_box)]
@@ -1670,6 +1713,10 @@ pub trait Answering {
         &self,
         address: &flow_ethos::Address,
     ) -> std::result::Result<flow_ethos::Address, Output>;
+    fn abandon_queue_delivery(
+        &self,
+        abandon_queue_delivery: &AbandonQueueDelivery_Data,
+    ) -> std::result::Result<QueueDeliveryAbandoned_Data, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1811,6 +1858,11 @@ impl Answerable for Input {
                 nexus
                     .release_permaflow(carried)
                     .map_or_else(|refusal| refusal, Output::PermaflowReleased)
+            }
+            Input::AbandonQueueDelivery(carried) => {
+                nexus
+                    .abandon_queue_delivery(carried)
+                    .map_or_else(|refusal| refusal, Output::QueueDeliveryAbandoned)
             }
         }
     }
