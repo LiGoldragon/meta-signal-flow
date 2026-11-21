@@ -86,6 +86,18 @@ fn a_meta_0_90_peer_is_refused_with_this_digest() {
 }
 
 #[test]
+fn the_meta_contract_without_refresh_mode_is_refused() {
+    let previous = Handshake::of_source(include_str!("fixtures/meta-signal-flow-0.91.ethos"));
+    assert_ne!(previous, Input::greeting());
+    assert_eq!(
+        Input::receipt(&previous),
+        HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
+            Input::contract_digest()
+        ))
+    );
+}
+
+#[test]
 fn the_ordinary_contract_is_refused_on_the_meta_socket() {
     assert_eq!(
         Input::receipt(&<signal_flow::Input as Contracted>::greeting()),

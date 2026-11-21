@@ -562,9 +562,12 @@ Signal
   ; continues, its purpose and the records it rests on.
   Effort.[ Default High Medium Low ]
   ModelEffort.{ Model Effort }
-  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity Purpose Records Effort }
+  ; Manual preserves the current seat at rest; explicit Refresh remains available.
+  RefreshMode.[ Automatic Manual ]
+  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity RefreshMode Purpose Records Effort }
   ; One value of one permaflow, changed alone by Configure.Amend. Workspace,
-  ; Purpose, Kind and Continuity replace that value; Add appends one
+  ; Purpose, Kind, Continuity, Effort and RefreshMode replace that value.
+  ; RefreshMode applies to the current permaflow; Add appends one
   ; element to the end of its list, Remove takes it out.
   Change.[ Workspace.Option<Root>
            Purpose
@@ -572,7 +575,8 @@ Signal
            Continuity
            Effort
            Add.Element
-           Remove.Element ]
+           Remove.Element
+           RefreshMode ]
   ; One element of a permaflow's lists: a module of its system prompt, a
   ; module of its first prompt (its PromptModules), or a leave-out.
   Element.[ SystemModule.ModuleIdentity

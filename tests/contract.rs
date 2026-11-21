@@ -126,7 +126,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] Default } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook [] [] recovery-guidance 64 [] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained Automatic «Keeps Flow running.» [ flows/a68420/vision/flow.md ] Default } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook [] [] recovery-guidance 64 [] }";
 
     let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
@@ -291,6 +291,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
             flow_kind: signal_flow::FlowKind::Regular,
             tool_set: signal_flow::ToolSet::Default,
             continuity: meta_signal_flow::Continuity::Maintained,
+            refresh_mode: meta_signal_flow::RefreshMode::Automatic,
             purpose: meta_signal_flow::Purpose("Keeps Flow running.".to_string()),
             records: meta_signal_flow::Records(vec![meta_signal_flow::RecordPath(
                 "flows/a68420/vision/flow.md".to_string()
@@ -789,7 +790,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OnDemand «» [] Default } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OnDemand Automatic «» [] Default } ]";
     let query = Potential::<meta_signal_flow::Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -807,7 +808,7 @@ fn configure_metaflows_has_a_concrete_datom() {
 #[test]
 fn one_declaration_is_configured_and_removed_alone() {
     for text in [
-        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ ClaudeMd ] [ spirit:core:0 ] [] Regular Default OnDemand «» [] Default }",
+        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ ClaudeMd ] [ spirit:core:0 ] [] Regular Default OnDemand Manual «» [] Default }",
         "Configure.Harness.{ Claude [ / ] [ Escape Escape ] [ Enter ] }",
         "Configure.Refresh.{ claude-fable-5-2 280000 }",
         "Remove.Permaflow.{ Psyche book Haiku }",
@@ -856,7 +857,7 @@ fn leave_outs_are_the_permaflow_s_and_a_foreign_one_is_an_unknown_feature() {
     // A permaflow without its leave-outs is no longer a ConfigureMetaflow.
     assert!(
         Potential::<Input>::from(
-            "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OnDemand «» [] Default }"
+            "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OnDemand Automatic «» [] Default }"
         )
         .actualize(&mut budget())
         .is_err()
@@ -889,6 +890,8 @@ fn amend_changes_one_value_of_one_permaflow() {
         "Configure.Amend.{ { Psyche book Haiku } Workspace.None }",
         "Configure.Amend.{ { Psyche book Haiku } Kind.Simplified }",
         "Configure.Amend.{ { Psyche book Haiku } Continuity.Maintained }",
+        "Configure.Amend.{ { Psyche book Haiku } RefreshMode.Manual }",
+        "Configure.Amend.{ { Psyche book Haiku } RefreshMode.Automatic }",
         "Configure.Amend.{ { Psyche core Fable } Add.PromptModule.vision:energy-nexus:1 }",
         "Configure.Amend.{ { Psyche core Fable } Add.SystemModule.spirit:core:0 }",
         "Configure.Amend.{ { Psyche core Fable } Remove.PromptModule.vision:energy-nexus:1 }",

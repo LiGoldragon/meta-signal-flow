@@ -1,5 +1,14 @@
 # Upgrades
 
+## 0.92.0: permaflow RefreshMode
+
+`ConfigureMetaflow` now places `Automatic` or `Manual` after Continuity.
+`Configure.Amend.{ Address RefreshMode.Manual }` changes the setting alone;
+the configuration snapshot returns it. Manual preserves the current seat
+at rest and leaves explicit Refresh available. Flow migrates existing
+declarations to Automatic. The meta peers must repin together; ordinary
+Signal is unchanged.
+
 ## 0.91.0: AbandonQueueDelivery; an attempt may be Abandoned
 
 Built on 0.90.0 (`e613711`), on signal-flow 0.69.0 (`da01bb0`) and the same

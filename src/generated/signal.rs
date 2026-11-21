@@ -334,6 +334,13 @@ pub struct ModelEffort {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum RefreshMode {
+    Automatic,
+    Manual,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigureMetaflow {
     pub address: flow_ethos::Address,
     pub root_option: std::option::Option<Root>,
@@ -343,6 +350,7 @@ pub struct ConfigureMetaflow {
     pub flow_kind: signal_flow::FlowKind,
     pub tool_set: signal_flow::ToolSet,
     pub continuity: Continuity,
+    pub refresh_mode: RefreshMode,
     pub purpose: Purpose,
     pub records: Records,
     pub effort: Effort,
@@ -358,6 +366,7 @@ pub enum Change {
     Effort(Effort),
     Add(Element),
     Remove(Element),
+    RefreshMode(RefreshMode),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
