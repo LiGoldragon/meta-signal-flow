@@ -86,7 +86,7 @@ fn configure_ack_names_its_outcome_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Secondary } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Tertiary } 30 None { 1 3 1 } }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / «!» # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [ { Secondary Psyche claude-opus } { Secondary Mind gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] [ { { Field flow Quaternary } Claude [ SkillTool WorkflowTool ] } ] [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Secondary } Some./srv/core [ spirit:core ] [ vision:flow ] Regular Default Maintained «Keeps Flow running.» [ flows/a68420/vision/flow.md ] } ] [ { { Mind core Secondary } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Tertiary } 30 None { 1 3 1 } [] }";
 
     let response = Potential::<Response>::from(text)
         .actualize(&mut budget())
@@ -604,7 +604,7 @@ fn configure_declares_the_default_minutes_and_the_snapshot_carries_it() {
         "ConfigureRejected.MinutesRefused.Zero",
         "ConfigureRejected.MinutesRefused.Negative",
         "ConfigureRejected.MinutesRefused.Unreachable",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] [] [] [] [] None 45 None { 1 3 1 } }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] [] [] [] [] None 45 None { 1 3 1 } [] }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -667,7 +667,7 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
         "ConfigureRejected.CountersRefused.NotEmpty",
         "ConfigureRejected.CountersRefused.Lowered.{ 121 46 301 }",
         "ConfigureRejected.CountersRefused.NotRunning",
-        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] [] [] [] [] None 45 None { 120 45 300 } }",
+        "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] [] [] [] [] None 45 None { 120 45 300 } [] }",
     ] {
         let response = Potential::<Response>::from(reply)
             .actualize(&mut budget())
@@ -679,6 +679,43 @@ fn configure_declares_the_counters_and_the_snapshot_carries_them() {
             response
         );
     }
+}
+
+/// The Harness Nexus sockets are a configuration family of their own, one
+/// entry per HarnessKind, declared whole over Configure and read back as the
+/// snapshot's last field. The Claude and the Codex Harness Nexus take the
+/// same family.
+#[test]
+fn configure_declares_the_harness_nexuses_and_the_snapshot_carries_them() {
+    let text = "Configure.HarnessNexuses.[ { Claude /run/user/1001/nexus/main/claude-harness-subscription.sock } { Codex /run/user/1001/nexus/main/codex-harness-subscription.sock } ]";
+    let query = Potential::<Query>::from(text)
+        .actualize(&mut budget())
+        .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+    assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+    let Query::Configure(meta_signal_flow::Configuration::HarnessNexuses(entries)) = &query else {
+        panic!("expected the HarnessNexuses family");
+    };
+    assert_eq!(entries.len(), 2);
+    assert_eq!(entries[0].harness_kind, meta_signal_flow::HarnessKind::Claude);
+    assert_eq!(
+        entries[0].harness_nexus_path,
+        "/run/user/1001/nexus/main/claude-harness-subscription.sock"
+    );
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Query, rkyv::rancor::Error>(&archive).unwrap(),
+        query
+    );
+    let reply = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/control.sock [ gpt-6.1 ] } [] [ Psyche ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None } [] [] [] [] [] [] None 45 None { 120 45 300 } [ { Claude /run/user/1001/nexus/main/claude-harness-subscription.sock } ] }";
+    let response = Potential::<Response>::from(reply)
+        .actualize(&mut budget())
+        .unwrap_or_else(|error| panic!("{reply}: {error:?}"));
+    assert_eq!(response.datomize(vec![]).protosize().compact(), reply);
+    let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&response).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Response, rkyv::rancor::Error>(&archive).unwrap(),
+        response
+    );
 }
 
 /// A stored send outcome refused for an unidentified sender holds the raw

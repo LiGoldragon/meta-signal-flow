@@ -2,6 +2,15 @@
 
 How to deploy each breaking change of meta-signal-flow.
 
+## 54.1.0: the Harness Nexus sockets are a configuration family
+
+- `ConfigurationChange` appends `HarnessNexuses.Vector<ConfigureHarnessNexus>`
+  and `ConfigurationSnapshot` appends the same field after `Counters`.
+  `ConfigureHarnessNexus` is `{ HarnessKind HarnessNexusPath }`, one entry per
+  harness, declared whole like the other families, so the Claude and the Codex
+  Harness Nexus take one family. `ConfigureNexus` is unchanged.
+- Set the Claude Harness Nexus: `Configure.HarnessNexuses.[ { Claude <socket path> } ]`.
+
 ## 54.0.0: share the ordinary running-seat adoption contract
 
 - The `signal-flow` dependency moves to 42.0.0 so the Nexus has one ordinary

@@ -124,6 +124,15 @@ pub struct ConfigureCounters {
     pub send_outcome: SendOutcome,
 }
 #[rustfmt::skip]
+pub type HarnessNexusPath = String;
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ConfigureHarnessNexus {
+    pub harness_kind: signal_flow::HarnessKind,
+    pub harness_nexus_path: HarnessNexusPath,
+}
+#[rustfmt::skip]
 pub type HeartbeatPeriodSeconds = i64;
 #[rustfmt::skip]
 pub type HeartbeatRecipients = std::vec::Vec<flow_ethos::Address>;
@@ -157,6 +166,7 @@ pub enum ConfigurationChange {
     DefaultMinutes(flow_ethos::Minutes),
     Heartbeat(std::option::Option<HeartbeatConfig>),
     Counters(ConfigureCounters),
+    HarnessNexuses(std::vec::Vec<ConfigureHarnessNexus>),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -188,6 +198,8 @@ pub type Heartbeat = std::option::Option<HeartbeatConfig>;
 #[rustfmt::skip]
 pub type Counters = ConfigureCounters;
 #[rustfmt::skip]
+pub type HarnessNexuses = std::vec::Vec<ConfigureHarnessNexus>;
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ConfigurationSnapshot {
@@ -202,6 +214,7 @@ pub struct ConfigurationSnapshot {
     pub default_minutes: DefaultMinutes,
     pub heartbeat: Heartbeat,
     pub counters: Counters,
+    pub harness_nexuses: HarnessNexuses,
 }
 #[rustfmt::skip]
 pub type IdempotencyKey = String;
