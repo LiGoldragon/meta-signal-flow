@@ -1442,6 +1442,8 @@ pub enum Input {
     HoldPermaflow(flow_ethos::Address),
     ReleasePermaflow(flow_ethos::Address),
     AbandonQueueDelivery(AbandonQueueDelivery_Data),
+    Succeed(signal_flow::AddressSuccession),
+    ReadSuccession(flow_ethos::Address),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1569,6 +1571,15 @@ pub enum AbandonQueueDeliveryRejected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum SucceedRefused_Data {
+    UnknownAddress(flow_ethos::Address),
+    ConflictingSuccessor(signal_flow::AddressSuccession),
+    Cycle(flow_ethos::Address),
+    StoreRefused(StoreFailure),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Output {
     Configuration(ConfigurationSnapshot),
     Configured(ConfigurationChange),
@@ -1625,6 +1636,9 @@ pub enum Output {
     WithdrawRejected(WithdrawRejected_Data),
     RestartQueued(signal_flow::FlowId),
     AbandonQueueDeliveryRejected(AbandonQueueDeliveryRejected_Data),
+    Succeeded(signal_flow::AddressSuccession),
+    SuccessionRead(std::option::Option<signal_flow::AddressSuccession>),
+    SucceedRefused(SucceedRefused_Data),
 }
 #[rustfmt::skip]
 #[allow(clippy::result_large_err, clippy::ptr_arg, clippy::borrowed_box)]
@@ -1742,6 +1756,14 @@ pub trait Answering {
         &self,
         abandon_queue_delivery: &AbandonQueueDelivery_Data,
     ) -> std::result::Result<QueueDeliveryAbandoned_Data, Output>;
+    fn succeed(
+        &self,
+        address_succession: &signal_flow::AddressSuccession,
+    ) -> std::result::Result<ConfigureRefusal, Output>;
+    fn read_succession(
+        &self,
+        address: &flow_ethos::Address,
+    ) -> std::result::Result<ResetRejection, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1888,6 +1910,16 @@ impl Answerable for Input {
                 nexus
                     .abandon_queue_delivery(carried)
                     .map_or_else(|refusal| refusal, Output::QueueDeliveryAbandoned)
+            }
+            Input::Succeed(carried) => {
+                nexus
+                    .succeed(carried)
+                    .map_or_else(|refusal| refusal, Output::ConfigureRefused)
+            }
+            Input::ReadSuccession(carried) => {
+                nexus
+                    .read_succession(carried)
+                    .map_or_else(|refusal| refusal, Output::ResetRejected)
             }
         }
     }

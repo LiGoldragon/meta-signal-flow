@@ -368,7 +368,7 @@
 ; of its own.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
+[ signal_flow:[ AddressSuccession FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
   flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -405,7 +405,9 @@ Signal
   Resume
   HoldPermaflow.Address
   ReleasePermaflow.Address
-  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason } ]
+  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason }
+  Succeed.AddressSuccession
+  ReadSuccession.Address ]
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -468,7 +470,13 @@ Signal
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RestartQueued.FlowId
-  AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished EmptyReason ] ]
+  AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished EmptyReason ]
+  Succeeded.AddressSuccession
+  SuccessionRead.Option<AddressSuccession>
+  SucceedRefused.[ UnknownAddress.Address
+                   ConflictingSuccessor.AddressSuccession
+                   Cycle.Address
+                   StoreRefused.StoreFailure ] ]
 [ State.[ Acting Resting Crystallizing Asleep ]  ; a flow's state, as the override panel sets it
   PermaflowHold.[ Held Released ]                ; independent of Continuity and expiring locks
   ; The meta contract owns this read projection; Memory owns its stored form.

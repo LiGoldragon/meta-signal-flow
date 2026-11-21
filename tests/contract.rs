@@ -1156,3 +1156,37 @@ fn handover_configuration_round_trips_zero_count_policy_and_archive_path() {
         }
     }
 }
+
+#[test]
+fn address_succession_requests_and_readback_keep_both_addresses() {
+    let addresses = "{ { Psyche research Sonnet } { Mind research Sol } }";
+    for text in [
+        format!("Succeed.{addresses}"),
+        "ReadSuccession.{ Psyche research Sonnet }".into(),
+    ] {
+        let input = Potential::<Input>::from(text.as_str())
+            .actualize(&mut budget())
+            .expect("succession input");
+        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&input).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&bytes).unwrap(),
+            input
+        );
+        assert_eq!(input.datomize(vec![]).protosize().compact(), text);
+    }
+    for text in [
+        format!("Succeeded.{addresses}"),
+        format!("SuccessionRead.Some.{addresses}"),
+        "SuccessionRead.None".into(),
+    ] {
+        let output = Potential::<Output>::from(text.as_str())
+            .actualize(&mut budget())
+            .expect("succession output");
+        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&output).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Output, rkyv::rancor::Error>(&bytes).unwrap(),
+            output
+        );
+        assert_eq!(output.datomize(vec![]).protosize().compact(), text);
+    }
+}
