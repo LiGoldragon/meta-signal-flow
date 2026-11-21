@@ -7,8 +7,9 @@ use meta_signal_flow::{
     AbandonQueueDelivery_Data, AbandonQueueDeliveryRejected_Data, AbandonmentCause,
     AbandonmentRecord, Input, Output, ProcessId, ProcessIdentity, ProcessStartToken, ProcessUserId,
     QueueAttemptId, QueueDeliveriesRead_Data, QueueDeliveryAbandoned_Data, QueueResolutionReason,
-    ResolverIdentity, UnixSeconds, VisibleQueueDelivery, VisibleQueueDeliveryStanding,
-    VisibleQueueEvidence, VisibleQueueEvidence_Legacy_Data,
+    ResolverIdentity, UnixSeconds, VisibleAbandonmentCause, VisibleAbandonmentRecord,
+    VisibleQueueDelivery, VisibleQueueDeliveryStanding, VisibleQueueEvidence,
+    VisibleQueueEvidence_Legacy_Data,
 };
 use signal_flow::{FlowId, HarnessKind, NativeSessionId, VisibleRequest, VisibleSender};
 
@@ -47,7 +48,7 @@ fn causes() -> Vec<AbandonmentCause> {
     ]
 }
 
-fn abandoned(abandonment_record: AbandonmentRecord) -> VisibleQueueDelivery {
+fn abandoned(visible_abandonment_cause: VisibleAbandonmentCause) -> VisibleQueueDelivery {
     VisibleQueueDelivery {
         native_session_id: NativeSessionId("s1".to_string()),
         harness_kind: HarnessKind::Codex,
@@ -56,7 +57,11 @@ fn abandoned(abandonment_record: AbandonmentRecord) -> VisibleQueueDelivery {
             visible_request: VisibleRequest::Order("go".into()),
         }),
         visible_queue_delivery_standing: VisibleQueueDeliveryStanding::Abandoned(
-            abandonment_record,
+            VisibleAbandonmentRecord {
+                visible_abandonment_cause,
+                queue_resolution_reason: QueueResolutionReason("its seat is gone".to_string()),
+                unix_seconds: UnixSeconds(1_790_000_000),
+            },
         ),
     }
 }
@@ -81,12 +86,18 @@ fn abandon_queue_delivery_and_its_answers_round_trip_as_archives() {
         replies.push(Output::QueueDeliveryAbandoned(
             QueueDeliveryAbandoned_Data {
                 address: address(),
-                abandonment_record: record(cause.clone()),
+                abandonment_record: record(cause),
             },
         ));
+    }
+    for cause in [
+        VisibleAbandonmentCause::Owner(owner().process_identity),
+        VisibleAbandonmentCause::FlowRetired,
+        VisibleAbandonmentCause::RequestEnded(RequestId("k7ph".to_string())),
+    ] {
         replies.push(Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
             address: address(),
-            visible_queue_delivery_vector: vec![abandoned(record(cause))],
+            visible_queue_delivery_vector: vec![abandoned(cause)],
         }));
     }
     for reply in replies {
@@ -150,20 +161,29 @@ mod datom {
             }),
         );
         output_reads_and_prints_back_as(
-            "QueueDeliveriesRead.{ { Mind flow Sol } [ { s1 Codex Legacy.{ Unbound Order.go } Abandoned.{ FlowRetired.74e4d1 «its seat is gone» 1790000000 } } ] }",
+            "QueueDeliveriesRead.{ { Mind flow Sol } [ { s1 Codex Legacy.{ Unbound Order.go } Abandoned.{ FlowRetired «its seat is gone» 1790000000 } } ] }",
             Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
                 address: address(),
-                visible_queue_delivery_vector: vec![abandoned(record(
-                    AbandonmentCause::FlowRetired(FlowId("74e4d1".to_string())),
-                ))],
+                visible_queue_delivery_vector: vec![abandoned(
+                    VisibleAbandonmentCause::FlowRetired,
+                )],
             }),
         );
         output_reads_and_prints_back_as(
             "QueueDeliveriesRead.{ { Mind flow Sol } [ { s1 Codex Legacy.{ Unbound Order.go } Abandoned.{ RequestEnded.k7ph «its seat is gone» 1790000000 } } ] }",
             Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
                 address: address(),
-                visible_queue_delivery_vector: vec![abandoned(record(
-                    AbandonmentCause::RequestEnded(RequestId("k7ph".to_string())),
+                visible_queue_delivery_vector: vec![abandoned(
+                    VisibleAbandonmentCause::RequestEnded(RequestId("k7ph".to_string())),
+                )],
+            }),
+        );
+        output_reads_and_prints_back_as(
+            "QueueDeliveriesRead.{ { Mind flow Sol } [ { s1 Codex Legacy.{ Unbound Order.go } Abandoned.{ Owner.{ 7 1001 99 } «its seat is gone» 1790000000 } } ] }",
+            Output::QueueDeliveriesRead(QueueDeliveriesRead_Data {
+                address: address(),
+                visible_queue_delivery_vector: vec![abandoned(VisibleAbandonmentCause::Owner(
+                    owner().process_identity,
                 ))],
             }),
         );

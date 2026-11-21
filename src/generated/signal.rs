@@ -1256,13 +1256,29 @@ pub struct VisibleQueueResolutionRecord {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum VisibleAbandonmentCause {
+    Owner(ProcessIdentity),
+    FlowRetired,
+    RequestEnded(flow_ethos::RequestId),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct VisibleAbandonmentRecord {
+    pub visible_abandonment_cause: VisibleAbandonmentCause,
+    pub queue_resolution_reason: QueueResolutionReason,
+    pub unix_seconds: UnixSeconds,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum VisibleQueueDeliveryStanding {
     Prepared,
     Uncertain(std::option::Option<Undecided>),
     ReceiptRecorded,
     Absent(AbsenceProof),
     Resolved(VisibleQueueResolutionRecord),
-    Abandoned(AbandonmentRecord),
+    Abandoned(VisibleAbandonmentRecord),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

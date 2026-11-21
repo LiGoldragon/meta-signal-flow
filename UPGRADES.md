@@ -17,8 +17,9 @@ ethos-zero 29.0.0 (`f23eacf`). Flow Nexus 0.60.5, bead 76bv.
   Owner.ResolverIdentity FlowRetired.FlowId RequestEnded.RequestId ]`, a
   meta peer, or the Nexus itself when the attempt's flow left its Address
   or a Cancel or CloseRequest closed its request.
-- `QueueDeliveryStanding` and `VisibleQueueDeliveryStanding` append
-  `Abandoned.AbandonmentRecord`.
+- `QueueDeliveryStanding` appends `Abandoned.AbandonmentRecord`.
+  `VisibleQueueDeliveryStanding` appends `Abandoned.VisibleAbandonmentRecord`:
+  its owner is named by process, and retirement is recorded without a flow ID.
 - **Output discriminants move.** `QueueDeliveryAbandoned` stands after
   `PermaflowReleased`, so every output from `ConfigureRefused` on moves one
   rkyv discriminant. Both ends of the meta socket repin together.

@@ -203,7 +203,8 @@
 ; resolved an Uncertain attempt through ResolveQueueDelivery; the record holds
 ; the outcome, the requesting peer, the reason and the time. Abandoned: the
 ; attempt was given up with its receipt never seen, and its request is never
-; sent again; the AbandonmentRecord names who gave it up and why. Settled
+; sent again; the visible record gives the cause and reason. It identifies an
+; owner by process and records retirement without a flow id. Settled
 ; attempts are not listed. ReadQueueDeliveriesRejected: UnknownAddress, StoreRefused.
 
 ; ResolveQueueDelivery settles one Uncertain attempt by its QueueAttemptId
@@ -759,12 +760,16 @@ Signal
   ; Debug is the one explicit interface that exposes them.
   VisibleDelivery.{ InterruptWitness DeliveryGrade }
   VisibleQueueResolutionRecord.{ QueueResolutionOutcome ProcessIdentity QueueResolutionReason UnixSeconds }
+  VisibleAbandonmentCause.[ Owner.ProcessIdentity
+                            FlowRetired
+                            RequestEnded.RequestId ]
+  VisibleAbandonmentRecord.{ VisibleAbandonmentCause QueueResolutionReason UnixSeconds }
   VisibleQueueDeliveryStanding.[ Prepared
                                  Uncertain.Option<Undecided>
                                  ReceiptRecorded
                                  Absent.AbsenceProof
                                  Resolved.VisibleQueueResolutionRecord
-                                 Abandoned.AbandonmentRecord ]
+                                 Abandoned.VisibleAbandonmentRecord ]
   VisibleQueueEvidence.[ Logical.VisibleNativeInput
                          Legacy.{ VisibleSender VisibleRequest } ]
   VisibleQueueDelivery.{ NativeSessionId HarnessKind VisibleQueueEvidence VisibleQueueDeliveryStanding }
