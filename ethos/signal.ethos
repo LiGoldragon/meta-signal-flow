@@ -442,6 +442,8 @@ Signal
   PermaflowHeld.Address
   PermaflowReleased.Address
   QueueDeliveryAbandoned.{ Address AbandonmentRecord }
+  Succeeded.AddressSuccession
+  SuccessionRead.Option<AddressSuccession>
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -471,8 +473,6 @@ Signal
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RestartQueued.FlowId
   AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished EmptyReason ]
-  Succeeded.AddressSuccession
-  SuccessionRead.Option<AddressSuccession>
   SucceedRefused.[ UnknownAddress.Address
                    ConflictingSuccessor.AddressSuccession
                    Cycle.Address

@@ -1615,6 +1615,8 @@ pub enum Output {
     PermaflowHeld(flow_ethos::Address),
     PermaflowReleased(flow_ethos::Address),
     QueueDeliveryAbandoned(QueueDeliveryAbandoned_Data),
+    Succeeded(signal_flow::AddressSuccession),
+    SuccessionRead(std::option::Option<signal_flow::AddressSuccession>),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1636,8 +1638,6 @@ pub enum Output {
     WithdrawRejected(WithdrawRejected_Data),
     RestartQueued(signal_flow::FlowId),
     AbandonQueueDeliveryRejected(AbandonQueueDeliveryRejected_Data),
-    Succeeded(signal_flow::AddressSuccession),
-    SuccessionRead(std::option::Option<signal_flow::AddressSuccession>),
     SucceedRefused(SucceedRefused_Data),
 }
 #[rustfmt::skip]
@@ -1759,11 +1759,14 @@ pub trait Answering {
     fn succeed(
         &self,
         address_succession: &signal_flow::AddressSuccession,
-    ) -> std::result::Result<ConfigureRefusal, Output>;
+    ) -> std::result::Result<signal_flow::AddressSuccession, Output>;
     fn read_succession(
         &self,
         address: &flow_ethos::Address,
-    ) -> std::result::Result<ResetRejection, Output>;
+    ) -> std::result::Result<
+        std::option::Option<signal_flow::AddressSuccession>,
+        Output,
+    >;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1912,14 +1915,12 @@ impl Answerable for Input {
                     .map_or_else(|refusal| refusal, Output::QueueDeliveryAbandoned)
             }
             Input::Succeed(carried) => {
-                nexus
-                    .succeed(carried)
-                    .map_or_else(|refusal| refusal, Output::ConfigureRefused)
+                nexus.succeed(carried).map_or_else(|refusal| refusal, Output::Succeeded)
             }
             Input::ReadSuccession(carried) => {
                 nexus
                     .read_succession(carried)
-                    .map_or_else(|refusal| refusal, Output::ResetRejected)
+                    .map_or_else(|refusal| refusal, Output::SuccessionRead)
             }
         }
     }

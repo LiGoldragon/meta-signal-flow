@@ -1190,3 +1190,13 @@ fn address_succession_requests_and_readback_keep_both_addresses() {
         assert_eq!(output.datomize(vec![]).protosize().compact(), text);
     }
 }
+
+/// The compiler also checks the generated positional dispatch. A Datom
+/// round-trip alone can pass when an input is paired with the wrong output.
+pub trait SuccessionDispatchContract: meta_signal_flow::Answering {
+    fn proves_succession_dispatch(&self, succession: &signal_flow::AddressSuccession) {
+        let _: Result<signal_flow::AddressSuccession, Output> = self.succeed(succession);
+        let _: Result<Option<signal_flow::AddressSuccession>, Output> =
+            self.read_succession(&succession.first_address);
+    }
+}
