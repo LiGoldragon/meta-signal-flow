@@ -433,13 +433,13 @@ rec {
       };
       "flow-ethos" = rec {
         crateName = "flow-ethos";
-        version = "0.54.3";
+        version = "0.56.2";
         edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/flow";
-          rev = "062ef9e14abbf6552b257e9ce7e1c22f5bc00c27";
-          sha256 = "1rz6vqapv8zxl772ad6810ssi6rcgllncj7ab865pml46j9fcn7i";
+          rev = "d13304b67d55bb11ec07cc4603081826d0eded33";
+          sha256 = "1il2kj4g3gny3iz04cfw5sdr4w4rxhfy7y9bhdh3ki6b9lwbm16v";
         };
         libName = "flow_ethos";
         dependencies = [
@@ -463,7 +463,7 @@ rec {
         buildDependencies = [
           {
             name = "ethos-zero";
-            packageId = "ethos-zero 22.0.0";
+            packageId = "ethos-zero 29.0.0";
           }
         ];
         features = {
@@ -634,7 +634,7 @@ rec {
       };
       "meta-signal-flow" = rec {
         crateName = "meta-signal-flow";
-        version = "0.92.0";
+        version = "0.94.0";
         edition = "2024";
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };
         libName = "meta_signal_flow";
@@ -1145,13 +1145,13 @@ rec {
       };
       "signal-flow" = rec {
         crateName = "signal-flow";
-        version = "0.69.0";
+        version = "0.71.0";
         edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/signal-flow";
-          rev = "da01bb0533a2b2800efcc3a4ceacee8307261fd7";
-          sha256 = "049cpb43zskfx5zzbppn9j9bc823ykj21ds9xlsb0y6vsa629vmz";
+          rev = "c61b5788cccf4cd184418c35ae0f94527cf073e2";
+          sha256 = "1dm0p9j4ccbs68j40wf85fj72sc9lvvw7w8j8w4mpx5plx9gb76v";
         };
         libName = "signal_flow";
         dependencies = [

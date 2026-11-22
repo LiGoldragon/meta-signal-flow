@@ -369,7 +369,7 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
-  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
+  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes NotificationType WorkNotification ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -405,7 +405,10 @@ Signal
   Resume
   HoldPermaflow.Address
   ReleasePermaflow.Address
-  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason } ]
+  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason }
+  ReadDesignerNoticePolicy
+  ReadDefaultNotificationDestinations
+  ReadWorkOutcome.RequestId ]
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -440,6 +443,9 @@ Signal
   PermaflowHeld.Address
   PermaflowReleased.Address
   QueueDeliveryAbandoned.{ Address AbandonmentRecord }
+  DesignerNoticePolicy
+  DefaultNotificationDestinations
+  WorkOutcome.Option<WorkOutcomeRecord>
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -597,6 +603,10 @@ Signal
   HeartbeatRecipients.Vector<Address>
   HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
   CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
+  DesignerNoticePolicy.Vector<Address>
+  DefaultNotificationDestination.{ NotificationType Address }
+  DefaultNotificationDestinations.Vector<DefaultNotificationDestination>
+  WorkOutcomeRecord.{ WorkNotification Vector<Address> }
   ; Keep the payload type distinct from the unit Input.Configuration variant.
   ConfigurationChange.[ ModelEffort
                          Models.Vector<ConfigureModel>
@@ -624,7 +634,9 @@ Signal
                          Refresh.ConfigureThreshold
                          Amend.{ Address Change }          ; one value of one permaflow
                          SuccessorRecoveryText              ; emergency successor guidance, one value
-                         EndedTurnRetention.TurnRetentionBound ]   ; one value, replaces the committed one
+                         EndedTurnRetention.TurnRetentionBound
+                         DesignerNoticePolicy
+                         DefaultNotificationDestination ]
   ; One declaration taken away, by its key.
   Removal.[ Permaflow.Address
             Harness.HarnessKind
