@@ -1184,3 +1184,42 @@ fn designer_notice_policy_has_separate_typed_set_and_read_surfaces() {
         "DesignerNoticePolicy.[]"
     );
 }
+
+#[test]
+fn notices_two_defaults_and_outcome_read_are_typed() {
+    for text in [
+        "Configure.DefaultNotificationDestination.{ WorkDone { Mind quiet Sol } }",
+        "Configure.DefaultNotificationDestination.{ WorkCancelled { Psyche witness Sol } }",
+        "ReadDefaultNotificationDestinations",
+        "ReadWorkOutcome.k7ph",
+    ] {
+        let input = Potential::<Input>::from(text)
+            .actualize(&mut budget())
+            .unwrap();
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&input).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
+            input
+        );
+        assert_eq!(input.datomize(vec![]).protosize().compact(), text);
+    }
+    let response = Output::WorkOutcome(Some(meta_signal_flow::WorkOutcomeRecord {
+        work_notification: flow_ethos::WorkNotification {
+            request_id: flow_ethos::RequestId("k7ph".into()),
+            notification_type: flow_ethos::NotificationType::WorkDone,
+            address: flow_ethos::Address {
+                aspect: flow_ethos::Aspect::Mind,
+                topic: flow_ethos::Topic("workOwner".into()),
+                model: flow_ethos::Model::Sol,
+            },
+        },
+        address_vector: vec![],
+    }));
+    let text = response.datomize(vec![]).protosize().compact();
+    assert_eq!(
+        Potential::<Output>::from(text.as_str())
+            .actualize(&mut budget())
+            .unwrap(),
+        response
+    );
+}

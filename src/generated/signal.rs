@@ -449,6 +449,26 @@ pub struct DesignerNoticePolicy(pub std::vec::Vec<flow_ethos::Address>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DefaultNotificationDestination {
+    pub notification_type: flow_ethos::NotificationType,
+    pub address: flow_ethos::Address,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct DefaultNotificationDestinations(
+    pub std::vec::Vec<DefaultNotificationDestination>,
+);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct WorkOutcomeRecord {
+    pub work_notification: flow_ethos::WorkNotification,
+    pub address_vector: std::vec::Vec<flow_ethos::Address>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Amend_Data {
     pub address: flow_ethos::Address,
     pub change: Change,
@@ -485,6 +505,7 @@ pub enum ConfigurationChange {
     SuccessorRecoveryText(SuccessorRecoveryText),
     EndedTurnRetention(TurnRetentionBound),
     DesignerNoticePolicy(DesignerNoticePolicy),
+    DefaultNotificationDestination(DefaultNotificationDestination),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1448,6 +1469,8 @@ pub enum Input {
     ReleasePermaflow(flow_ethos::Address),
     AbandonQueueDelivery(AbandonQueueDelivery_Data),
     ReadDesignerNoticePolicy,
+    ReadDefaultNotificationDestinations,
+    ReadWorkOutcome(flow_ethos::RequestId),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1611,6 +1634,8 @@ pub enum Output {
     PermaflowReleased(flow_ethos::Address),
     QueueDeliveryAbandoned(QueueDeliveryAbandoned_Data),
     DesignerNoticePolicy(DesignerNoticePolicy),
+    DefaultNotificationDestinations(DefaultNotificationDestinations),
+    WorkOutcome(std::option::Option<WorkOutcomeRecord>),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1752,6 +1777,13 @@ pub trait Answering {
     fn read_designer_notice_policy(
         &self,
     ) -> std::result::Result<DesignerNoticePolicy, Output>;
+    fn read_default_notification_destinations(
+        &self,
+    ) -> std::result::Result<DefaultNotificationDestinations, Output>;
+    fn read_work_outcome(
+        &self,
+        request_id: &flow_ethos::RequestId,
+    ) -> std::result::Result<std::option::Option<WorkOutcomeRecord>, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1903,6 +1935,19 @@ impl Answerable for Input {
                 nexus
                     .read_designer_notice_policy()
                     .map_or_else(|refusal| refusal, Output::DesignerNoticePolicy)
+            }
+            Input::ReadDefaultNotificationDestinations => {
+                nexus
+                    .read_default_notification_destinations()
+                    .map_or_else(
+                        |refusal| refusal,
+                        Output::DefaultNotificationDestinations,
+                    )
+            }
+            Input::ReadWorkOutcome(carried) => {
+                nexus
+                    .read_work_outcome(carried)
+                    .map_or_else(|refusal| refusal, Output::WorkOutcome)
             }
         }
     }
