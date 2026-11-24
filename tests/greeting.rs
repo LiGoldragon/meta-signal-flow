@@ -106,3 +106,15 @@ fn the_ordinary_contract_is_refused_on_the_meta_socket() {
         ))
     );
 }
+
+#[test]
+fn the_meta_contract_without_the_paired_send_several_refusal_is_refused() {
+    let previous = Handshake::of_source(include_str!("fixtures/meta-signal-flow-0.92.ethos"));
+    assert_ne!(previous, Input::greeting());
+    assert_eq!(
+        Input::receipt(&previous),
+        HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
+            Input::contract_digest()
+        ))
+    );
+}

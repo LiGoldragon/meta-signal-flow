@@ -1,5 +1,8 @@
 ; Flow privileged Signal.
 ;
+; The ordinary Refusal and VisibleRefusal imported here carry the
+; typed SendSeveral conflict and its zero-based message position.
+;
 ; Flow is the only pane writer. TypeMessage and Command are the only ways
 ; anything is typed into a flow's pane, and both run under Flow's own
 ; per-pane lease: an exclusive hold over the whole key sequence, never

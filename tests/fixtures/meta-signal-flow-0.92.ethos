@@ -1,0 +1,790 @@
+; Flow privileged Signal.
+;
+; Flow is the only pane writer. TypeMessage and Command are the only ways
+; anything is typed into a flow's pane, and both run under Flow's own
+; per-pane lease: an exclusive hold over the whole key sequence, never
+; handed out on the wire.
+;
+; TypeMessage carries a typed Message addressed by FlowId; Flow renders it
+; and types it into the flow's pane, answered MessageTyped.
+; A Letter whose Content is a Waking is typed as that Waking alone: one
+; top-level vector of its inputs, oldest first, each naming its logical
+; id, its sender and its own priority, so the recipient can tell each
+; message and who sent it. Any other Letter is typed with its Priority
+; head first (HardAbrupt., MiddleAbrupt. or Soft.). A Letter names its
+; MessageId first: the id the
+; sender's Message Nexus minted, carried through untouched so the
+; recipient reading the pane can Acknowledge it. Flow never interprets it. The Content may hold no control character but
+; LF and TAB (ControlCharacter carries the byte offset in the rendered
+; pane text), and a first line that is a harness command (a sigil of the
+; recipient's HarnessProfile, then a command word) is refused as
+; HarnessCommand: harness commands go through Command. Vet answers what
+; TypeMessage would refuse and types nothing. A flow its Address no longer
+; receives as is refused Superseded, naming the flow the Address receives
+; as; a flow whose launch holds its Address unconfirmed is refused
+; Unconfirmed. Which flow an Address receives as is read from the record
+; its launch writes at confirmation, never from a reap or a handover still
+; pending, and Command refuses the same two. TypeMessage is idempotent on its
+; DeliveryId: a repeat answers the stored Delivery and types nothing. A
+; delivery a crash left under the lease settles Uncertain and is never
+; retried.
+;
+; Soft needs the recipient Idle or Done; every tier refuses a Blocked
+; recipient and a composer that already holds text. Transported means
+; Herdr accepted the text for the exact binding; Presented means the
+; recipient was seen reacting on the exact pane. InterruptWitness says
+; whether a HardAbrupt interrupt was seen to leave Working.
+;
+; Every query on this socket gives the same answer to every peer, a flow,
+; a subflow or the living at a shell. MetaAspects and MessageNexusBinary
+; are configured and read by nothing.
+;
+; Every connection to this socket greets first, through Signal's
+; Handshake, before any Input is decoded: Greeted with this contract's
+; digest, or GreetingRefused.ContractMismatch carrying it. A first frame
+; that is not this contract's greeting, a greeting of an earlier contract
+; or of the ordinary one, an Input written first or a frame too short to be
+; a greeting, is answered that typed refusal and the connection ends; Flow
+; records it as the ordinary socket records its own, an UndecodableFrame of
+; metadata alone, seen through the ordinary Observe.Undecodable.
+;
+; ResolvePeer names the flow a process runs in, as ResolveCaller does for
+; an ordinary connection's own peer.
+;
+; ReadEvents answers the harness events Flow holds in its Memory for one
+; flow, in the order its Reports were recorded, with metadata alone:
+; a Stop carries its session, transcript path and background work, while
+; assistant-message content remains only in the transient ordinary Report.
+; The answer is EventsRead, or
+; ReadEventsRejected.UnknownFlow for a FlowId Flow does not hold.
+;
+; Configure.Permaflow, Configure.Harness and Configure.Refresh change one
+; declaration alone, keyed by its name: one permaflow by its Address, one
+; HarnessProfile by its HarnessKind, one model's refresh threshold by its
+; ModelName. It is added or replaced in one atomic commit, the rest of its
+; family kept. Each answers Configured with the change it was given,
+; echoed whole, also when the committed value already is the declaration
+; and nothing is written; a Harness while no Nexus is declared answers
+; Unconfigured. Remove takes one away by the same key and answers Removed
+; with the Removal it was given, echoed whole, also when no entry of that
+; key is held and nothing is written. The names are tentative.
+;
+; Configure.EndedTurnRetention sets how many ended Codex turn ids each
+; thread's turn ledger keeps, to know a turn's start or end that reaches Flow
+; again after the turn ended. Past the bound a ledger lets its least ended
+; turn go and keeps the greatest it let go as its watermark: a turn at or
+; below it that the ledger does not hold leaves the ledger unreconciled
+; until Flow reads the thread again, never at rest. Every bound is correct;
+; a larger one keeps more and rereads less. A new Memory seeds 64; a
+; negative bound is refused EndedTurnRetentionRefused. A change applies to
+; every ledger at once.
+;
+; Configure.Amend changes one value of one permaflow alone: it names the
+; permaflow's Address and the Change. Workspace, Purpose, Kind and
+; Continuity replace that one value; Add appends one Element, a system
+; module, a prompt module or a leave-out, to the end of its list, and
+; Remove takes it out of its list. The permaflow is read by its Address
+; and written back with that one value changed in one atomic commit, under
+; the same single-entry commit Permaflow takes, so every other permaflow and
+; every other family is kept as it was. It answers Configured with the
+; Amend it was given, echoed whole; when the permaflow already holds the
+; value, already holds the element added, or does not hold the element
+; removed, nothing is written and the answer is the same echo.
+; ConfigureRefused changes nothing: UnknownPermaflow
+; when no permaflow is declared at the Address; UnknownModule when the
+; module added is not an identity of the form type:subject:version or the
+; Curriculum Nexus at the configured CurriculumNexusPath does not hold it;
+; CurriculumUnavailable when that Curriculum Nexus cannot be asked. Only
+; an Amend that adds a module asks Curriculum: a whole permaflow, by
+; Permaflow or Metaflows, is taken as declared. Every declaration about a
+; permaflow, an Amend among them, takes effect at its next flow: a launch,
+; a wake, a restart and a successor read the declaration as it stands
+; then, and a running flow keeps what it was launched with.
+;
+; A permaflow's leave-outs are the parts of its harness's start its flows
+; go without, unless a Start names its own, which replace them. Each
+; leave-out belongs to one harness, and a permaflow's belong to the harness
+; its Address's Model runs on: the native model the Models family names for
+; that Model runs on Codex when one of the Nexus's Codex endpoints lists it,
+; and on Claude otherwise. A leave-out of another harness, in a Permaflow,
+; in a Metaflows entry or added by an Amend, is refused UnknownFeature,
+; naming it. While the Model has no native model configured, or no Nexus is
+; declared, the harness is not yet known, and the launch checks the
+; leave-outs against the harness it starts on.
+;
+; Configure declares one configuration family whole: Models, Thresholds,
+; Nexus, SendServers, Metaflows, Investigation, DefaultMinutes,
+; ProtectedAddresses, Counters or HarnessHook. The declared value replaces that family's committed
+; value in one atomic commit, so the family's effective value is always its
+; last declaration; an entry absent from the declaration is removed. It
+; answers Configured with the declaration it was given, echoed whole, also
+; when the committed value already equals it and nothing is written. Each family
+; holds one entry per key: Models one per Model, Thresholds one
+; per ModelName, SendServers one per CodexAppServerBinary, Metaflows one per
+; Address: the declaration an ordinary Launch of that Address starts from. ConfigureRefused changes
+; nothing: DuplicateEntry when a declaration names one key twice,
+; TopicRefused when an entry's Address, or an Amend's, has a topic that is
+; not an uncapitalized camelCase identifier,
+; CodexModelsOverlap when a Nexus names one model under both Codex
+; endpoints, MinutesRefused when a DefaultMinutes is
+; refused by the rule a Task's Minutes meets at admission (Zero, Negative,
+; Unreachable), CountersRefused when a Counters is refused (below).
+; Configuration reads the committed Nexus, the committed
+; model, threshold, send-server and metaflow vectors, the
+; Investigation seat, the default Minutes and the counters; it answers
+; Unconfigured while no Nexus has been declared.
+;
+; Counters names the next id each family allocates: the next logical
+; delivery, the next queue attempt, the next send outcome. A store that
+; has allocated nothing reads { 1 3 1 }: a queue attempt's number is also
+; its Codex app-server request id, whose first two a connection reserves.
+; A Counters is taken only on an empty store, one that has recorded no
+; logical delivery, no queue attempt and no send outcome, so a new store
+; continues the ids of the store it replaces; it is refused NotEmpty
+; otherwise, Lowered (carrying the counters as they stand) when any value
+; is below its family's counter now, and NotRunning by a Nexus opened for
+; configuration only, which holds no counters. A refused Counters changes
+; nothing.
+;
+; DefaultMinutes is the Minutes Flow gives a request that carries none of
+; its own: the Minutes a migrated Order takes. A new Memory holds the
+; constant Flow seeds it with until a DefaultMinutes is declared.
+;
+; A model's refresh threshold is the context, in tokens, past which a flow
+; running that model is refreshed: it is given no new message, Flow keeps
+; the metaflow's next messages for its next flow, and the flow is replaced
+; as it goes idle, its reap owed in the same event. It is told nothing and
+; writes no handover. A model with no threshold configured is never
+; refreshed.
+;
+; Investigation is the Address of the seat Flow gives the investigation of
+; a flow that compacted while it kept working without being given more
+; work: Flow raises a warning and launches that seat from its Metaflows
+; declaration with the investigation as its brief, or queues it for the
+; seat when it is Awake. A seat's context is named by its launch, never
+; configured here.
+; Configure.Nexus names the actual Message executable in MessageNexusBinary,
+; and the one Herdr session every launch opens its pane in, whoever asks.
+; Lease is the lock duration in seconds; a fresh, unconfigured default is 60.
+; CurriculumNexusPath is the socket of the Curriculum Nexus that composes
+; every launch's context. A running Nexus reads its Codex endpoints and its
+; Curriculum socket from the committed configuration, and a running Nexus
+; takes a replaced value at once, without a restart.
+;
+; HarnessHook is the hook command a Claude flow is launched with: written
+; into the flow's settings so the flow runs it on its harness events. A
+; deployment names a stable path it repoints at each Flow it activates, so
+; a flow keeps the deployed hook across upgrades. Unconfigured, or a path
+; that is not absolute, names the flow-hook beside the Nexus's executable.
+;
+; ObserveConfiguration subscribes to the configuration: the snapshot as
+; Configuration answers it (Unconfigured while no Nexus is declared) on
+; open, then one more each time a Configure replaces a family, until the
+; peer goes.
+;
+; A send server is an MCP server a Codex app-server runs for one thread,
+; trusted to name the thread whose tool calls it serves (signal-flow
+; IdentifyThread). ConfigureSendServer pairs the executable a Codex
+; app-server runs with the MCP send-server executable its child must run;
+; each is matched against the executable the kernel reports for the running
+; process, so a configured path names the binary itself, never a wrapper
+; script that execs it.
+
+; ReadQueueDeliveries answers every queued request of one metaflow that Flow
+; has begun handing to a native seat and not settled: the attempt, the flow
+; and native session it was handed to, the request with its sender, and its
+; standing. Prepared: recorded, nothing native done yet. Uncertain: native
+; input may have happened and no exact receipt was found; it is never sent
+; again, and Undecided names why reconciliation from native history could not
+; decide, or is None before one ran. ReceiptRecorded: the exact native
+; receipt is held and the request leaves the queue when it is still oldest.
+; Absent: native history proved the request never reached the seat, so a new
+; attempt was authorised; AbsenceProof names the proof. Resolved: the owner
+; resolved an Uncertain attempt through ResolveQueueDelivery; the record holds
+; the outcome, the requesting peer, the reason and the time. Abandoned: the
+; attempt was given up with its receipt never seen, and its request is never
+; sent again; the visible record gives the cause and reason. It identifies an
+; owner by process and records retirement without a flow id. Settled
+; attempts are not listed. ReadQueueDeliveriesRejected: UnknownAddress, StoreRefused.
+
+; ResolveQueueDelivery settles one Uncertain attempt by its QueueAttemptId
+; when reconciliation from native history cannot: the owner states what is
+; true and why. Delivered: the request reached the seat, so it leaves the
+; queue. Absent: it did not, so a new attempt is authorised. Flow records the
+; resolution with the identity of the requesting meta peer (its process, and
+; the flow it runs in when it runs in one; process 0 when the peer could not
+; be read), the reason, and the time in Unix
+; seconds, in the same commit as the settlement or authorisation; the
+; attempt then lists as Resolved. Flow never resolves by itself.
+; QueueDeliveryResolved answers with the attempt and the resolution.
+; ResolveQueueDeliveryRejected changes nothing: UnknownAttempt, NotUncertain
+; (the attempt is Prepared, ReceiptRecorded, Absent, Settled or Resolved),
+; NotOldest (the attempt is no longer the oldest request of its address),
+; EmptyReason, StoreRefused.
+
+; AbandonQueueDelivery gives up one attempt by its QueueAttemptId, in any
+; unfinished phase (Prepared, Uncertain, ReceiptRecorded), parked or not:
+; the owner states why. The attempt is finished, Abandoned, and authorises
+; no new attempt; its request is never sent again, and its delivery ends
+; Abandoned, so the request may be archived and its sender reads that it
+; may not have arrived. The request itself stays open. An attempt still at
+; the head of its queue leaves the queue in the same commit. Flow records
+; who asked, as ResolveQueueDelivery records its resolver, with the reason
+; and the time. QueueDeliveryAbandoned answers with the attempt's Address
+; and the record. AbandonQueueDeliveryRejected changes nothing:
+; UnknownAttempt, AlreadyFinished (the attempt is Settled, Read, Absent,
+; Resolved or Abandoned), EmptyReason.
+;
+; AbandonmentCause names who gave an attempt up. Owner: a meta peer, through
+; AbandonQueueDelivery, named as ResolveQueueDelivery names its resolver.
+; FlowRetired: the Nexus itself, when the flow the attempt was handed to
+; left its Address before its receipt was seen, the FlowId that flow's.
+; RequestEnded: the Nexus itself, when a Cancel or a CloseRequest closed the
+; request, the RequestId its own.
+
+; ReadSendOutcomes answers every completed ordinary Send invocation with the
+; typed response, caller when known, its sender (an Address, Unbound for a
+; caller in no flow, Unknown for one not kept), recipient when known, and a
+; digest of its request. The private request body is not stored. Each outcome
+; is committed before its response is emitted. Count these rows to establish
+; the number of completed Send outcomes independently.
+; ReadSendOutcomesRejected says the store refused the read.
+
+; Compaction is an emergency measure. Command.Compact is refused, before
+; anything reaches the pane, unless the flow's last measured context was
+; at or above the refresh threshold configured for its model (the Refresh
+; of that model's ConfigureThreshold, declared by Configure.Thresholds):
+; CompactionRefused.BelowThreshold carries that context and that threshold,
+; in tokens; Unmeasured says no context size is recorded for the flow;
+; NoThreshold says no refresh threshold applies, its model having none
+; configured.
+;
+; TypeMessage is refused PastThreshold, before anything reaches the pane, when
+; the flow's last measured context is at or past its model's refresh
+; threshold: a flow past its threshold is given no new message.
+
+; MetaBindExisting verifies each binding against Herdr before it is stored:
+; PaneAbsent (the container's Herdr session shows no agent of the binding's
+; harness at its workspace, pane and terminal), ProcessMismatch (the pane's
+; foreground processes do not include the binding's process), SessionMismatch
+; (Herdr reports another native session for the pane), SessionUnreported (a
+; Claude pane reports no native session), SessionUnproven (a Codex pane
+; reports none and no rollout whose session_meta names the session exists),
+; HerdrUnreadable (the session's snapshot or the pane's processes could not
+; be read), RoleMismatch (the binding's aspect is not its Address's, or its
+; model is not the native model configured for its Address's Model). It is
+; taken from any peer; MetaFlowOwnerId is recorded and checked against
+; nothing.
+
+; Inspect answers the metaflow at Address whole, as Flow holds it now: its
+; state, its Past and its queue; its binding, the row of the flow it is
+; Awake as with the Herdr pane that flow lives in, and the process bound to
+; its Address; the sender lock held on it; and every attempt outstanding
+; for it, a queued request handed to a seat and not settled, or a launch at
+; its Address not settled; each reap owed at its Address and the handover
+; owed at it, as ReapPending and HandoverPending with where each stands;
+; and the restart of the flow it is Awake as, while one is recorded. A reap
+; or a handover Flow owes without its own record yet, because the commit
+; that would record it was refused, is listed too: the reap at Unrecorded,
+; the handover with its owner as Flow judges it at the Inspect. An owner or
+; a predecessor no flow row names is listed Missing, and one whose row
+; could not be read Unknown. It changes nothing.
+; InspectRejected says Flow holds no metaflow for the Address the
+; Inspect named.
+;
+; A RestartRecord is the durable lock a flow's restart holds on its
+; Address, written before each effect it names: Closing before the old
+; harness is closed, Closed once its pane is gone and its process proven
+; exited, Opening before the new pane is created, Spawning with that pane
+; before the harness is resumed in it. The record is removed in the write
+; that binds the resumed seat. Failed keeps the session, the queue and the
+; Address held, for a retry or the owner's Stop (Stopped). Interrupted is a
+; spawn whose outcome is unproven, with the new pane when one was recorded;
+; it is never retried and only a Stop that proves the spawn quiesced clears
+; it. OldSeat is the route the flow ran in and, when Herdr showed it, the
+; birth of its harness process. Attempts counts the runs of the restart.
+
+; ProtectedAddresses names the Addresses whose flows Flow keeps: one entry
+; per Address, none by default. A protected Address's flow is never
+; refreshed for its model's threshold; it is handed its messages past it,
+; and a Compact of it is refused as below the threshold. Every other act on
+; it is answered as for any Address, to any peer. Restart here takes a flow
+; as the ordinary one does, with its answers: a Restart of a working flow
+; answers RestartQueued, as the ordinary one does; what the ordinary one
+; answers Refused is OrdinaryRefused here.
+;
+; The override panel is the owner's hand on what the Flow Nexus holds and
+; does, its inputs standing at the root of this Signal. Each override is
+; recorded in the Flow Nexus's Memory as a transition of the flow it acts
+; on, with the cause Overridden. SetState corrects the state the Nexus
+; holds for a flow. CrystallizeNow asks a flow for its crystallization
+; whatever its state; it is Asked, and a flow with no harness running is
+; Unharnessed. Renew starts a fresh flow of a permaflow from its
+; crystallization and closes the old one: when the fresh flow reports
+; Started, the old flow's running turn is interrupted and its harness
+; closed; Renewed names the fresh flow. Close closes a flow's harness.
+; Deliver hands a permaflow its queue now. Unlock releases a permaflow's
+; lock. Forget removes the record of a flow that has no harness; a flow
+; with one is Harnessed. Hold is the shutdown switch: the Flow Nexus stops
+; acting on its own, its clocks, its deliveries and its launches, and still
+; answers. Resume lets it act again. A flow is Acting while its turn runs,
+; Resting between turns, Crystallizing while it writes its
+; crystallization, and Asleep once it has no harness; MetaflowState is the
+; metaflow's, Awake as a flow or Asleep.
+;
+; Refused is the refusal every input may answer, and changes nothing:
+; UnknownFlow and UnknownAddress name what Flow does not hold, Restarting a
+; flow a restart holds, CapsuleRefused a flow whose place the Capsule did
+; not close, Unrenewed why a fresh flow did not start, and StoreRefused
+; why Memory refused.
+
+; Rebind repairs where a metaflow's flow lives, with no harness action.
+; Rebinding.Pane: the flow the metaflow is Awake as now lives in this pane
+; of the Herdr session its route names; Flow reads the pane's terminal and
+; agent from Herdr and records them as the flow's route, so the flow is
+; reached in that pane and a process in it is identified as that flow.
+; Rebinding.Flow: the metaflow's current flow is now this flow, and the flow
+; it was Awake as joins Past; its queue, locks and declaration stay. Rebound
+; names the Address. RebindRejected changes nothing: UnknownAddress, Flow
+; holds no metaflow for the Address; NotAwake, the metaflow is Asleep, so no
+; flow is current; PaneAbsent, Herdr shows no agent of the flow's harness in
+; that pane of the flow's session; HerdrUnavailable, Herdr could not be
+; read; FlowUnknown, Flow holds no row for the flow; FlowTaken, the flow is
+; already another metaflow's current flow, the Address of that metaflow.
+
+; Withdraw takes one queued request, by its LogicalDeliveryId, out of its
+; metaflow's queue, and closes any attempt outstanding for it: one handed
+; to a seat that may have reached it stays recorded as it stands and is
+; never handed over again, one whose receipt is recorded settles as
+; delivered, and a request that never reached the seat ends Withdrawn for
+; its sender. Withdrawn names the request. WithdrawRejected changes nothing:
+; UnknownAddress, Flow holds no metaflow for the Address; NotQueued, the
+; metaflow's queue holds no request of that id.
+;
+; The n-th output answers the n-th input; the outputs after the last
+; input's answer no input by position. Configuration and
+; ObserveConfiguration both answer Configuration: Configuration has it at
+; its position, and ObserveConfiguration has there Unconfigured, a reply
+; of its own.
+
+Signal
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
+  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
+[ Configuration
+  Configure.ConfigurationChange
+  ConsumeReset.ResetRequest
+  RegisterFlow.FlowNode
+  MetaBindExisting
+  Restart.FlowId                                ; as the ordinary Restart, a protected Address's included
+  TypeMessage.DeliveryRequest
+  Vet.DeliveryRequest
+  Command.CommandRequest
+  ResolvePeer.ProcessIdentity
+  ReadEvents.FlowId
+  ReadQueueDeliveries.Address
+  ReadSendOutcomes
+  ObserveLegacyArchive
+  Debug.Address
+  ResolveQueueDelivery.QueueDeliveryResolution
+  Inspect.Address                               ; the metaflow whole: state, binding, queue, locks, attempts
+  DebugDelivery.RequestId
+  Rebind.{ Address
+           Rebinding.[ Pane.HerdrPaneId         ; the current flow now lives in this pane
+                       Flow.FlowId ] }          ; the metaflow's current flow is now this flow
+  Withdraw.{ Address LogicalDeliveryId }        ; one queued delivery leaves the queue
+  ObserveConfiguration                          ; the configuration, then each change
+  Remove.Removal                                ; one declaration leaves its family
+  SetState.{ FlowId State }                     ; the override panel: the owner's hand on the Nexus
+  CrystallizeNow.FlowId
+  Renew.Address
+  Close.FlowId
+  Deliver.Address
+  Unlock.Address
+  Forget.FlowId
+  Hold
+  Resume
+  HoldPermaflow.Address
+  ReleasePermaflow.Address
+  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason } ]
+[ Configuration.ConfigurationSnapshot
+  Configured.ConfigurationChange                ; the change given, echoed whole
+  ResetConsumed.ResetOutcome
+  FlowRegistered.FlowNode
+  BoundExisting
+  Restarted.FlowId
+  MessageTyped.VisibleDelivery
+  Vetted
+  Commanded.CommandOutcome
+  PeerResolved.CallerIdentity
+  EventsRead.{ FlowId Vector<HarnessEventMetadata> } ; the ordered, metadata-only event history
+  QueueDeliveriesRead.{ Address Vector<VisibleQueueDelivery> }
+  SendOutcomesRead.Vector<VisibleSendOutcomeRecord>
+  LegacyArchiveObserved.Vector<VisibleLegacyArchiveEntry>
+  Debugged.DebugSnapshot
+  QueueDeliveryResolved.{ Address VisibleQueueDeliveryResolution }
+  Inspected.{ VisibleMetaflow Binding Vector<Lock> Vector<VisibleAttempt> Option<RestartRecord> PermaflowHold }
+  DeliveryDebugged.{ DeliverySnapshot Receipt.Option<NativeReceipt> ReadBy.Option<LogicalDeliveryId> }
+  Rebound.Address
+  Withdrawn
+  Unconfigured                                  ; ObserveConfiguration's; its frames are Configuration
+  Removed.Removal                               ; the Removal given, echoed whole
+  StateSet.{ FlowId State }                     ; the override panel's answers
+  Asked.FlowId
+  Renewed.FlowId                                ;   the fresh flow
+  Closed.FlowId
+  Delivered.Address
+  Unlocked.Address
+  Forgotten.FlowId
+  Held
+  Resumed
+  PermaflowHeld.Address
+  PermaflowReleased.Address
+  QueueDeliveryAbandoned.{ Address AbandonmentRecord }
+  ConfigureRefused.ConfigureRefusal
+  ResetRejected.ResetRejection
+  FlowRegistrationRejected.FlowRegistrationRejection
+  BindExistingRejected.BindExistingRejection
+  RestartRefused.RestartRefusal
+  OrdinaryRefused.Refusal
+  DeliveryRejected.DeliveryRejection
+  CommandRejected.CommandRejection
+  PeerResolutionRejected.CallerResolutionRejection
+  Refused.[ UnknownFlow.FlowId                  ; a refusal changes nothing
+            UnknownAddress.Address
+            Harnessed.FlowId                    ;   the flow still has a harness
+            Unharnessed.FlowId                  ;   the flow has no harness to ask
+            Restarting.FlowId                   ;   a restart holds the flow
+            CapsuleRefused.FlowId               ;   the Capsule did not close the flow's place
+            Unrenewed.RefreshRejection          ;   the fresh flow did not start, and why
+            StoreRefused.StoreFailure           ;   Memory refused, and why
+            PermaflowHeld.Address ]             ;   release this Address before a direct control
+  ReadEventsRejected.[ UnknownFlow StoreRefused ]
+  ReadQueueDeliveriesRejected.[ UnknownAddress StoreRefused ]
+  ReadSendOutcomesRejected
+  ObserveLegacyArchiveRejected.StoreFailure
+  ResolveQueueDeliveryRejected.VisibleResolveQueueDeliveryRejected
+  InspectRejected
+  RebindRejected.[ UnknownAddress PaneAbsent FlowUnknown NotAwake HerdrUnavailable FlowTaken.Address ]
+  DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
+  WithdrawRejected.[ UnknownAddress NotQueued ]
+  RestartQueued.FlowId
+  AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished EmptyReason ] ]
+[ State.[ Acting Resting Crystallizing Asleep ]  ; a flow's state, as the override panel sets it
+  PermaflowHold.[ Held Released ]                ; independent of Continuity and expiring locks
+  ; The meta contract owns this read projection; Memory owns its stored form.
+  StopMetadata.{                     ; a Stop's correlation and background-work metadata
+     Option<NativeSessionId>
+     Option<TranscriptPath>
+     BackgroundWork }
+  HarnessEventMetadata.[             ; event identity and metadata, in ordinary Event's order
+     Started.Option<NativeSessionId>
+     ToolUsed.String
+     Stopped.StopMetadata
+     PromptSubmitted.NativePrompt
+     Ended.Option<NativeSessionId>
+     Cleared.Option<NativeSessionId> ]
+  ; Flow Library owns the shared configuration field types.
+  ; This record exists only for Flow's current internal launch defaults.
+  ; The process sockets are separately supplied by Library.Place; this
+  ; record is not a Configure wire payload.
+  ; A Nexus that does not own a Message Nexus executable carries None.
+  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot CodexEndpoint CodexEndpoint Vector<HarnessProfile> MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> Lease }
+  ; The native model a seat of one Model runs, in every aspect; a Start
+  ; naming another native model for that seat is refused.
+  ConfigureModel.{ Model Native.String }
+  ; The refresh threshold of the flows that run one model, in tokens.
+  ConfigureThreshold.{ ModelName RefreshThreshold.Integer }
+  ; The model policy governing handover warning and reminder behavior.
+  HandoverPolicy.{ ModelName WarningShareLeft.Integer ReminderText.String EveryMinutes.Integer }
+  ; The configured guidance for an emergency successor without a handover.
+  SuccessorRecoveryText.String
+  ; One model's event-driven warning policy, with denominator and usage provenance.
+  ContextWarningPolicy.{ ModelName ContextWarningLimit ContextUsageProjection Vector<WarningBoundary> }
+  ; A source-established native limit or an explicitly provisional policy choice.
+  ContextWarningLimit.{ LimitBasis WarningTokens ContextBoundaryEvidence }
+  ; NativeEffectiveLimit is a limit established by the native source;
+  ; ProvisionalPolicy is an explicitly provisional policy choice.
+  LimitBasis.[ NativeEffectiveLimit ProvisionalPolicy ]
+  WarningTokens.Integer
+  ; Native model-call observations; neither names the unreported live context estimate.
+  ContextUsageProjection.[ CodexLastTotal ClaudeCompletedInputWithCache ]
+  ; The native/source evidence locator and the known observational coverage gap.
+  ContextBoundaryEvidence.{ HarnessKind HarnessVersion.String TranscriptPath BoundaryIdentity.String CoverageGap.String }
+  ; Fixed stages, most urgent first; every policy carries exactly one each.
+  WarningStage.[ Emergency Middle Early ]
+  ; Remaining percent, delivery priority and rendered text are configuration.
+  WarningBoundary.{ WarningStage RemainingPercent.Integer WarningPriority WarningText.String }
+  WarningPriority.[ HardAbrupt MiddleAbrupt Soft ]
+  ; The installed native hooks, selected explicitly by running configuration.
+  HarnessHookEvent.[ SessionStart PostToolUse UserPromptSubmit Stop SessionEnd ]
+  ContextWarningConfigurationRefusal.[ InvalidWarningTokens InvalidRemainingPercent DuplicateStage MissingStage InvalidStageOrder WarningTextRefused DuplicateHookEvent ]
+  Repository.String
+  Path.String
+  HandoverPoliciesConfiguration.[ Configured.Vector<HandoverPolicy> Unconfigured ]
+  HandoverArchiveConfiguration.[ Configured.Path Unconfigured ]
+  HandoverCountConfiguration.[ Configured.Integer Unconfigured ]
+  HarnessHookConfiguration.[ Configured.Path Unconfigured ]
+  ; Whole handover archive publication budget, in milliseconds.
+  Duration.Integer
+  CurriculumNexusPath.String
+  ; Optional presentation guidance preserved exactly as configured, including
+  ; its whitespace and line breaks.
+  PresentationPrompt.String
+  ; A Nexus that does not own a Message Nexus executable carries None.
+  ; HerdrSessionName is the one Herdr session every launch opens its pane in.
+  ConfigureNexus.{ SourceRoot CodexEndpoint CodexEndpoint HarnessProfiles MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> CurriculumNexusPath Lease Option<PresentationPrompt> HerdrSessionName }
+  CodexAppServerBinary.String
+  McpSendServerBinary.String
+  ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
+  ; How a metaflow continues. OnDemand: a flow whose turn ends with nothing
+  ; queued has its harness and pane closed, the metaflow Asleep with its
+  ; address and transcript kept, and a request that wakes starts the next
+  ; flow with the whole queue. Maintained: the metaflow is never without a
+  ; running flow; a flow refreshed, at its threshold or by order, or ended
+  ; unexpectedly (its harness gone) is followed by a successor whether or
+  ; not anything is queued, the successor confirmed before the predecessor
+  ; is reaped, and an idle flow keeps its harness. A metaflow is Maintained
+  ; by its exact Address, never by its Model.
+  Continuity.[ OnDemand Maintained ]
+  ; What the metaflow is for, composed with the brief into the first prompt.
+  Purpose.String
+  ; The workspace a metaflow's flows run in. None takes the Nexus source root.
+  Root.String
+  ; A record of the living the metaflow rests on, as a path under the
+  ; records root.
+  RecordPath.String
+  Records.Vector<RecordPath>
+  ; A permaflow's declaration, everything Flow holds about its Address: the
+  ; workspace its flows run in, the leave-outs its flows start without
+  ; when a Start names none (each of the harness its Model runs on), the
+  ; context modules a Launch of its Address composes into the system prompt
+  ; and into the first user message, its kind and tool set, how it
+  ; continues, its purpose and the records it rests on.
+  Effort.[ Default High Medium Low ]
+  ModelEffort.{ Model Effort }
+  ; Manual preserves the current seat at rest; explicit Refresh remains available.
+  RefreshMode.[ Automatic Manual ]
+  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity RefreshMode Purpose Records Effort }
+  ; One value of one permaflow, changed alone by Configure.Amend. Workspace,
+  ; Purpose, Kind, Continuity, Effort and RefreshMode replace that value.
+  ; RefreshMode applies to the current permaflow; Add appends one
+  ; element to the end of its list, Remove takes it out.
+  Change.[ Workspace.Option<Root>
+           Purpose
+           Kind.FlowKind
+           Continuity
+           Effort
+           Add.Element
+           Remove.Element
+           RefreshMode ]
+  ; One element of a permaflow's lists: a module of its system prompt, a
+  ; module of its first prompt (its PromptModules), or a leave-out.
+  Element.[ SystemModule.ModuleIdentity
+            PromptModule.ModuleIdentity
+            LeaveOut ]
+  ; Extra native harness arguments for one metaflow. The empty string is no
+  ; arguments. Flow parses this shell-word grammar before any launch effect.
+  HarnessFlagText.String
+  ConfigureHarnessFlags.{ Address HarnessFlagText }
+  ; The next id each family allocates.
+  ConfigureCounters.{ LogicalDelivery.Integer QueueAttempt.Integer SendOutcome.Integer }
+  DrawBound.Integer
+  TryBound.Integer
+  ; The ended Codex turn ids one thread's turn ledger keeps, 0 or more; a
+  ; new Memory seeds 64.
+  TurnRetentionBound.Integer
+  HeartbeatPeriodSeconds.Integer
+  HeartbeatRecipients.Vector<Address>
+  HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
+  CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
+  ; Keep the payload type distinct from the unit Input.Configuration variant.
+  ConfigurationChange.[ ModelEffort
+                         Models.Vector<ConfigureModel>
+                         Thresholds.Vector<ConfigureThreshold>
+                         HandoverPolicies.Vector<HandoverPolicy>
+                         HandoverArchive.Path
+                         HandoverCount.Integer
+                         PublicationDeadline.Duration
+                         Nexus.ConfigureNexus
+                         SendServers.Vector<ConfigureSendServer>
+                         Metaflows.Vector<ConfigureMetaflow>
+                         HarnessFlags.Vector<ConfigureHarnessFlags>
+                         Investigation.Address
+                         DefaultMinutes.Minutes
+                         Heartbeat.Option<HeartbeatConfig>
+                         ProtectedAddresses.Vector<Address>
+                         Counters.ConfigureCounters
+                         RequestIdDraws.DrawBound
+                         AnnouncementTries.TryBound
+                         HarnessHook.Path
+                         ContextWarningPolicy
+                         HarnessHookEvents.Vector<HarnessHookEvent>
+                         Permaflow.ConfigureMetaflow
+                         Harness.HarnessProfile
+                         Refresh.ConfigureThreshold
+                         Amend.{ Address Change }          ; one value of one permaflow
+                         SuccessorRecoveryText              ; emergency successor guidance, one value
+                         EndedTurnRetention.TurnRetentionBound ]   ; one value, replaces the committed one
+  ; One declaration taken away, by its key.
+  Removal.[ Permaflow.Address
+            Harness.HarnessKind
+            Refresh.ModelName
+            ContextWarning.ModelName ]
+  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> SuccessorRecoveryText ConfiguredEndedTurnRetention.TurnRetentionBound ConfiguredModelEfforts.Vector<ModelEffort> }
+  IdempotencyKey.String
+  CreditId.String
+  CreditSelection.[ Next
+                    Specific.CreditId ]
+  ResetRequest.{ IdempotencyKey CreditSelection }
+  ResetOutcome.[ Reset NothingToReset NoCredit AlreadyRedeemed ]
+  HandoverConfigurationRefusal.[ InvalidWarningShareLeft InvalidEveryMinutes InvalidHandoverCount NegativeHandoverCount InvalidPublicationDeadline DuplicatePolicy DuplicateArchive StoreRefused ]
+  ConfigureRefusal.[ ContextWarningConfigurationRefused.ContextWarningConfigurationRefusal HandoverConfigurationRefused.HandoverConfigurationRefusal StoreRefused DuplicateEntry CodexModelsOverlap TopicRefused.Topic MinutesRefused.MinutesRefusal CountersRefused.CountersRefusal RequestIdDrawsRefused AnnouncementTriesRefused UnknownPermaflow.Address UnknownFeature.LeaveOut UnknownModule.ModuleIdentity CurriculumUnavailable EndedTurnRetentionRefused ]
+  ResetRejection.[ AdapterUnavailable ProtocolRefused ]
+  FlowRegistrationRejection.[ StoreRefused UnknownOrUnclaimedIdentity ConflictingBinding ]
+  ProcessId.Integer
+  ProcessUserId.Integer
+  ProcessStartToken.String
+  ProcessIdentity.{ ProcessId ProcessUserId ProcessStartToken }
+  HerdrServerSocketPath.String
+  MetaFlowOwnerId.FlowId
+  HerdrTabId.String
+  WorkingDirectory.String
+  FlowLifecycle.[ RegisteredUnconfirmed AdoptedActive ]
+  FlowContainer.{ HerdrSessionName HerdrServerSocketPath ProcessIdentity MetaFlowOwnerId }
+  FlowBinding.{ FlowId Aspect ModelName HarnessKind NativeSessionId HerdrWorkspaceId HerdrPaneId HerdrTabId HerdrTerminalId HerdrAgentName ProcessIdentity WorkingDirectory }
+  MetaBindExisting.{ FlowContainer Address FlowBinding }
+  BoundFlowBinding.{ FlowId FlowLifecycle }
+  FlowBindingRefusalReason.[ AmbiguousPane DeadProcess DuplicateFlowId AnatomyMismatch PaneAbsent ProcessMismatch SessionMismatch SessionUnreported SessionUnproven HerdrUnreadable RoleMismatch AddressOwnerLive AddressOwnerUnknown NativeIdentityMismatch ]
+  RefusedFlowBinding.{ FlowId FlowBindingRefusalReason }
+  FlowBindingResult.[ Bound.BoundFlowBinding
+                      Refused.RefusedFlowBinding ]
+  BoundExisting.{ FlowContainer FlowBindingResult }
+  BindExistingRejection.[ ContainerUnavailable ContainerIdentityMismatch StoreRefused ]
+  OldSeat.{ HerdrRoute Option<Process> }
+  RestartFailure.[ CloseRefused CloseUnproven ResumeRefused.String BindMismatch Stopped ]
+  RestartPhase.[ Closing
+                 Closed
+                 Opening
+                 Spawning.HerdrPaneBinding
+                 Failed.RestartFailure
+                 Interrupted.Option<HerdrPaneBinding> ]
+  RestartRecord.{ FlowId NativeSessionId Address OldSeat RestartPhase Attempts.Integer }
+  DeliveryId.String
+  CommandLine.String
+  ByteOffset.Integer
+  ; A Waking is what one hand-over types: every queued input under its
+  ; sender, recipient and priority, one top-level vector, oldest first.
+  Content.[ Waking.Vector<VisibleNativeInput>
+            Text.String
+            Living.{ Context Verbatim } ]
+  Letter.{ VisibleSender Content }
+  Message.[ HardAbrupt.Letter
+            MiddleAbrupt.Letter
+            Soft.Letter ]
+  DeliveryRequest.{ DeliveryId FlowId Message }
+  InterruptWitness.[ NotRequested Observed Unobserved ]
+  DeliveryGrade.[ Transported Presented Uncertain ]
+  Delivery.{ DeliveryId FlowId InterruptWitness DeliveryGrade }
+  BodyRefusal.[ EmptyBody
+                HarnessCommand.CommandLine
+                ControlCharacter.ByteOffset ]
+  DeliveryRejection.[ UnknownFlow
+                      FlowStopped
+                      RouteUnavailable
+                      RecipientWorking
+                      RecipientBlocked
+                      ComposerOccupied
+                      BodyRefused.BodyRefusal
+                      NotDelivered
+                      PersistenceRefused
+                      FlowRetired
+                      FlowExited
+                      PastThreshold
+                      Superseded.FlowId ; the Address receives as this later flow
+                      Unconfirmed ]     ; the flow's launch holds its Address unconfirmed
+  HarnessCommandKind.[ Compact Interrupt ]
+  CommandRequest.{ FlowId HarnessCommandKind }
+  CommandGrade.[ Transported Observed Uncertain ]
+  CommandOutcome.{ FlowId HarnessCommandKind CommandGrade }
+  ContextTokens.Integer
+  RefreshTokens.Integer
+  ContextBelowThreshold.{ ContextTokens RefreshTokens }
+  CompactionRefusal.[ BelowThreshold.ContextBelowThreshold Unmeasured NoThreshold ]
+  CommandRejection.[ UnknownFlow FlowStopped RouteUnavailable RecipientBlocked UnsupportedForHarness NotDelivered FlowRetired FlowExited CompactionRefused.CompactionRefusal Superseded.FlowId Unconfirmed ]
+  StoreFailure.String
+  QueueAttemptId.String
+  Undecided.[ HistoryUnreadable HistoryReplaced PendingInHarness Ambiguous SeatNotResting AbsenceUnprovable ]
+  AbsenceProof.[ HandOverRefused HistoryAbsent ]
+  QueueDeliveryStanding.[ Prepared
+                          Uncertain.Option<Undecided>
+                          ReceiptRecorded
+                          Absent.AbsenceProof
+                          Resolved.QueueResolutionRecord
+                          Abandoned.AbandonmentRecord ]
+  QueueResolutionReason.String
+  UnixSeconds.Integer
+  QueueResolutionOutcome.[ Delivered Absent ]
+  QueueDeliveryResolution.{ QueueAttemptId QueueResolutionOutcome QueueResolutionReason }
+  ResolverIdentity.{ ProcessIdentity Option<FlowId> }
+  QueueResolutionRecord.{ QueueResolutionOutcome ResolverIdentity QueueResolutionReason UnixSeconds }
+  ResolveQueueDeliveryRejection.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered AlreadyRead ]
+  AbandonmentCause.[ Owner.ResolverIdentity
+                     FlowRetired.FlowId
+                     RequestEnded.RequestId ]
+  AbandonmentRecord.{ AbandonmentCause QueueResolutionReason UnixSeconds }
+  QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueueEvidence QueueDeliveryStanding }
+  QueueRequestId.String
+  LegacyArchiveEntry.{ QueueRequestId Address QueueEvidence Vector<QueueAttemptId> }
+  SendOutcomeId.String
+  RequestDigest.String
+  QueueEvidence.[ Logical.QueueEntry Legacy.{ SentBy Request } ]
+  PriorSendOutcome.[ Queued Delivered ]
+  OrdinarySendOutcome.[ Accepted.SendAcceptance Refused.Refusal PriorAdmission.PriorSendOutcome Sent.SendReceipt Failed.SendFailure ]
+  ; A Send's outcome: its caller when read, its sender, its recipient when
+  ; named, the digest of its request, and what it was answered.
+  SendOutcomeRecord.{ SendOutcomeId Option<Process> SentBy Option<Address> RequestDigest OrdinarySendOutcome }
+  ; What binds a metaflow to a running seat: the row of the flow it is
+  ; Awake as, with the Herdr pane it lives in, none while it is Asleep; and
+  ; the process bound to its Address, if one is.
+  Binding.{ Option<FlowNode> Option<Process> }
+  ; One attempt Flow holds outstanding for a metaflow.
+  Attempt.[ Queued.QueueDelivery                ; a queued request handed to a seat and not settled
+            Launch.LaunchAttempt                ; a launch at the metaflow's Address not settled
+            Reap.ReapPending                    ; a reap owed at the Address, and where it stands
+            Handover.HandoverPending ]          ; the handover owed at the Address, and why
+  ; Inspect keeps launch lifecycle detail for the next lifecycle projection,
+  ; while its queued-delivery branch exposes no private attempt, run or
+  ; logical-delivery key.
+  VisibleAttempt.[ Queued.VisibleQueueDelivery
+                   Launch.LaunchAttempt
+                   Reap.ReapPending
+                   Handover.HandoverPending ]
+  VisibleMetaflow.{ Address MetaflowState Vector<FlowId> Vector<VisibleNativeInput> }
+  ; Operational meta replies project private routing and ledger keys away.
+  ; Debug is the one explicit interface that exposes them.
+  VisibleDelivery.{ InterruptWitness DeliveryGrade }
+  VisibleQueueResolutionRecord.{ QueueResolutionOutcome ProcessIdentity QueueResolutionReason UnixSeconds }
+  VisibleAbandonmentCause.[ Owner.ProcessIdentity
+                            FlowRetired
+                            RequestEnded.RequestId ]
+  VisibleAbandonmentRecord.{ VisibleAbandonmentCause QueueResolutionReason UnixSeconds }
+  VisibleQueueDeliveryStanding.[ Prepared
+                                 Uncertain.Option<Undecided>
+                                 ReceiptRecorded
+                                 Absent.AbsenceProof
+                                 Resolved.VisibleQueueResolutionRecord
+                                 Abandoned.VisibleAbandonmentRecord ]
+  VisibleQueueEvidence.[ Logical.VisibleNativeInput
+                         Legacy.{ VisibleSender VisibleRequest } ]
+  VisibleQueueDelivery.{ NativeSessionId HarnessKind VisibleQueueEvidence VisibleQueueDeliveryStanding }
+  VisibleQueueDeliveryResolution.{ QueueResolutionOutcome QueueResolutionReason }
+  VisibleResolveQueueDeliveryRejected.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.VisibleQueueResolutionRecord AlreadyDelivered AlreadyRead ]
+  VisibleOrdinarySendOutcome.[ Accepted.VisibleSendAcceptance
+                               Refused.VisibleRefusal
+                               PriorAdmission.PriorSendOutcome
+                               Sent.VisibleSendReceipt
+                               Failed.VisibleSendFailure ]
+  VisibleSendOutcomeRecord.{ Option<Process> SentBy Option<Address> RequestDigest VisibleOrdinarySendOutcome }
+  VisibleLegacyArchiveEntry.{ Address VisibleQueueEvidence }
+  DebugSnapshot.{ Address Vector<FlowId> Vector<LogicalDeliveryId> }
+  ]

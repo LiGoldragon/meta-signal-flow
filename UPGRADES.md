@@ -1,5 +1,12 @@
 # Upgrades
 
+## 0.95.0: Pair with ordinary SendSeveral
+
+This contract imports the ordinary 0.72.0 refusal types, which include
+the typed SendSeveral conflict. The generated meta Rust is unchanged; the
+authored digest changes so a peer using the prior ordinary refusal types
+is rejected before reading meta messages.
+
 ## 0.92.0: permaflow RefreshMode
 
 `ConfigureMetaflow` now places `Automatic` or `Manual` after Continuity.

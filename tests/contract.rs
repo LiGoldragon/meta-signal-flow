@@ -1156,3 +1156,23 @@ fn handover_configuration_round_trips_zero_count_policy_and_archive_path() {
         }
     }
 }
+
+#[test]
+fn meta_projects_the_paired_send_several_refusal() {
+    let text = "OrdinaryRefused.SimplifiedAwaitingMemberConflict.1";
+    let output = Potential::<Output>::from(text)
+        .actualize(&mut budget())
+        .unwrap();
+    assert_eq!(
+        output,
+        Output::OrdinaryRefused(signal_flow::Refusal::SimplifiedAwaitingMemberConflict(
+            signal_flow::SendSeveralMessagePosition(1)
+        ))
+    );
+    assert_eq!(output.datomize(vec![]).protosize().compact(), text);
+    let archived = rkyv::to_bytes::<rkyv::rancor::Error>(&output).unwrap();
+    assert_eq!(
+        rkyv::from_bytes::<Output, rkyv::rancor::Error>(&archived).unwrap(),
+        output
+    );
+}

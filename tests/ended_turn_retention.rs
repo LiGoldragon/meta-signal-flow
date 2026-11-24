@@ -30,8 +30,8 @@ fn retention_is_one_configuration_value_on_the_binary_wire() {
 }
 
 #[test]
-fn retention_is_preserved_in_the_reserved_hold_release() {
-    assert_eq!(meta_signal_flow::WIRE_VERSION, "0.92.0");
+fn wire_version_names_the_current_meta_contract() {
+    assert_eq!(meta_signal_flow::WIRE_VERSION, "0.95.0");
 }
 
 #[cfg(feature = "datom")]
