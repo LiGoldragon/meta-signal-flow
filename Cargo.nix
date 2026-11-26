@@ -335,8 +335,8 @@ rec {
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/ethos-zero";
-          rev = "8c95310c4c372cfe115cdebc3e85021b98cf2974";
-          sha256 = "1nqshn23ibbnnadi10wj79dn6wcjjkgfav6qkwsa7jg6r9m87v76";
+          rev = "9abd9fe56a2b1b84fb858ae4c8cb74435e063a04";
+          sha256 = "19zng1kmric7prrdnhq18jwy9bwkxhmy1pj4yrvvs88q5304y48j";
         };
         libName = "ethos_zero";
         dependencies = [
@@ -379,15 +379,15 @@ rec {
         };
         resolvedDefaultFeatures = [ "datom" "default" ];
       };
-      "ethos-zero 29.0.0" = rec {
+      "ethos-zero 31.1.2" = rec {
         crateName = "ethos-zero";
-        version = "29.0.0";
+        version = "31.1.2";
         edition = "2024";
         crateBin = [];
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/ethos-zero";
-          rev = "f23eacf338a90ce4a6dea011554724fa6488fcc9";
+          rev = "9abd9fe56a2b1b84fb858ae4c8cb74435e063a04";
           sha256 = "15wh2r0ljqvjqrh8hc8av4p8210nsdyl9iwhb5zh6k467r59ymm8";
         };
         libName = "ethos_zero";
@@ -673,7 +673,7 @@ rec {
         buildDependencies = [
           {
             name = "ethos-zero";
-            packageId = "ethos-zero 29.0.0";
+            packageId = "ethos-zero 31.1.2";
           }
         ];
         features = {

@@ -392,13 +392,13 @@ Signal
   Vetted
   Commanded.CommandOutcome
   PeerResolved.CallerIdentity
-  EventsRead.{ FlowId Vector<HarnessEventMetadata> } ; the ordered, metadata-only event history
-  QueueDeliveriesRead.{ Address Vector<VisibleQueueDelivery> }
-  SendOutcomesRead.Vector<VisibleSendOutcomeRecord>
-  LegacyArchiveObserved.Vector<VisibleLegacyArchiveEntry>
+  EventsRead.{ FlowId ⟦ HarnessEventMetadata ⟧ } ; the ordered, metadata-only event history
+  QueueDeliveriesRead.{ Address ⟦ VisibleQueueDelivery ⟧ }
+  SendOutcomesRead.⟦ VisibleSendOutcomeRecord ⟧
+  LegacyArchiveObserved.⟦ VisibleLegacyArchiveEntry ⟧
   Debugged.DebugSnapshot
   QueueDeliveryResolved.{ Address VisibleQueueDeliveryResolution }
-  Inspected.{ VisibleMetaflow Binding Vector<Lock> Vector<VisibleAttempt> Option<RestartRecord> PermaflowHold }
+  Inspected.{ VisibleMetaflow Binding ⟦ Lock ⟧ ⟦ VisibleAttempt ⟧ Option<RestartRecord> PermaflowHold }
   DeliveryDebugged.{ DeliverySnapshot Receipt.Option<NativeReceipt> ReadBy.Option<LogicalDeliveryId> }
   Rebound.Address
   Withdrawn
@@ -462,7 +462,7 @@ Signal
   ; The process sockets are separately supplied by Library.Place; this
   ; record is not a Configure wire payload.
   ; A Nexus that does not own a Message Nexus executable carries None.
-  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot CodexEndpoint CodexEndpoint Vector<HarnessProfile> MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> Lease }
+  NexusRuntimeSettings.{ OrdinarySocketPath MetaSocketPath SourceRoot CodexEndpoint CodexEndpoint ⟦ HarnessProfile ⟧ MetaAspects Option<MessageNexusPath> Option<MessageNexusBinary> Lease }
   ; The native model a seat of one Model runs, in every aspect; a Start
   ; naming another native model for that seat is refused.
   ConfigureModel.{ Model Native.String }
@@ -473,7 +473,7 @@ Signal
   ; The configured guidance for an emergency successor without a handover.
   SuccessorRecoveryText.String
   ; One model's event-driven warning policy, with denominator and usage provenance.
-  ContextWarningPolicy.{ ModelName ContextWarningLimit ContextUsageProjection Vector<WarningBoundary> }
+  ContextWarningPolicy.{ ModelName ContextWarningLimit ContextUsageProjection ⟦ WarningBoundary ⟧ }
   ; A source-established native limit or an explicitly provisional policy choice.
   ContextWarningLimit.{ LimitBasis WarningTokens ContextBoundaryEvidence }
   ; NativeEffectiveLimit is a limit established by the native source;
@@ -494,7 +494,7 @@ Signal
   ContextWarningConfigurationRefusal.[ InvalidWarningTokens InvalidRemainingPercent DuplicateStage MissingStage InvalidStageOrder WarningTextRefused DuplicateHookEvent ]
   Repository.String
   Path.String
-  HandoverPoliciesConfiguration.[ Configured.Vector<HandoverPolicy> Unconfigured ]
+  HandoverPoliciesConfiguration.[ Configured.⟦ HandoverPolicy ⟧ Unconfigured ]
   HandoverArchiveConfiguration.[ Configured.Path Unconfigured ]
   HandoverCountConfiguration.[ Configured.Integer Unconfigured ]
   HarnessHookConfiguration.[ Configured.Path Unconfigured ]
@@ -527,7 +527,7 @@ Signal
   ; A record of the living the metaflow rests on, as a path under the
   ; records root.
   RecordPath.String
-  Records.Vector<RecordPath>
+  Records.⟦ RecordPath ⟧
   ; A permaflow's declaration, everything Flow holds about its Address: the
   ; workspace its flows run in, the leave-outs its flows start without
   ; when a Start names none (each of the harness its Model runs on), the
@@ -564,31 +564,31 @@ Signal
   ; new Memory seeds 64.
   TurnRetentionBound.Integer
   HeartbeatPeriodSeconds.Integer
-  HeartbeatRecipients.Vector<Address>
+  HeartbeatRecipients.⟦ Address ⟧
   HeartbeatConfig.{ HeartbeatPeriodSeconds HeartbeatRecipients }
   CountersRefusal.[ NotEmpty Lowered.ConfigureCounters NotRunning ]
   ; Keep the payload type distinct from the unit Input.Configuration variant.
   ConfigurationChange.[ ModelEffort
-                         Models.Vector<ConfigureModel>
-                         Thresholds.Vector<ConfigureThreshold>
-                         HandoverPolicies.Vector<HandoverPolicy>
+                         Models.⟦ ConfigureModel ⟧
+                         Thresholds.⟦ ConfigureThreshold ⟧
+                         HandoverPolicies.⟦ HandoverPolicy ⟧
                          HandoverArchive.Path
                          HandoverCount.Integer
                          PublicationDeadline.Duration
                          Nexus.ConfigureNexus
-                         SendServers.Vector<ConfigureSendServer>
-                         Metaflows.Vector<ConfigureMetaflow>
-                         HarnessFlags.Vector<ConfigureHarnessFlags>
+                         SendServers.⟦ ConfigureSendServer ⟧
+                         Metaflows.⟦ ConfigureMetaflow ⟧
+                         HarnessFlags.⟦ ConfigureHarnessFlags ⟧
                          Investigation.Address
                          DefaultMinutes.Minutes
                          Heartbeat.Option<HeartbeatConfig>
-                         ProtectedAddresses.Vector<Address>
+                         ProtectedAddresses.⟦ Address ⟧
                          Counters.ConfigureCounters
                          RequestIdDraws.DrawBound
                          AnnouncementTries.TryBound
                          HarnessHook.Path
                          ContextWarningPolicy
-                         HarnessHookEvents.Vector<HarnessHookEvent>
+                         HarnessHookEvents.⟦ HarnessHookEvent ⟧
                          Permaflow.ConfigureMetaflow
                          Harness.HarnessProfile
                          Refresh.ConfigureThreshold
@@ -600,7 +600,7 @@ Signal
             Harness.HarnessKind
             Refresh.ModelName
             ContextWarning.ModelName ]
-  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.Vector<ConfigureModel> ConfiguredThresholds.Vector<ConfigureThreshold> ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.Vector<ConfigureSendServer> ConfiguredMetaflows.Vector<ConfigureMetaflow> ConfiguredHarnessFlags.Vector<ConfigureHarnessFlags> ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.Vector<Address> ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.Vector<ContextWarningPolicy> ConfiguredHarnessHookEvents.Vector<HarnessHookEvent> SuccessorRecoveryText ConfiguredEndedTurnRetention.TurnRetentionBound ConfiguredModelEfforts.Vector<ModelEffort> }
+  ConfigurationSnapshot.{ ConfiguredNexus.ConfigureNexus ConfiguredModels.⟦ ConfigureModel ⟧ ConfiguredThresholds.⟦ ConfigureThreshold ⟧ ConfiguredHandoverPolicies.HandoverPoliciesConfiguration ConfiguredHandoverArchive.HandoverArchiveConfiguration ConfiguredHandoverCount.HandoverCountConfiguration ConfiguredPublicationDeadline.Duration ConfiguredSendServers.⟦ ConfigureSendServer ⟧ ConfiguredMetaflows.⟦ ConfigureMetaflow ⟧ ConfiguredHarnessFlags.⟦ ConfigureHarnessFlags ⟧ ConfiguredInvestigation.Option<Address> ConfiguredDefaultMinutes.Minutes ConfiguredHeartbeat.Option<HeartbeatConfig> ConfiguredProtectedAddresses.⟦ Address ⟧ ConfiguredCounters.ConfigureCounters ConfiguredRequestIdDraws.DrawBound ConfiguredAnnouncementTries.TryBound ConfiguredHarnessHook.HarnessHookConfiguration ConfiguredContextWarningPolicies.⟦ ContextWarningPolicy ⟧ ConfiguredHarnessHookEvents.⟦ HarnessHookEvent ⟧ SuccessorRecoveryText ConfiguredEndedTurnRetention.TurnRetentionBound ConfiguredModelEfforts.⟦ ModelEffort ⟧ }
   IdempotencyKey.String
   CreditId.String
   CreditSelection.[ Next
@@ -644,7 +644,7 @@ Signal
   ByteOffset.Integer
   ; A Waking is what one hand-over types: every queued input under its
   ; sender, recipient and priority, one top-level vector, oldest first.
-  Content.[ Waking.Vector<VisibleNativeInput>
+  Content.[ Waking.⟦ VisibleNativeInput ⟧
             Text.String
             Living.{ Context Verbatim } ]
   Letter.{ VisibleSender Content }
@@ -699,7 +699,7 @@ Signal
   ResolveQueueDeliveryRejection.[ UnknownAttempt NotUncertain NotOldest EmptyReason StoreRefused NativeReceiptRequired LegacyUncorrelated AlreadyResolved.QueueResolutionRecord AlreadyDelivered AlreadyRead ]
   QueueDelivery.{ QueueAttemptId FlowId NativeSessionId HarnessKind QueueEvidence QueueDeliveryStanding }
   QueueRequestId.String
-  LegacyArchiveEntry.{ QueueRequestId Address QueueEvidence Vector<QueueAttemptId> }
+  LegacyArchiveEntry.{ QueueRequestId Address QueueEvidence ⟦ QueueAttemptId ⟧ }
   SendOutcomeId.String
   RequestDigest.String
   QueueEvidence.[ Logical.QueueEntry Legacy.{ SentBy Request } ]
@@ -724,7 +724,7 @@ Signal
                    Launch.LaunchAttempt
                    Reap.ReapPending
                    Handover.HandoverPending ]
-  VisibleMetaflow.{ Address MetaflowState Vector<FlowId> Vector<VisibleNativeInput> }
+  VisibleMetaflow.{ Address MetaflowState ⟦ FlowId ⟧ ⟦ VisibleNativeInput ⟧ }
   ; Operational meta replies project private routing and ledger keys away.
   ; Debug is the one explicit interface that exposes them.
   VisibleDelivery.{ InterruptWitness DeliveryGrade }
@@ -746,5 +746,5 @@ Signal
                                Failed.VisibleSendFailure ]
   VisibleSendOutcomeRecord.{ Option<Process> SentBy Option<Address> RequestDigest VisibleOrdinarySendOutcome }
   VisibleLegacyArchiveEntry.{ Address VisibleQueueEvidence }
-  DebugSnapshot.{ Address Vector<FlowId> Vector<LogicalDeliveryId> }
+  DebugSnapshot.{ Address ⟦ FlowId ⟧ ⟦ LogicalDeliveryId ⟧ }
   ]

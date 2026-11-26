@@ -99,8 +99,8 @@ dependencies = [
 
 [[package]]
 name = "ethos-zero"
-version = "29.0.0"
-source = "git+https://github.com/LiGoldragon/ethos-zero?rev=f23eacf#f23eacf338a90ce4a6dea011554724fa6488fcc9"
+version = "31.1.2"
+source = "git+https://github.com/LiGoldragon/ethos-zero?rev=f23eacf#9abd9fe56a2b1b84fb858ae4c8cb74435e063a04"
 dependencies = [
  "datom-codec",
  "prettyplease",
@@ -178,7 +178,7 @@ name = "meta-signal-flow"
 version = "0.90.0"
 dependencies = [
  "datom-codec",
- "ethos-zero 29.0.0",
+ "ethos-zero 31.1.2",
  "flow-ethos",
  "protos",
  "rkyv",
