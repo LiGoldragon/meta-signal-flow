@@ -175,7 +175,7 @@ dependencies = [
 
 [[package]]
 name = "meta-signal-flow"
-version = "0.93.0"
+version = "0.96.0"
 dependencies = [
  "datom-codec",
  "ethos-zero 29.0.0",
@@ -330,11 +330,12 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "signal"
-version = "11.0.0"
-source = "git+https://github.com/LiGoldragon/signal?rev=6d4eb74#6d4eb74a238ea4a6149bd12c42a8c06aec01b154"
+version = "11.2.0"
+source = "git+https://github.com/LiGoldragon/signal?rev=4f5cbb9322ecae7a8821439179e778d495d7804a#4f5cbb9322ecae7a8821439179e778d495d7804a"
 dependencies = [
  "datom-codec",
  "ethos-zero 22.0.0",
+ "futures-core",
  "protos",
  "rkyv",
  "thiserror",
@@ -342,8 +343,8 @@ dependencies = [
 
 [[package]]
 name = "signal-flow"
-version = "0.70.0"
-source = "git+https://github.com/LiGoldragon/signal-flow?rev=5c858a180213eaed1df9bc47132e3a40ebcbf814#5c858a180213eaed1df9bc47132e3a40ebcbf814"
+version = "0.74.0"
+source = "git+https://github.com/LiGoldragon/signal-flow?rev=6932471e69f06cf2f8f27b3d09e80ac67feb396f#6932471e69f06cf2f8f27b3d09e80ac67feb396f"
 dependencies = [
  "datom-codec",
  "ethos-zero 27.0.0",

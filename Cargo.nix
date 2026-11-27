@@ -634,7 +634,7 @@ rec {
       };
       "meta-signal-flow" = rec {
         crateName = "meta-signal-flow";
-        version = "0.93.0";
+        version = "0.96.0";
         edition = "2024";
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };
         libName = "meta_signal_flow";
@@ -1101,20 +1101,25 @@ rec {
       };
       "signal" = rec {
         crateName = "signal";
-        version = "11.0.0";
+        version = "11.2.0";
         edition = "2024";
         links = "signal";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/signal";
-          rev = "6d4eb74a238ea4a6149bd12c42a8c06aec01b154";
-          sha256 = "0hqy8k58s6sc9wz76k8iq40bv636js5s951zgd01ncrxcy6h776a";
+          rev = "4f5cbb9322ecae7a8821439179e778d495d7804a";
+          sha256 = "14f2bwprz32psr58n9i36padya0r4p54hwm1yq145h1ab6nawvk2";
         };
         dependencies = [
           {
             name = "datom-codec";
             packageId = "datom-codec";
             optional = true;
+          }
+          {
+            name = "futures-core";
+            packageId = "futures-core";
+            usesDefaultFeatures = false;
           }
           {
             name = "protos";
@@ -1145,13 +1150,13 @@ rec {
       };
       "signal-flow" = rec {
         crateName = "signal-flow";
-        version = "0.70.0";
+        version = "0.74.0";
         edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/signal-flow";
-          rev = "5c858a180213eaed1df9bc47132e3a40ebcbf814";
-          sha256 = "0zy53dr158k6l0xkmnzi0gg23axmhpkpqbi95zx3mg4lhbvjdqw0";
+          rev = "6932471e69f06cf2f8f27b3d09e80ac67feb396f";
+          sha256 = "0m32xpzgyx4bvbcaignrl7ngbrzadwk9fakiqk7275j0c9hxbz51";
         };
         libName = "signal_flow";
         dependencies = [
