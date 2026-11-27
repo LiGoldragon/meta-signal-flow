@@ -1,5 +1,15 @@
 # Upgrades
 
+## 0.96.0: Signal 11.2 and the ordinary 0.74 family
+
+- Pin Signal 11.2 (`4f5cbb9322ecae7a8821439179e778d495d7804a`)
+  and ordinary signal-flow 0.74.0
+  (`6932471e69f06cf2f8f27b3d09e80ac67feb396f`). Ordinary and meta Flow
+  Signals remain distinct package families with their own release lines.
+- The authored meta Ethos and generated types are unchanged from 0.93.0, so
+  the meta contract digest and archive bytes are unchanged. Only package
+  metadata and the compatible Signal implementation dependencies advance.
+
 ## 0.93.0: decide what happens to parked launches before releasing a hold
 
 - Pin signal-flow 0.70.0 (`5c858a1`), including the terminal
