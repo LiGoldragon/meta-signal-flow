@@ -16,6 +16,21 @@ pub enum State {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum ParkedLaunchDisposition {
+    Start,
+    Drop,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ParkedLaunchRelease {
+    pub address: flow_ethos::Address,
+    pub parked_launch_disposition: ParkedLaunchDisposition,
+    pub launch_request_id_vector: std::vec::Vec<signal_flow::LaunchRequestId>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum PermaflowHold {
     Held,
     Released,
@@ -1442,6 +1457,7 @@ pub enum Input {
     HoldPermaflow(flow_ethos::Address),
     ReleasePermaflow(flow_ethos::Address),
     AbandonQueueDelivery(AbandonQueueDelivery_Data),
+    ReleaseParkedLaunches(ParkedLaunchRelease),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1569,6 +1585,13 @@ pub enum AbandonQueueDeliveryRejected_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct ParkedLaunchReleaseRejected_Data {
+    pub address: flow_ethos::Address,
+    pub launch_request_id_vector: std::vec::Vec<signal_flow::LaunchRequestId>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Output {
     Configuration(ConfigurationSnapshot),
     Configured(ConfigurationChange),
@@ -1604,6 +1627,7 @@ pub enum Output {
     PermaflowHeld(flow_ethos::Address),
     PermaflowReleased(flow_ethos::Address),
     QueueDeliveryAbandoned(QueueDeliveryAbandoned_Data),
+    ParkedLaunchesReleased(ParkedLaunchRelease),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1625,6 +1649,7 @@ pub enum Output {
     WithdrawRejected(WithdrawRejected_Data),
     RestartQueued(signal_flow::FlowId),
     AbandonQueueDeliveryRejected(AbandonQueueDeliveryRejected_Data),
+    ParkedLaunchReleaseRejected(ParkedLaunchReleaseRejected_Data),
 }
 #[rustfmt::skip]
 #[allow(clippy::result_large_err, clippy::ptr_arg, clippy::borrowed_box)]
@@ -1742,6 +1767,10 @@ pub trait Answering {
         &self,
         abandon_queue_delivery: &AbandonQueueDelivery_Data,
     ) -> std::result::Result<QueueDeliveryAbandoned_Data, Output>;
+    fn release_parked_launches(
+        &self,
+        parked_launch_release: &ParkedLaunchRelease,
+    ) -> std::result::Result<ParkedLaunchRelease, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1888,6 +1917,11 @@ impl Answerable for Input {
                 nexus
                     .abandon_queue_delivery(carried)
                     .map_or_else(|refusal| refusal, Output::QueueDeliveryAbandoned)
+            }
+            Input::ReleaseParkedLaunches(carried) => {
+                nexus
+                    .release_parked_launches(carried)
+                    .map_or_else(|refusal| refusal, Output::ParkedLaunchesReleased)
             }
         }
     }

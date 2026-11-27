@@ -368,7 +368,7 @@
 ; of its own.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt LaunchRequestId MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
   flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -405,7 +405,8 @@ Signal
   Resume
   HoldPermaflow.Address
   ReleasePermaflow.Address
-  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason } ]
+  AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason }
+  ReleaseParkedLaunches.ParkedLaunchRelease ]
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -440,6 +441,7 @@ Signal
   PermaflowHeld.Address
   PermaflowReleased.Address
   QueueDeliveryAbandoned.{ Address AbandonmentRecord }
+  ParkedLaunchesReleased.ParkedLaunchRelease
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -468,8 +470,15 @@ Signal
   DebugDeliveryRejected.[ UnknownRequest StoreRefused ]
   WithdrawRejected.[ UnknownAddress NotQueued ]
   RestartQueued.FlowId
-  AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished EmptyReason ] ]
+  AbandonQueueDeliveryRejected.[ UnknownAttempt AlreadyFinished EmptyReason ]
+  ParkedLaunchReleaseRejected.{ Address Vector<LaunchRequestId> } ]
 [ State.[ Acting Resting Crystallizing Asleep ]  ; a flow's state, as the override panel sets it
+  ; ReleasePermaflow refuses while launches are parked, returning their IDs.
+  ; To release, name the complete current cohort (unique IDs), and choose
+  ; the same disposition for all. A mismatch refuses without mutation.
+  ; Start authorizes the original launches; it does not receipt a native start.
+  ParkedLaunchDisposition.[ Start Drop ]
+  ParkedLaunchRelease.{ Address ParkedLaunchDisposition Vector<LaunchRequestId> }
   PermaflowHold.[ Held Released ]                ; independent of Continuity and expiring locks
   ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata

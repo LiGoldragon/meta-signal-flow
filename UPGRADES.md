@@ -1,5 +1,26 @@
 # Upgrades
 
+## 0.93.0: decide what happens to parked launches before releasing a hold
+
+- `ReleasePermaflow.Address` retains its spelling and success reply when
+  no launches are parked. Otherwise it answers `ParkedLaunchReleaseRejected`
+  with the address and the actual parked launch request IDs; nothing changes.
+- `ReleaseParkedLaunches.{ Address Start|Drop [ launch-request-ids ] }`
+  names the exact cohort. Compare the complete set while the hold is locked.
+  Reject duplicate, missing or unexpected IDs without changing the hold or
+  any launch. Both decision and actual IDs are returned in
+  `ParkedLaunchesReleased`; a Start reply means permission has been
+  recorded, not that a native process has started. Follow LaunchStatus
+  for each original ID, including refusal and ambiguity.
+- A release must commit the decision before draining. Start resumes only
+  the original launch IDs; Drop records terminal outcomes before the hold
+  clears. Neither disconnect, repeated release, nor restart can mint another
+  launch or revive a dropped one. Queued ordinary sends keep their normal
+  release behavior; their IDs are not launch request IDs.
+- Keep clients and Nexus on the same meta digest. The new input's paired
+  success output precedes the refusal tail, changing affected archive tags.
+  A peer presenting the frozen 0.92 digest is refused before dispatch.
+
 ## 0.92.0: permaflow RefreshMode
 
 `ConfigureMetaflow` now places `Automatic` or `Manual` after Continuity.
