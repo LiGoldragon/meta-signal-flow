@@ -2,6 +2,9 @@
 
 ## 0.93.0: decide what happens to parked launches before releasing a hold
 
+- Pin signal-flow 0.70.0 (`5c858a1`), including the terminal
+  `StartRejection.ParkedLaunchDropped` used for a dropped launch.
+
 - `ReleasePermaflow.Address` retains its spelling and success reply when
   no launches are parked. Otherwise it answers `ParkedLaunchReleaseRejected`
   with the address and the actual parked launch request IDs; nothing changes.

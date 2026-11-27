@@ -1145,13 +1145,13 @@ rec {
       };
       "signal-flow" = rec {
         crateName = "signal-flow";
-        version = "0.69.0";
+        version = "0.70.0";
         edition = "2024";
         workspace_member = null;
         src = pkgs.fetchgit {
           url = "https://github.com/LiGoldragon/signal-flow";
-          rev = "da01bb0533a2b2800efcc3a4ceacee8307261fd7";
-          sha256 = "049cpb43zskfx5zzbppn9j9bc823ykj21ds9xlsb0y6vsa629vmz";
+          rev = "5c858a180213eaed1df9bc47132e3a40ebcbf814";
+          sha256 = "0zy53dr158k6l0xkmnzi0gg23axmhpkpqbi95zx3mg4lhbvjdqw0";
         };
         libName = "signal_flow";
         dependencies = [
