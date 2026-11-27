@@ -1,7 +1,7 @@
 {
   description = "meta-signal-flow privileged wire contract";
 
-  inputs.base.url = "github:LiGoldragon/build-base";
+  inputs.base.url = "github:LiGoldragon/build-base/ad766924ec82548fcfa90e7900daa8911d4c6425";
 
   # Cargo.nix is generated from Cargo.lock by the build base's crate2nix and
   # committed, so evaluation imports no derivation:
