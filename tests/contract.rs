@@ -126,7 +126,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
         );
     }
 
-    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained Automatic «Keeps Flow running.» [ flows/a68420/vision/flow.md ] Default } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook [] [] recovery-guidance 64 [] }";
+    let text = "Configuration.{ { /srv/source { codex-stable-flow-client /home/someone/.codex /home/someone/.codex/app-server-control/app-server-control.sock [ gpt-5.6-terra ] } { codex-next-flow-client /home/someone/.codex-next /home/someone/.codex-next/app-server-control/app-server-control.sock [ gpt-6.1 ] } [ { Claude [ / ! # ] [ esc esc ] [ enter ] } ] [ Psyche Mind ] Some./srv/message-nexus.sock Some./usr/bin/message-nexus /srv/curriculum/curriculum.sock 60 None main } [ { Opus claude-opus } { Sol gpt-6.1 } ] [ { claude-opus-5-5 200000 } ] Unconfigured Unconfigured Unconfigured 60000 [ { /nix/store/codex/bin/codex /nix/store/send/bin/flow-send-mcp } ] [ { { Mind core Sol } Some./srv/core [ CodexAgentsMd CodexSkillListing ] [ spirit:core ] [ vision:flow ] Regular Default Maintained Automatic «Keeps Flow running.» [ flows/a68420/vision/flow.md ] Default None } ] [ { { Mind core Sol } «--disallowedTools 'Artifact*'» } ] Some.{ Psyche compaction Sonnet } 30 None [] { 1 3 1 } 64 3 Configured./home/someone/.local/bin/flow-hook [] [] recovery-guidance 64 [] }";
 
     let response = Potential::<Output>::from(text)
         .actualize(&mut budget())
@@ -296,6 +296,7 @@ fn configure_ack_echoes_its_change_and_configuration_read_carries_the_snapshot()
             records: meta_signal_flow::Records(vec![meta_signal_flow::RecordPath(
                 "flows/a68420/vision/flow.md".to_string()
             )]),
+            harness_kind_option: None,
         }]
     );
     assert_eq!(
@@ -790,7 +791,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OnDemand Automatic «» [] Default } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OnDemand Automatic «» [] Default None } ]";
     let query = Potential::<meta_signal_flow::Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -808,7 +809,7 @@ fn configure_metaflows_has_a_concrete_datom() {
 #[test]
 fn one_declaration_is_configured_and_removed_alone() {
     for text in [
-        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ ClaudeMd ] [ spirit:core:0 ] [] Regular Default OnDemand Manual «» [] Default }",
+        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ ClaudeMd ] [ spirit:core:0 ] [] Regular Default OnDemand Manual «» [] Default None }",
         "Configure.Harness.{ Claude [ / ] [ Escape Escape ] [ Enter ] }",
         "Configure.Refresh.{ claude-fable-5-2 280000 }",
         "Remove.Permaflow.{ Psyche book Haiku }",
@@ -825,6 +826,41 @@ fn one_declaration_is_configured_and_removed_alone() {
             query
         );
     }
+}
+
+/// A permaflow names the harness its flows launch on, last, or None for the
+/// harness its Model runs on; the declaration without it, as 0.93 wrote it,
+/// is no longer a ConfigureMetaflow.
+#[test]
+fn a_permaflow_names_its_harness_or_none() {
+    let declaration = "Configure.Permaflow.{ { Psyche book Haiku } None [] [] [] Regular Default OnDemand Automatic «» [] Default";
+    for (harness, chosen) in [
+        ("None", None),
+        ("Some.Claude", Some(signal_flow::HarnessKind::Claude)),
+        ("Some.Codex", Some(signal_flow::HarnessKind::Codex)),
+    ] {
+        let text = format!("{declaration} {harness} }}");
+        let query = Potential::<Input>::from(text.as_str())
+            .actualize(&mut budget())
+            .unwrap_or_else(|error| panic!("{text}: {error:?}"));
+        let Input::Configure(meta_signal_flow::ConfigurationChange::Permaflow(declared)) = &query
+        else {
+            panic!("expected a permaflow declaration: {text}");
+        };
+        assert_eq!(declared.harness_kind_option, chosen);
+        assert_eq!(query.datomize(vec![]).protosize().compact(), text);
+        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(&query).unwrap();
+        assert_eq!(
+            rkyv::from_bytes::<Input, rkyv::rancor::Error>(&archive).unwrap(),
+            query
+        );
+    }
+    let previous = format!("{declaration} }}");
+    assert!(
+        Potential::<Input>::from(previous.as_str())
+            .actualize(&mut budget())
+            .is_err()
+    );
 }
 
 #[test]
@@ -857,7 +893,7 @@ fn leave_outs_are_the_permaflow_s_and_a_foreign_one_is_an_unknown_feature() {
     // A permaflow without its leave-outs is no longer a ConfigureMetaflow.
     assert!(
         Potential::<Input>::from(
-            "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OnDemand Automatic «» [] Default }"
+            "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OnDemand Automatic «» [] Default None }"
         )
         .actualize(&mut budget())
         .is_err()

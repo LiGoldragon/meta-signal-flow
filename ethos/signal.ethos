@@ -103,7 +103,8 @@
 ;
 ; A permaflow's leave-outs are the parts of its harness's start its flows
 ; go without, unless a Start names its own, which replace them. Each
-; leave-out belongs to one harness, and a permaflow's belong to the harness
+; leave-out belongs to one harness, and a permaflow's belong to its
+; harness: the one its declaration names, or, when it names None, the one
 ; its Address's Model runs on: the native model the Models family names for
 ; that Model runs on Codex when one of the Nexus's Codex endpoints lists it,
 ; and on Claude otherwise. A leave-out of another harness, in a Permaflow,
@@ -573,7 +574,9 @@ Signal
   ModelEffort.{ Model Effort }
   ; Manual preserves the current seat at rest; explicit Refresh remains available.
   RefreshMode.[ Automatic Manual ]
-  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity RefreshMode Purpose Records Effort }
+  ; Its harness, last: None runs it on the harness its Model runs on, by the
+  ; rule of the leave-outs; Some names the harness its flows launch on.
+  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity RefreshMode Purpose Records Effort Option<HarnessKind> }
   ; One value of one permaflow, changed alone by Configure.Amend. Workspace,
   ; Purpose, Kind, Continuity, Effort and RefreshMode replace that value.
   ; RefreshMode applies to the current permaflow; Add appends one

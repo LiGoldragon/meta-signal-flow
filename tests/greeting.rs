@@ -118,3 +118,15 @@ fn the_peer_whose_release_could_start_parked_launches_is_refused_before_dispatch
         ))
     );
 }
+
+#[test]
+fn the_meta_contract_without_a_permaflow_harness_is_refused() {
+    let previous = Handshake::of_source(include_str!("fixtures/meta-signal-flow-0.93.ethos"));
+    assert_ne!(previous, Input::greeting());
+    assert_eq!(
+        Input::receipt(&previous),
+        HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
+            Input::contract_digest()
+        ))
+    );
+}

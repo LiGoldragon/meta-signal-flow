@@ -369,6 +369,7 @@ pub struct ConfigureMetaflow {
     pub purpose: Purpose,
     pub records: Records,
     pub effort: Effort,
+    pub harness_kind_option: std::option::Option<signal_flow::HarnessKind>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

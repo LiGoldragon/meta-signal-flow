@@ -1,5 +1,26 @@
 # Upgrades
 
+## Unreleased: a permaflow names its harness
+
+Not yet released or numbered; the version stays 0.93.0 until a release
+takes this change.
+
+- `ConfigureMetaflow` gains `Option<HarnessKind>`, last, after Effort.
+  `None` keeps the rule the leave-outs state: Codex when a configured
+  Codex endpoint lists the Model's native model, Claude otherwise. `Some`
+  names the harness the permaflow's flows launch on, and its leave-outs
+  are checked against that harness.
+- `HarnessKind` is flow-ethos's, through signal-flow; no second harness
+  type is declared. At the pinned flow-ethos (`062ef9e1`) it is
+  `[ Codex Claude ]`; OpenCode and Pi come with the flow-ethos that
+  appends them, with no change here.
+- Flow upgrades every stored declaration (the 0.93 record, its schema
+  after RefreshMode) to the new form with `None`, so every permaflow
+  keeps the harness it runs on today.
+- The contract digest changes: a 0.93 peer is refused
+  (tests/fixtures/meta-signal-flow-0.93.ethos). The meta peers repin
+  together; ordinary Signal is unchanged.
+
 ## 0.93.0: decide what happens to parked launches before releasing a hold
 
 - Pin signal-flow 0.70.0 (`5c858a1`), including the terminal
