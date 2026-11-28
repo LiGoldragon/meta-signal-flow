@@ -147,6 +147,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "harness-nexus-library"
+version = "0.3.0"
+source = "git+https://github.com/LiGoldragon/harness-nexus-library?rev=ae7e008700972b7f033de6ba94c36e6c49fc93f8#ae7e008700972b7f033de6ba94c36e6c49fc93f8"
+dependencies = [
+ "datom-codec",
+ "flow-ethos",
+ "protos",
+ "rkyv",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -175,11 +186,12 @@ dependencies = [
 
 [[package]]
 name = "meta-signal-flow"
-version = "0.93.0"
+version = "0.94.0"
 dependencies = [
  "datom-codec",
  "ethos-zero 29.0.0",
  "flow-ethos",
+ "harness-nexus-library",
  "protos",
  "rkyv",
  "signal",

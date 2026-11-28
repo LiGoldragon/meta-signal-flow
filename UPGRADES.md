@@ -1,5 +1,27 @@
 # Upgrades
 
+## 0.94.0: ObserveHarness, what each Harness Nexus told beside Flow's own state
+
+- Depend on harness-nexus-library 0.3.0 (`ae7e008`), the event vocabulary
+  every Harness Nexus tells, without default features; this crate's `datom`
+  feature forwards `harness/datom`. Its `Event` and `State` are imported
+  under names of their own, `HarnessEvent` and `HarnessState`.
+- The meta Signal appends one input, `ObserveHarness`, answered at its
+  position `HarnessObserved.{ Vector<HarnessWitness>
+  Vector<HarnessDisagreement> }`: every flow Flow holds as each configured
+  Harness Nexus socket last told it, with Flow's own state of it now, then
+  the ring of disagreements, oldest first.
+- New types: `HarnessSocket.String`; `HarnessWitness.{ FlowId HarnessSocket
+  HarnessEvent HarnessState HarnessTokens.Integer Option<State> }`;
+  `HarnessDisagreement.{ FlowId HarnessSocket Seen.Integer HarnessState
+  Option<State> }`, Seen in Unix seconds. A witness decides nothing.
+- **Output discriminants move.** `HarnessObserved` stands after
+  `ParkedLaunchesReleased`, so every output from `ConfigureRefused` on
+  moves one rkyv discriminant. Both ends of the meta socket repin together.
+- The generated `Answering` gains `observe_harness`.
+- The contract digest changes: a 0.93 peer is refused with 0.94's digest
+  (tests/fixtures/meta-signal-flow-0.93.ethos). `WIRE_VERSION` reads 0.94.0.
+
 ## 0.93.0: decide what happens to parked launches before releasing a hold
 
 - Pin signal-flow 0.70.0 (`5c858a1`), including the terminal

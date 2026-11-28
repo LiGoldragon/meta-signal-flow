@@ -361,6 +361,26 @@
 ; UnknownAddress, Flow holds no metaflow for the Address; NotQueued, the
 ; metaflow's queue holds no request of that id.
 ;
+; ObserveHarness answers what the Harness Nexuses Flow subscribes to have
+; told it of each flow, beside Flow's own state of the flow, and decides
+; nothing. Flow dials each Harness Nexus socket its daemon configuration
+; names, sends Subscribe once per connection, and holds the Subscribed
+; snapshot and then each Changed. A HarnessWitness is one flow as one
+; socket last told it: its last Event and State, its last context size
+; (ContextSize), and Flow's own State of the flow now, None while Flow
+; records none. A witness a Subscribed gave carries InFlight with the work
+; that snapshot shows in flight, until its first Changed. A socket's fresh
+; Subscribed replaces every witness it gave; a flow it told Ended stays
+; until then. Only a flow Flow holds is listed. When a Changed moves a
+; flow's harness State to a new value, the two are compared once its
+; GraceSeconds have passed, if the harness State is still that value and
+; Flow records a State for the flow: Flowing.Working, Waiting and Blocked
+; agree with Acting, Flowing.Rested with Resting, Ended with Asleep,
+; Crystallizing with any Flowing state, and Dry is not judged. Every
+; HarnessDisagreement, Seen in Unix seconds, is kept in a ring of the
+; configured capacity, oldest first, the oldest dropped. Nothing Flow
+; does is decided by a witness.
+;
 ; The n-th output answers the n-th input; the outputs after the last
 ; input's answer no input by position. Configuration and
 ; ObserveConfiguration both answer Configuration: Configuration has it at
@@ -369,7 +389,8 @@
 
 Signal
 [ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt LaunchRequestId MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
-  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
+  flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ]
+  harness:[ HarnessEvent.Event HarnessState.State ] ]
 [ Configuration
   Configure.ConfigurationChange
   ConsumeReset.ResetRequest
@@ -406,7 +427,8 @@ Signal
   HoldPermaflow.Address
   ReleasePermaflow.Address
   AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason }
-  ReleaseParkedLaunches.ParkedLaunchRelease ]
+  ReleaseParkedLaunches.ParkedLaunchRelease
+  ObserveHarness ]                              ; what each Harness Nexus told, beside Flow's own state
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -442,6 +464,7 @@ Signal
   PermaflowReleased.Address
   QueueDeliveryAbandoned.{ Address AbandonmentRecord }
   ParkedLaunchesReleased.ParkedLaunchRelease
+  HarnessObserved.{ Vector<HarnessWitness> Vector<HarnessDisagreement> } ; witnesses, then the ring oldest first
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection
@@ -480,6 +503,11 @@ Signal
   ParkedLaunchDisposition.[ Start Drop ]
   ParkedLaunchRelease.{ Address ParkedLaunchDisposition Vector<LaunchRequestId> }
   PermaflowHold.[ Held Released ]                ; independent of Continuity and expiring locks
+  HarnessSocket.String                           ; a Harness Nexus's subscription socket, as configured
+  ; One flow as one socket last told it, with Flow's own state of it now.
+  HarnessWitness.{ FlowId HarnessSocket HarnessEvent HarnessState HarnessTokens.Integer Option<State> }
+  ; A harness State that stood its grace against Flow's own, Seen in Unix seconds.
+  HarnessDisagreement.{ FlowId HarnessSocket Seen.Integer HarnessState Option<State> }
   ; The meta contract owns this read projection; Memory owns its stored form.
   StopMetadata.{                     ; a Stop's correlation and background-work metadata
      Option<NativeSessionId>

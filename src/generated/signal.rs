@@ -36,6 +36,39 @@ pub enum PermaflowHold {
     Released,
 }
 #[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessSocket(pub String);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessTokens(pub i64);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessWitness {
+    pub flow_id: signal_flow::FlowId,
+    pub harness_socket: HarnessSocket,
+    pub harness_event: harness::Event,
+    pub harness_state: harness::State,
+    pub harness_tokens: HarnessTokens,
+    pub state_option: std::option::Option<State>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Seen(pub i64);
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessDisagreement {
+    pub flow_id: signal_flow::FlowId,
+    pub harness_socket: HarnessSocket,
+    pub seen: Seen,
+    pub harness_state: harness::State,
+    pub state_option: std::option::Option<State>,
+}
+#[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct StopMetadata {
@@ -1458,6 +1491,7 @@ pub enum Input {
     ReleasePermaflow(flow_ethos::Address),
     AbandonQueueDelivery(AbandonQueueDelivery_Data),
     ReleaseParkedLaunches(ParkedLaunchRelease),
+    ObserveHarness,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1520,6 +1554,13 @@ pub struct StateSet_Data {
 pub struct QueueDeliveryAbandoned_Data {
     pub address: flow_ethos::Address,
     pub abandonment_record: AbandonmentRecord,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct HarnessObserved_Data {
+    pub harness_witness_vector: std::vec::Vec<HarnessWitness>,
+    pub harness_disagreement_vector: std::vec::Vec<HarnessDisagreement>,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1628,6 +1669,7 @@ pub enum Output {
     PermaflowReleased(flow_ethos::Address),
     QueueDeliveryAbandoned(QueueDeliveryAbandoned_Data),
     ParkedLaunchesReleased(ParkedLaunchRelease),
+    HarnessObserved(HarnessObserved_Data),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1771,6 +1813,7 @@ pub trait Answering {
         &self,
         parked_launch_release: &ParkedLaunchRelease,
     ) -> std::result::Result<ParkedLaunchRelease, Output>;
+    fn observe_harness(&self) -> std::result::Result<HarnessObserved_Data, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1922,6 +1965,11 @@ impl Answerable for Input {
                 nexus
                     .release_parked_launches(carried)
                     .map_or_else(|refusal| refusal, Output::ParkedLaunchesReleased)
+            }
+            Input::ObserveHarness => {
+                nexus
+                    .observe_harness()
+                    .map_or_else(|refusal| refusal, Output::HarnessObserved)
             }
         }
     }

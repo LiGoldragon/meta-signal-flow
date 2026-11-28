@@ -553,6 +553,46 @@ rec {
         };
         resolvedDefaultFeatures = [ "alloc" "slab" "std" ];
       };
+      "harness-nexus-library" = rec {
+        crateName = "harness-nexus-library";
+        version = "0.3.0";
+        edition = "2024";
+        workspace_member = null;
+        src = pkgs.fetchgit {
+          url = "https://github.com/LiGoldragon/harness-nexus-library";
+          rev = "ae7e008700972b7f033de6ba94c36e6c49fc93f8";
+          sha256 = "0pzack9igg9qh0yb148pl4yy3a0v5ik3208abgd6gcisjsgxpsqb";
+        };
+        libName = "harness";
+        dependencies = [
+          {
+            name = "datom-codec";
+            packageId = "datom-codec";
+            optional = true;
+          }
+          {
+            name = "flow-ethos";
+            packageId = "flow-ethos";
+            rename = "flow";
+            usesDefaultFeatures = false;
+          }
+          {
+            name = "protos";
+            packageId = "protos";
+            optional = true;
+          }
+          {
+            name = "rkyv";
+            packageId = "rkyv";
+            usesDefaultFeatures = false;
+            features = [ "std" "bytecheck" "little_endian" "pointer_width_32" "unaligned" ];
+          }
+        ];
+        features = {
+          "datom" = [ "dep:datom-codec" "dep:protos" "flow/datom" ];
+        };
+        resolvedDefaultFeatures = [ "datom" ];
+      };
       "hashbrown" = rec {
         crateName = "hashbrown";
         version = "0.17.1";
@@ -634,7 +674,7 @@ rec {
       };
       "meta-signal-flow" = rec {
         crateName = "meta-signal-flow";
-        version = "0.93.0";
+        version = "0.94.0";
         edition = "2024";
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./.; };
         libName = "meta_signal_flow";
@@ -647,6 +687,12 @@ rec {
           {
             name = "flow-ethos";
             packageId = "flow-ethos";
+            usesDefaultFeatures = false;
+          }
+          {
+            name = "harness-nexus-library";
+            packageId = "harness-nexus-library";
+            rename = "harness";
             usesDefaultFeatures = false;
           }
           {
@@ -677,7 +723,7 @@ rec {
           }
         ];
         features = {
-          "datom" = [ "dep:datom-codec" "dep:protos" "flow-ethos/datom" "signal-flow/datom" "signal/datom" ];
+          "datom" = [ "dep:datom-codec" "dep:protos" "flow-ethos/datom" "signal-flow/datom" "signal/datom" "harness/datom" ];
         };
         resolvedDefaultFeatures = [ "datom" "default" ];
       };

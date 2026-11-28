@@ -118,3 +118,18 @@ fn the_peer_whose_release_could_start_parked_launches_is_refused_before_dispatch
         ))
     );
 }
+
+/// A peer built on meta-signal-flow 0.93.0, which had no ObserveHarness,
+/// greets with 0.93's digest and is refused with 0.94's, before any of its
+/// inputs is read.
+#[test]
+fn the_meta_contract_without_observe_harness_is_refused() {
+    let previous = Handshake::of_source(include_str!("fixtures/meta-signal-flow-0.93.ethos"));
+    assert_ne!(previous, Input::greeting());
+    assert_eq!(
+        Input::receipt(&previous),
+        HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
+            Input::contract_digest()
+        ))
+    );
+}
