@@ -3,8 +3,8 @@
 //! expected texts are written out here, not computed through the codec.
 
 use meta_signal_flow::{
-    HarnessDisagreement, HarnessObserved_Data, HarnessSocket, HarnessTokens, HarnessWitness,
-    Input, Output, Seen, State,
+    HarnessDisagreement, HarnessObserved_Data, HarnessSocket, HarnessTokens, HarnessWitness, Input,
+    Output, Seen, State,
 };
 use signal_flow::FlowId;
 
