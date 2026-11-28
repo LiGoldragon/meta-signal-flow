@@ -1,5 +1,22 @@
 # Upgrades
 
+## 0.95.0: Bind, a session's transcript as a permaflow's flow
+
+- The meta Signal appends one input, `Bind.{ Address TranscriptPath }`,
+  answered at its position `Bound.{ Address FlowId Option<FlowId> }`: the
+  flow bound, then the flow it replaced, None when the Address held none.
+  Flow reads the session from the transcript, takes its flow id from the
+  session id and holds that flow as the Address's current flow.
+- One new output refusal, `BindRefused.[ UnknownPermaflow.Address
+  Unreadable.TranscriptPath ]`: no permaflow at the Address, or no session
+  read from the file.
+- **Output discriminants move.** `Bound` and `BindRefused` stand after
+  `HarnessObserved`, so every output from `ConfigureRefused` on moves two
+  rkyv discriminants. Both ends of the meta socket repin together.
+- The generated `Answering` gains `bind`.
+- The contract digest changes: a 0.94 peer is refused with 0.95's digest
+  (tests/fixtures/meta-signal-flow-0.94.ethos). `WIRE_VERSION` reads 0.95.0.
+
 ## 0.94.0: ObserveHarness, what each Harness Nexus told beside Flow's own state
 
 - Depend on harness-nexus-library 0.3.0 (`ae7e008`), the event vocabulary

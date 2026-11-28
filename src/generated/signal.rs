@@ -1455,6 +1455,13 @@ pub struct AbandonQueueDelivery_Data {
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Bind_Data {
+    pub address: flow_ethos::Address,
+    pub transcript_path: signal_flow::TranscriptPath,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Input {
     Configuration,
     Configure(ConfigurationChange),
@@ -1492,6 +1499,7 @@ pub enum Input {
     AbandonQueueDelivery(AbandonQueueDelivery_Data),
     ReleaseParkedLaunches(ParkedLaunchRelease),
     ObserveHarness,
+    Bind(Bind_Data),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1561,6 +1569,21 @@ pub struct QueueDeliveryAbandoned_Data {
 pub struct HarnessObserved_Data {
     pub harness_witness_vector: std::vec::Vec<HarnessWitness>,
     pub harness_disagreement_vector: std::vec::Vec<HarnessDisagreement>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub struct Bound_Data {
+    pub address: flow_ethos::Address,
+    pub flow_id: signal_flow::FlowId,
+    pub flow_id_option: std::option::Option<signal_flow::FlowId>,
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum BindRefused_Data {
+    UnknownPermaflow(flow_ethos::Address),
+    Unreadable(signal_flow::TranscriptPath),
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -1670,6 +1693,8 @@ pub enum Output {
     QueueDeliveryAbandoned(QueueDeliveryAbandoned_Data),
     ParkedLaunchesReleased(ParkedLaunchRelease),
     HarnessObserved(HarnessObserved_Data),
+    Bound(Bound_Data),
+    BindRefused(BindRefused_Data),
     ConfigureRefused(ConfigureRefusal),
     ResetRejected(ResetRejection),
     FlowRegistrationRejected(FlowRegistrationRejection),
@@ -1814,6 +1839,7 @@ pub trait Answering {
         parked_launch_release: &ParkedLaunchRelease,
     ) -> std::result::Result<ParkedLaunchRelease, Output>;
     fn observe_harness(&self) -> std::result::Result<HarnessObserved_Data, Output>;
+    fn bind(&self, bind: &Bind_Data) -> std::result::Result<Bound_Data, Output>;
 }
 #[rustfmt::skip]
 pub trait Answerable {
@@ -1970,6 +1996,9 @@ impl Answerable for Input {
                 nexus
                     .observe_harness()
                     .map_or_else(|refusal| refusal, Output::HarnessObserved)
+            }
+            Input::Bind(carried) => {
+                nexus.bind(carried).map_or_else(|refusal| refusal, Output::Bound)
             }
         }
     }

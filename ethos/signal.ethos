@@ -381,6 +381,14 @@
 ; configured capacity, oldest first, the oldest dropped. Nothing Flow
 ; does is decided by a witness.
 ;
+; Bind makes a session the flow of a permaflow. Flow reads the session from
+; the transcript at the path, takes its flow id from the session id, and
+; holds that flow as the Address's current flow, its state from then on as
+; the Claude Harness Nexus tells it. An Address that held another flow is
+; bound to the new one; the flow it held is closed and named in Bound.
+; UnknownPermaflow: no permaflow is configured at the Address; Unreadable:
+; no session id could be read from the file.
+;
 ; The n-th output answers the n-th input; the outputs after the last
 ; input's answer no input by position. Configuration and
 ; ObserveConfiguration both answer Configuration: Configuration has it at
@@ -428,7 +436,8 @@ Signal
   ReleasePermaflow.Address
   AbandonQueueDelivery.{ QueueAttemptId QueueResolutionReason }
   ReleaseParkedLaunches.ParkedLaunchRelease
-  ObserveHarness ]                              ; what each Harness Nexus told, beside Flow's own state
+  ObserveHarness                                ; what each Harness Nexus told, beside Flow's own state
+  Bind.{ Address TranscriptPath } ]             ; a session's transcript becomes the flow of a permaflow
 [ Configuration.ConfigurationSnapshot
   Configured.ConfigurationChange                ; the change given, echoed whole
   ResetConsumed.ResetOutcome
@@ -465,6 +474,8 @@ Signal
   QueueDeliveryAbandoned.{ Address AbandonmentRecord }
   ParkedLaunchesReleased.ParkedLaunchRelease
   HarnessObserved.{ Vector<HarnessWitness> Vector<HarnessDisagreement> } ; witnesses, then the ring oldest first
+  Bound.{ Address FlowId Option<FlowId> }       ; the flow bound, then the flow it replaced
+  BindRefused.[ UnknownPermaflow.Address Unreadable.TranscriptPath ] ; no permaflow at the Address, or no session read from the file
   ConfigureRefused.ConfigureRefusal
   ResetRejected.ResetRejection
   FlowRegistrationRejected.FlowRegistrationRejection

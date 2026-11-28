@@ -133,3 +133,18 @@ fn the_meta_contract_without_observe_harness_is_refused() {
         ))
     );
 }
+
+/// A peer built on meta-signal-flow 0.94.0, which had no Bind, greets with
+/// 0.94's digest and is refused with 0.95's, before any of its inputs is
+/// read.
+#[test]
+fn the_meta_contract_without_bind_is_refused() {
+    let previous = Handshake::of_source(include_str!("fixtures/meta-signal-flow-0.94.ethos"));
+    assert_ne!(previous, Input::greeting());
+    assert_eq!(
+        Input::receipt(&previous),
+        HandshakeReceipt::GreetingRefused(HandshakeRejection::ContractMismatch(
+            Input::contract_digest()
+        ))
+    );
+}
