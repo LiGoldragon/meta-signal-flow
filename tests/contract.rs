@@ -790,7 +790,7 @@ fn configure_send_servers_has_a_concrete_datom() {
 /// A metaflow declaration names the modules a Launch of its Address composes.
 #[test]
 fn configure_metaflows_has_a_concrete_datom() {
-    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OnDemand Automatic «» [] Default } ]";
+    let text = "Configure.Metaflows.[ { { Psyche core Opus } None [ ClaudeMd GitInstructions ] [ spirit:core:0 intent:psyche:0 ] [ compensation:truth:0 ] Regular Default OneShot Automatic «» [] Default } ]";
     let query = Potential::<meta_signal_flow::Input>::from(text)
         .actualize(&mut budget())
         .unwrap();
@@ -808,7 +808,7 @@ fn configure_metaflows_has_a_concrete_datom() {
 #[test]
 fn one_declaration_is_configured_and_removed_alone() {
     for text in [
-        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ ClaudeMd ] [ spirit:core:0 ] [] Regular Default OnDemand Manual «» [] Default }",
+        "Configure.Permaflow.{ { Psyche book Haiku } Some./home/li/book [ ClaudeMd ] [ spirit:core:0 ] [] Regular Default OneShot Manual «» [] Default }",
         "Configure.Harness.{ Claude [ / ] [ Escape Escape ] [ Enter ] }",
         "Configure.Refresh.{ claude-fable-5-2 280000 }",
         "Remove.Permaflow.{ Psyche book Haiku }",
@@ -857,7 +857,7 @@ fn leave_outs_are_the_permaflow_s_and_a_foreign_one_is_an_unknown_feature() {
     // A permaflow without its leave-outs is no longer a ConfigureMetaflow.
     assert!(
         Potential::<Input>::from(
-            "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OnDemand Automatic «» [] Default }"
+            "Configure.Permaflow.{ { Psyche book Haiku } None [ spirit:core:0 ] [] Regular Default OneShot Automatic «» [] Default }"
         )
         .actualize(&mut budget())
         .is_err()

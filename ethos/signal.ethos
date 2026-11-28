@@ -545,16 +545,12 @@ Signal
   CodexAppServerBinary.String
   McpSendServerBinary.String
   ConfigureSendServer.{ CodexAppServerBinary McpSendServerBinary }
-  ; How a metaflow continues. OnDemand: a flow whose turn ends with nothing
-  ; queued has its harness and pane closed, the metaflow Asleep with its
-  ; address and transcript kept, and a request that wakes starts the next
-  ; flow with the whole queue. Maintained: the metaflow is never without a
-  ; running flow; a flow refreshed, at its threshold or by order, or ended
-  ; unexpectedly (its harness gone) is followed by a successor whether or
-  ; not anything is queued, the successor confirmed before the predecessor
-  ; is reaped, and an idle flow keeps its harness. A metaflow is Maintained
-  ; by its exact Address, never by its Model.
-  Continuity.[ OnDemand Maintained ]
+  ; Continuity is selected by exact Address, never by Model. A OneShot
+  ; ends when its work is done. A Maintained flow stays live at rest and
+  ; may be replaced in place while running. Once down, either kind starts
+  ; only by Start; a Send neither starts it nor leaves a queued request.
+  ; Keep this order so the old first archive discriminant maps to OneShot.
+  Continuity.[ OneShot Maintained ]
   ; What the metaflow is for, composed with the brief into the first prompt.
   Purpose.String
   ; The workspace a metaflow's flows run in. None takes the Nexus source root.
