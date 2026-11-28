@@ -333,9 +333,16 @@ pub struct Records(pub std::vec::Vec<RecordPath>);
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
+pub enum Effort {
+    Default,
+    Native(String),
+}
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ModelEffort {
     pub model: flow_ethos::Model,
-    pub effort_option: std::option::Option<signal_flow::Effort>,
+    pub effort: Effort,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -359,7 +366,7 @@ pub struct ConfigureMetaflow {
     pub refresh_mode: RefreshMode,
     pub purpose: Purpose,
     pub records: Records,
-    pub effort_option: std::option::Option<signal_flow::Effort>,
+    pub effort: Effort,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
@@ -369,7 +376,7 @@ pub enum Change {
     Purpose(Purpose),
     Kind(signal_flow::FlowKind),
     Continuity(Continuity),
-    Effort(std::option::Option<signal_flow::Effort>),
+    Effort(Effort),
     Add(Element),
     Remove(Element),
     RefreshMode(RefreshMode),

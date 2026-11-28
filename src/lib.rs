@@ -13,8 +13,6 @@ pub use flow_ethos::Hash as SourceHash;
 pub use flow_ethos::Path as SourcePath;
 pub use flow_ethos::Repository as SourceRepository;
 
-pub use signal_flow::Effort;
-
 pub use signal::{ByteViewable, Restorable, Signal, Signalizable};
 
 /// The greeting every meta connection opens with, re-exported so a peer

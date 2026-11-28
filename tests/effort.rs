@@ -1,34 +1,40 @@
-//! Effort is the native spelling, held per model and per permaflow; Flow
-//! knows no level, so any spelling is configured and carried unchanged.
-use meta_signal_flow::{Change, ConfigurationChange, Effort, Input, Model, ModelEffort};
+//! An effort is Default or the native spelling, held per model and per
+//! permaflow; Flow knows no level, so any spelling is configured and
+//! carried as written.
+use meta_signal_flow::{
+    Amend_Data, Change, ConfigurationChange, Effort, Input, Model, ModelEffort,
+};
 
-/// Spellings a harness takes, a spelling no harness takes, and the
-/// absence that omits the argument.
-fn efforts() -> Vec<Option<Effort>> {
+/// Spellings a harness takes, spellings no harness takes, and Default.
+fn efforts() -> Vec<Effort> {
     [
         "low", "medium", "high", "xhigh", "max", "minimal", "none", "ultra",
     ]
     .into_iter()
-    .map(|spelling| Some(Effort(spelling.to_string())))
-    .chain([None])
+    .map(|spelling| Effort::Native(spelling.to_string()))
+    .chain([Effort::Default])
     .collect()
+}
+
+fn fable() -> signal_flow::Address {
+    signal_flow::Address {
+        aspect: meta_signal_flow::Aspect::Psyche,
+        topic: meta_signal_flow::Topic("core".to_string()),
+        model: Model::Fable,
+    }
 }
 
 #[test]
 fn every_effort_round_trips_unchanged_on_the_wire() {
-    for effort_option in efforts() {
+    for effort in efforts() {
         for input in [
             Input::Configure(ConfigurationChange::ModelEffort(ModelEffort {
                 model: Model::Haiku,
-                effort_option: effort_option.clone(),
+                effort: effort.clone(),
             })),
-            Input::Configure(ConfigurationChange::Amend(meta_signal_flow::Amend_Data {
-                address: signal_flow::Address {
-                    aspect: meta_signal_flow::Aspect::Psyche,
-                    topic: meta_signal_flow::Topic("core".to_string()),
-                    model: Model::Fable,
-                },
-                change: Change::Effort(effort_option.clone()),
+            Input::Configure(ConfigurationChange::Amend(Amend_Data {
+                address: fable(),
+                change: Change::Effort(effort.clone()),
             })),
         ] {
             let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&input).unwrap();
@@ -51,25 +57,23 @@ fn any_spelling_is_read_from_its_datom_as_written() {
         depth: 0,
         maximum_depth: 1024,
     };
-    let fable = signal_flow::Address {
-        aspect: meta_signal_flow::Aspect::Psyche,
-        topic: meta_signal_flow::Topic("core".to_string()),
-        model: Model::Fable,
-    };
-    for (written, effort_option) in [
-        ("Some.xhigh", Some(Effort("xhigh".to_string()))),
-        ("Some.max", Some(Effort("max".to_string()))),
-        ("Some.ultra", Some(Effort("ultra".to_string()))),
-        ("Some.«extra high»", Some(Effort("extra high".to_string()))),
-        ("None", None),
+    for (written, effort) in [
+        ("Native.xhigh", Effort::Native("xhigh".to_string())),
+        ("Native.max", Effort::Native("max".to_string())),
+        ("Native.ultra", Effort::Native("ultra".to_string())),
+        (
+            "Native.«extra high»",
+            Effort::Native("extra high".to_string()),
+        ),
+        ("Default", Effort::Default),
     ] {
         assert_eq!(
-            Potential::<Input>::from(format!("Configure.ModelEffort.{{ Haiku {written} }}"))
+            Potential::<Input>::from(format!("Configure.ModelEffort.{{ Sol {written} }}"))
                 .actualize(&mut budget())
                 .unwrap(),
             Input::Configure(ConfigurationChange::ModelEffort(ModelEffort {
-                model: Model::Haiku,
-                effort_option: effort_option.clone(),
+                model: Model::Sol,
+                effort: effort.clone(),
             })),
             "{written}"
         );
@@ -79,9 +83,9 @@ fn any_spelling_is_read_from_its_datom_as_written() {
             ))
             .actualize(&mut budget())
             .unwrap(),
-            Input::Configure(ConfigurationChange::Amend(meta_signal_flow::Amend_Data {
-                address: fable.clone(),
-                change: Change::Effort(effort_option),
+            Input::Configure(ConfigurationChange::Amend(Amend_Data {
+                address: fable(),
+                change: Change::Effort(effort),
             })),
             "{written}"
         );
