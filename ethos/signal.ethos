@@ -368,7 +368,7 @@
 ; of its own.
 
 Signal
-[ signal_flow:[ FlowNode FlowId Aspect ModelName HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt LaunchRequestId MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
+[ signal_flow:[ FlowNode FlowId Aspect ModelName Effort HarnessKind NativeSessionId TranscriptPath NativePrompt BackgroundWork HerdrRoute HerdrPaneBinding HerdrSessionName HerdrAgentName HerdrWorkspaceId HerdrPaneId HerdrTerminalId CallerIdentity CallerResolutionRejection FlowKind ToolSet ModuleIdentity SystemModules PromptModules LeaveOut LeaveOuts Process Refusal SendAcceptance NativeReceipt SentBy Request SendReceipt SendFailure LaunchAttempt LaunchRequestId MinutesRefusal VisibleNativeInput VisibleSender VisibleRequest DeliverySnapshot VisibleRefusal VisibleSendAcceptance VisibleSendReceipt VisibleSendFailure RestartRefusal ReapPending HandoverPending RefreshRejection ]
   flow_ethos:[ Context Verbatim NativeInput QueueEntry OrdinarySocketPath MetaSocketPath SourceRoot ClientPath Home ControlSocketPath CodexEndpoint KeyName CommandSigil InterruptKeys SubmitKeys HarnessProfile HarnessProfiles MetaAspects MessageNexusPath MessageNexusBinary Lease Subaspect Topic Model Address LogicalDeliveryId RequestId Metaflow MetaflowState.State Lock Minutes ] ]
 [ Configuration
   Configure.ConfigurationChange
@@ -568,21 +568,26 @@ Signal
   ; when a Start names none (each of the harness its Model runs on), the
   ; context modules a Launch of its Address composes into the system prompt
   ; and into the first user message, its kind and tool set, how it
-  ; continues, its purpose and the records it rests on.
-  Effort.[ Default High Medium Low ]
-  ModelEffort.{ Model Effort }
+  ; continues, its purpose and the records it rests on, and its effort.
+  ; A model's effort, the native spelling Flow passes to the harness
+  ; unchanged as its one effort argument. Flow knows no level and checks
+  ; none against the model: a spelling the harness refuses is refused at
+  ; the launch, with what the harness said. None omits the argument, and
+  ; the harness takes its own default.
+  ModelEffort.{ Model Option<Effort> }
   ; Manual preserves the current seat at rest; explicit Refresh remains available.
   RefreshMode.[ Automatic Manual ]
-  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity RefreshMode Purpose Records Effort }
+  ConfigureMetaflow.{ Address Option<Root> LeaveOuts SystemModules PromptModules FlowKind ToolSet Continuity RefreshMode Purpose Records Option<Effort> }
   ; One value of one permaflow, changed alone by Configure.Amend. Workspace,
   ; Purpose, Kind, Continuity, Effort and RefreshMode replace that value.
+  ; A permaflow's effort is its own; None there takes its model's.
   ; RefreshMode applies to the current permaflow; Add appends one
   ; element to the end of its list, Remove takes it out.
   Change.[ Workspace.Option<Root>
            Purpose
            Kind.FlowKind
            Continuity
-           Effort
+           Effort.Option<Effort>
            Add.Element
            Remove.Element
            RefreshMode ]

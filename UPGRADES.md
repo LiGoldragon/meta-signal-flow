@@ -1,5 +1,23 @@
 # Upgrades
 
+## 0.94.0: effort is the native spelling, held per model
+
+- `Effort` is signal-flow's `Effort.String`, the native spelling Flow passes
+  to the harness unchanged; the closed `[ Default High Medium Low ]` is gone.
+  Flow knows no level and checks none against the model: any spelling is
+  configured, stored and read back, and a spelling the harness refuses is
+  refused at the launch, with what the harness said.
+- `ModelEffort.{ Model Option<Effort> }`: None omits the effort argument and
+  the harness takes its own default.
+  `Configure.ModelEffort.{ Haiku Some.xhigh }`, `Configure.ModelEffort.{ Sol None }`.
+- `ConfigureMetaflow` ends in `Option<Effort>`, and `Change.Effort` carries
+  `Option<Effort>`: a permaflow's None takes its model's.
+  `Configure.Amend.{ { Psyche core Fable } Effort.Some.max }`.
+- Flow upgrades stored values on open: a model's or permaflow's `Default`
+  becomes None, `High`, `Medium` and `Low` become `high`, `medium` and `low`.
+- Keep clients and Nexus on the same meta digest; a peer presenting the
+  frozen 0.93 digest is refused before dispatch. Ordinary Signal is unchanged.
+
 ## 0.93.0: decide what happens to parked launches before releasing a hold
 
 - Pin signal-flow 0.70.0 (`5c858a1`), including the terminal
